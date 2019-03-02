@@ -23,7 +23,7 @@ import CategorySection from "./categories";
 import CollectionSection from "./collections";
 import { AppProgressProvider } from "./components/AppProgress";
 // import { ConfirmFormLeaveDialog } from "./components/ConfirmFormLeaveDialog";
-import { DateProvider } from "./components/DateFormatter";
+import { DateProvider } from "./components/Date";
 import { FormProvider } from "./components/Form";
 import { LocaleProvider } from "./components/Locale";
 import { MessageManager } from "./components/messages";
@@ -31,6 +31,7 @@ import { ShopProvider } from "./components/Shop";
 import { WindowTitle } from "./components/WindowTitle";
 import ConfigurationSection, { configurationMenu } from "./configuration";
 import { CustomerSection } from "./customers";
+import DiscountSection from "./discounts";
 import HomePage from "./home";
 import i18n from "./i18n";
 import { NotFound } from "./NotFound";
@@ -40,6 +41,7 @@ import ProductSection from "./products";
 import ProductTypesSection from "./productTypes";
 import SiteSettingsSection from "./siteSettings";
 import StaffSection from "./staff";
+import TaxesSection from "./taxes";
 import theme from "./theme";
 import { PermissionEnum } from "./types/globalTypes";
 
@@ -144,6 +146,11 @@ render(
                               component={CustomerSection}
                             />
                             <SectionRoute
+                              permissions={[PermissionEnum.MANAGE_DISCOUNTS]}
+                              path="/discounts"
+                              component={DiscountSection}
+                            />
+                            <SectionRoute
                               permissions={[PermissionEnum.MANAGE_PAGES]}
                               path="/pages"
                               component={PageSection}
@@ -172,6 +179,11 @@ render(
                               permissions={[PermissionEnum.MANAGE_SETTINGS]}
                               path="/site-settings"
                               component={SiteSettingsSection}
+                            />
+                            <SectionRoute
+                              permissions={[PermissionEnum.MANAGE_SETTINGS]}
+                              path="/taxes"
+                              component={TaxesSection}
                             />
                             {configurationMenu.filter(menuItem =>
                               hasPermission(menuItem.permission, user)

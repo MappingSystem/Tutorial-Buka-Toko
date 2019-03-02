@@ -6,6 +6,7 @@ import graphene_django_optimizer as gql_optimizer
 from django.db.models import Prefetch
 from graphene import relay
 from graphql.error import GraphQLError
+from graphql_jwt.decorators import permission_required
 
 from ...product import models
 from ...product.templatetags.product_images import (
@@ -15,7 +16,6 @@ from ...product.utils.availability import get_availability
 from ...product.utils.costs import (
     get_margin_for_variant, get_product_costs_data)
 from ..core.connection import CountableDjangoObjectType
-from ..core.decorators import permission_required
 from ..core.enums import ReportingPeriod, TaxRateType
 from ..core.fields import PrefetchingConnectionField
 from ..core.types import Money, MoneyRange, TaxedMoney, TaxedMoneyRange
@@ -140,7 +140,7 @@ class ProductVariant(CountableDjangoObjectType):
         description=dedent("""Override the base price of a product if necessary.
         A value of `null` indicates that the default product
         price is used."""))
-    price = graphene.Field(Money, description="Price of the product variant.")
+    price = graphene.Field(Money, description='Price of the product variant.')
     attributes = graphene.List(
         graphene.NonNull(SelectedAttribute), required=True,
         description='List of attributes assigned to this variant.')
@@ -176,6 +176,7 @@ class ProductVariant(CountableDjangoObjectType):
         attributes_qs = self.product.product_type.variant_attributes.all()
         return resolve_attribute_list(self.attributes, attributes_qs)
 
+    @permission_required('product.manage_products')
     def resolve_margin(self, info):
         return get_margin_for_variant(self)
 
@@ -188,17 +189,38 @@ class ProductVariant(CountableDjangoObjectType):
     def resolve_price_override(self, info):
         return self.price_override
 
+    @permission_required('product.manage_products')
+    def resolve_quantity(self, info):
+        return self.quantity
+
+    @permission_required(['order.manage_orders', 'product.manage_products'])
     def resolve_quantity_ordered(self, info):
         # This field is added through annotation when using the
         # `resolve_report_product_sales` resolver.
         return getattr(self, 'quantity_ordered', None)
 
+    @permission_required(['order.manage_orders', 'product.manage_products'])
+    def resolve_quantity_allocated(self, info):
+        return self.quantity_allocated
+
+    @permission_required(['order.manage_orders', 'product.manage_products'])
     def resolve_revenue(self, info, period):
         start_date = reporting_period_to_date(period)
         return calculate_revenue_for_variant(self, start_date)
 
     def resolve_images(self, info):
         return self.images.all()
+
+    @classmethod
+    def get_node(cls, info, id):
+        user = info.context.user
+        visible_products = models.Product.objects.visible_to_user(
+            user).values_list('pk', flat=True)
+        try:
+            return cls._meta.model.objects.filter(
+                product__id__in=visible_products).get(pk=id)
+        except cls._meta.model.DoesNotExist:
+            return None
 
 
 class ProductAvailability(graphene.ObjectType):
@@ -267,6 +289,9 @@ class Product(CountableDjangoObjectType):
             lambda: Collection,
             description='List of collections for the product'),
         model_field='collections')
+    available_on = graphene.Date(
+        deprecation_reason=(
+            'availableOn is deprecated, use publicationDate instead'))
 
     class Meta:
         description = dedent("""Represents an individual item for sale in the
@@ -298,7 +323,7 @@ class Product(CountableDjangoObjectType):
 
     @gql_optimizer.resolver_hints(
         prefetch_related='variants',
-        only=['available_on', 'charge_taxes', 'price', 'tax_rate'])
+        only=['publication_date', 'charge_taxes', 'price', 'tax_rate'])
     def resolve_availability(self, info):
         context = info.context
         availability = get_availability(
@@ -337,6 +362,20 @@ class Product(CountableDjangoObjectType):
 
     def resolve_collections(self, info):
         return self.collections.all()
+
+    def resolve_available_on(self, info):
+        return self.publication_date
+
+    @classmethod
+    def get_node(cls, info, id):
+        if info.context:
+            user = info.context.user
+            try:
+                return cls._meta.model.objects.visible_to_user(
+                    user).get(pk=id)
+            except cls._meta.model.DoesNotExist:
+                return None
+        return None
 
 
 def prefetch_products(info, *args, **kwargs):
@@ -396,6 +435,9 @@ class Collection(CountableDjangoObjectType):
         prefetch_related=prefetch_products)
     background_image = graphene.Field(
         Image, size=graphene.Int(description='Size of the image'))
+    published_date = graphene.Date(
+        deprecation_reason=(
+            'publishedDate is deprecated, use publicationDate instead'))
 
     class Meta:
         description = "Represents a collection of products."
@@ -415,6 +457,20 @@ class Collection(CountableDjangoObjectType):
             return self.prefetched_products
         qs = self.products.visible_to_user(info.context.user)
         return gql_optimizer.query(qs, info)
+
+    @classmethod
+    def get_node(cls, info, id):
+        if info.context:
+            user = info.context.user
+            try:
+                return cls._meta.model.objects.visible_to_user(
+                    user).get(pk=id)
+            except cls._meta.model.DoesNotExist:
+                return None
+        return None
+
+    def resolve_published_date(self, info):
+        return self.publication_date
 
 
 class Category(CountableDjangoObjectType):
@@ -469,7 +525,7 @@ class Category(CountableDjangoObjectType):
         # Otherwise we want to include products from child categories which
         # requires performing additional logic.
         tree = self.get_descendants(include_self=True)
-        qs = models.Product.objects.available_products()
+        qs = models.Product.objects.published()
         qs = qs.filter(category__in=tree)
         return gql_optimizer.query(qs, info)
 

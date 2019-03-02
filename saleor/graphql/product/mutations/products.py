@@ -18,13 +18,16 @@ from ...core.scalars import Decimal, WeightScalar
 from ...core.types import SeoInput, Upload
 from ...core.utils import clean_seo_fields
 from ..types import Category, Collection, Product, ProductImage, ProductVariant
-from ..utils import attributes_to_hstore
+from ..utils import attributes_to_hstore, validate_image_file
 
 
 class CategoryInput(graphene.InputObjectType):
-    description = graphene.String(description='Category description')
-    name = graphene.String(description='Category name')
-    slug = graphene.String(description='Category slug')
+    description = graphene.String(
+        description='Category description (HTML/text).')
+    description_json = graphene.JSONString(
+        description='Category description (JSON).')
+    name = graphene.String(description='Category name.')
+    slug = graphene.String(description='Category slug.')
     seo = SeoInput(description='Search engine optimization fields.')
     background_image = Upload(description='Background image file.')
     background_image_alt = graphene.String(
@@ -54,6 +57,9 @@ class CategoryCreate(ModelMutation):
             parent = cls.get_node_or_error(
                 info, parent_id, errors, field='parent', only_type=Category)
             cleaned_input['parent'] = parent
+        if input.get('background_image'):
+            image_data = info.context.FILES.get(input['background_image'])
+            validate_image_file(cls, image_data, 'background_image', errors)
         clean_seo_fields(cleaned_input)
         return cleaned_input
 
@@ -111,12 +117,15 @@ class CollectionInput(graphene.InputObjectType):
         description='Informs whether a collection is published.')
     name = graphene.String(description='Name of the collection.')
     slug = graphene.String(description='Slug of the collection.')
-    description = graphene.String(description='Description of the collection.')
+    description = graphene.String(
+        description='Description of the collection (HTML/text).')
+    description_json = graphene.JSONString(
+        description='Description of the collection (JSON).')
     background_image = Upload(description='Background image file.')
     background_image_alt = graphene.String(
         description='Alt text for an image.')
     seo = SeoInput(description='Search engine optimization fields.')
-    published_date = graphene.Date(
+    publication_date = graphene.Date(
         description='Publication date. ISO 8601 standard.')
 
 
@@ -146,6 +155,9 @@ class CollectionCreate(ModelMutation):
         cleaned_input = super().clean_input(info, instance, input, errors)
         if 'slug' not in cleaned_input and 'name' in cleaned_input:
             cleaned_input['slug'] = slugify(cleaned_input['name'])
+        if input.get('background_image'):
+            image_data = info.context.FILES.get(input['background_image'])
+            validate_image_file(cls, image_data, 'background_image', errors)
         clean_seo_fields(cleaned_input)
         return cleaned_input
 
@@ -254,7 +266,7 @@ class ProductInput(graphene.InputObjectType):
     attributes = graphene.List(
         AttributeValueInput,
         description='List of attributes.')
-    available_on = graphene.types.datetime.Date(
+    publication_date = graphene.types.datetime.Date(
         description='Publication date. ISO 8601 standard.')
     category = graphene.ID(
         description='ID of the product\'s category.', name='category')
@@ -264,7 +276,10 @@ class ProductInput(graphene.InputObjectType):
         graphene.ID,
         description='List of IDs of collections that the product belongs to.',
         name='collections')
-    description = graphene.String(description='Product description.')
+    description = graphene.String(
+        description='Product description (HTML/text).')
+    description_json = graphene.JSONString(
+        description='Product description (JSON).')
     is_published = graphene.Boolean(
         description='Determines if product is visible to customers.')
     name = graphene.String(description='Product name.')
@@ -651,8 +666,7 @@ class ProductImageCreate(BaseMutation):
         product = cls.get_node_or_error(
             info, input['product'], errors, 'product', only_type=Product)
         image_data = info.context.FILES.get(input['image'])
-        if not image_data.content_type.startswith('image/'):
-            cls.add_error(errors, 'image', 'Invalid file type')
+        validate_image_file(cls, image_data, 'image', errors)
         image = None
         if not errors:
             image = product.images.create(

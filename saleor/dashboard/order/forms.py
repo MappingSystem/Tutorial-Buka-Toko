@@ -3,7 +3,6 @@ from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import npgettext_lazy, pgettext_lazy
-from django_prices.forms import MoneyField
 
 from ...account.i18n import (
     AddressForm as StorefrontAddressForm, PossiblePhoneNumberFormField)
@@ -17,10 +16,11 @@ from ...order import OrderStatus
 from ...order.models import Fulfillment, FulfillmentLine, Order, OrderLine
 from ...order.utils import (
     add_variant_to_order, cancel_fulfillment, cancel_order,
-    change_order_line_quantity, recalculate_order)
+    change_order_line_quantity, delete_order_line, recalculate_order)
 from ...payment import ChargeStatus, CustomPaymentChoices, PaymentError
-from ...payment.models import Payment
-from ...payment.utils import get_billing_data
+from ...payment.utils import (
+    clean_mark_order_as_paid, gateway_capture, gateway_refund, gateway_void,
+    mark_order_as_paid)
 from ...product.models import Product, ProductVariant
 from ...product.utils import allocate_stock, deallocate_stock
 from ...shipping.models import ShippingMethod
@@ -274,7 +274,7 @@ class ManagePaymentForm(forms.Form):
     def try_payment_action(self, action):
         amount = self.cleaned_data['amount']
         try:
-            action(amount)
+            action(self.payment, amount)
         except (PaymentError, ValueError) as e:
             self.payment_error(str(e))
             return False
@@ -288,7 +288,7 @@ class CapturePaymentForm(ManagePaymentForm):
                                 'Only pre-authorized payments can be captured')
 
     def capture(self):
-        return self.try_payment_action(self.payment.capture)
+        return self.try_payment_action(gateway_capture)
 
 
 class RefundPaymentForm(ManagePaymentForm):
@@ -306,7 +306,7 @@ class RefundPaymentForm(ManagePaymentForm):
                     'Manual payments can not be refunded'))
 
     def refund(self):
-        return self.try_payment_action(self.payment.refund)
+        return self.try_payment_action(gateway_refund)
 
 
 class VoidPaymentForm(forms.Form):
@@ -329,7 +329,7 @@ class VoidPaymentForm(forms.Form):
 
     def void(self):
         try:
-            self.payment.void()
+            gateway_void(self.payment)
         except (PaymentError, ValueError) as e:
             self.payment_error(str(e))
             return False
@@ -341,26 +341,18 @@ class OrderMarkAsPaidForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.order = kwargs.pop('order')
+        self.user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
 
     def clean(self):
         super().clean()
-        if self.order.payments.exists():
-            raise forms.ValidationError(
-                pgettext_lazy(
-                    'Mark order as paid form error',
-                    'Orders with payments can not be manually marked as paid'))
+        try:
+            clean_mark_order_as_paid(self.order)
+        except PaymentError as e:
+            raise forms.ValidationError(str(e))
 
     def save(self):
-        defaults = {
-            'total': self.order.total.gross.amount,
-            'captured_amount': self.order.total.gross.amount,
-            'currency': self.order.total.gross.currency,
-            **get_billing_data(self.order)}
-        Payment.objects.get_or_create(
-            gateway=CustomPaymentChoices.MANUAL,
-            charge_status=ChargeStatus.CHARGED, order=self.order,
-            defaults=defaults)
+        mark_order_as_paid(self.order, self.user)
 
 
 class CancelOrderLineForm(forms.Form):
@@ -373,7 +365,7 @@ class CancelOrderLineForm(forms.Form):
         if self.line.variant and self.line.variant.track_inventory:
             deallocate_stock(self.line.variant, self.line.quantity)
         order = self.line.order
-        self.line.delete()
+        delete_order_line(self.line)
         recalculate_order(order)
 
 
@@ -538,7 +530,7 @@ class AddVariantToOrderForm(forms.Form):
 
     variant = AjaxSelect2ChoiceField(
         queryset=ProductVariant.objects.filter(
-            product__in=Product.objects.available_products()),
+            product__in=Product.objects.published()),
         fetch_data_url=reverse_lazy('dashboard:ajax-available-variants'),
         label=pgettext_lazy(
             'Order form: subform to add variant to order form: variant field',
@@ -621,6 +613,13 @@ class BaseFulfillmentLineFormSet(forms.BaseModelFormSet):
         super().__init__(*args, **kwargs)
         for form in self.forms:
             form.empty_permitted = False
+
+    def clean(self):
+        total_quantity = sum(
+            form.cleaned_data.get('quantity', 0) for form in self.forms)
+        if total_quantity <= 0:
+            raise forms.ValidationError(
+                'Total quantity must be larger than 0.')
 
 
 class FulfillmentLineForm(forms.ModelForm):

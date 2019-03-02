@@ -1,11 +1,13 @@
 import graphene
 import graphene_django_optimizer as gql_optimizer
+from django.conf import settings
 
 from ...checkout import models
 from ...core.utils.taxes import get_taxes_for_address
 from ..core.connection import CountableDjangoObjectType
 from ..core.types.money import TaxedMoney
 from ..order.utils import applicable_shipping_methods
+from ..payment.enums import PaymentGatewayEnum
 from ..shipping.types import ShippingMethod
 
 
@@ -26,7 +28,7 @@ class CheckoutLine(CountableDjangoObjectType):
 
     def resolve_total_price(self, info):
         taxes = get_taxes_for_address(self.cart.shipping_address)
-        return self.get_total(taxes=taxes)
+        return self.get_total(discounts=info.context.discounts, taxes=taxes)
 
     def resolve_requires_shipping(self, info):
         return self.is_shipping_required()
@@ -34,8 +36,12 @@ class CheckoutLine(CountableDjangoObjectType):
 
 class Checkout(CountableDjangoObjectType):
     available_shipping_methods = graphene.List(
-        ShippingMethod, required=False,
+        ShippingMethod, required=True,
         description='Shipping methods that can be used with this order.')
+    available_payment_gateways = graphene.List(
+        PaymentGatewayEnum, description='List of available payment gateways.',
+        required=True)
+    email = graphene.String(description='Email of a customer', required=True)
     is_shipping_required = graphene.Boolean(
         description='Returns True, if checkout requires shipping.',
         required=True)
@@ -67,7 +73,7 @@ class Checkout(CountableDjangoObjectType):
 
     def resolve_total_price(self, info):
         taxes = get_taxes_for_address(self.shipping_address)
-        return self.get_total(taxes=taxes)
+        return self.get_total(discounts=info.context.discounts, taxes=taxes)
 
     def resolve_subtotal_price(self, info):
         taxes = get_taxes_for_address(self.shipping_address)
@@ -85,6 +91,9 @@ class Checkout(CountableDjangoObjectType):
         price = self.get_subtotal(
             taxes=taxes, discounts=info.context.discounts)
         return applicable_shipping_methods(self, info, price.gross.amount)
+
+    def resolve_available_payment_gateways(self, info):
+        return settings.CHECKOUT_PAYMENT_GATEWAYS.keys()
 
     def resolve_is_shipping_required(self, info):
         return self.is_shipping_required()

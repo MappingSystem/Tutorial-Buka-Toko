@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.postgres.fields import JSONField
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.db.models import ExpressionWrapper, F, Max, Sum
+from django.db.models import F, Max, Sum
 from django.urls import reverse
 from django.utils.timezone import now
 from django.utils.translation import pgettext_lazy
@@ -96,6 +96,8 @@ class Order(models.Model):
     shipping_method_name = models.CharField(
         max_length=255, null=True, default=None, blank=True, editable=False)
     token = models.CharField(max_length=36, unique=True, blank=True)
+    # Token of a checkout instance that this order was created from
+    checkout_token = models.CharField(max_length=36, blank=True)
     total_net = MoneyField(
         currency=settings.DEFAULT_CURRENCY,
         max_digits=settings.DEFAULT_MAX_DIGITS,
@@ -272,11 +274,7 @@ class Order(models.Model):
         return self.total_captured - self.total.gross
 
     def get_total_weight(self):
-        # Cannot use `sum` as it parses an empty Weight to an int
-        weights = Weight(kg=0)
-        for line in self:
-            weights += line.variant.get_weight() * line.quantity
-        return weights
+        return self.weight
 
 
 class OrderLine(models.Model):
@@ -365,7 +363,7 @@ class FulfillmentLine(models.Model):
         OrderLine, related_name='+', on_delete=models.CASCADE)
     fulfillment = models.ForeignKey(
         Fulfillment, related_name='lines', on_delete=models.CASCADE)
-    quantity = models.IntegerField(validators=[MinValueValidator(1)])
+    quantity = models.PositiveIntegerField()
 
 
 class OrderEvent(models.Model):
