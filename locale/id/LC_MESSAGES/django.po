@@ -13,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2019-02-12 07:24-0600\n"
 "PO-Revision-Date: 2017-02-08 11:00+0000\n"
-"Last-Translator: Ramdhan Hidayat <ramdhan.h@gmail.com>, 2019\n"
+"Last-Translator: Chetabahana <chetabahana@gmail.com>, 2019\n"
 "Language-Team: Indonesian (https://www.transifex.com/mirumee/teams/34782/id/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -214,28 +214,28 @@ msgstr ""
 #: saleor/account/i18n.py:170
 msgctxt "Address form"
 msgid "This value is invalid for selected country"
-msgstr ""
+msgstr "Keterangan ini tidak valid untuk negara yang dipilih"
 
 #: saleor/account/models.py:135
 msgctxt "Permission description"
 msgid "Manage customers."
-msgstr ""
+msgstr "Kelola pelanggan."
 
 #: saleor/account/models.py:138
 msgctxt "Permission description"
 msgid "Manage staff."
-msgstr ""
+msgstr "Kelola staf."
 
 #: saleor/account/models.py:141
 msgctxt "Permission description"
 msgid "Impersonate customers."
-msgstr ""
+msgstr "Pelanggan tiruan."
 
 #: saleor/account/templatetags/i18n_address_tags.py:12
 #, python-format
 msgctxt "Address data"
 msgid "%(first_name)s %(last_name)s"
-msgstr ""
+msgstr "%(nama_depan)s %(nama_belakang)s"
 
 #: saleor/account/templatetags/i18n_address_tags.py:16
 #, python-format
@@ -280,7 +280,7 @@ msgstr "Sukses menghapus alamat"
 #: saleor/account/views.py:148
 msgctxt "Storefront message, when user requested his account removed"
 msgid "Please check your inbox for a confirmation e-mail."
-msgstr ""
+msgstr "Silakan periksa kotak masuk Anda untuk konfirmasi email."
 
 #: saleor/account/views.py:163
 msgctxt "Account deleted"
@@ -288,36 +288,38 @@ msgid ""
 "Your account was deleted successfully. In case of any trouble or questions "
 "feel free to contact us."
 msgstr ""
+"Akun Anda berhasil dihapus. Jika ada masalah atau pertanyaan"
+"jangan sungkan untuk menghubungi kami."
 
 #: saleor/checkout/__init__.py:15
 msgctxt "Type of address used to fulfill order"
 msgid "Billing"
-msgstr ""
+msgstr "Penagihan"
 
 #: saleor/checkout/__init__.py:19
 msgctxt "Type of address used to fulfill order"
 msgid "Shipping"
-msgstr ""
+msgstr "Pengiriman"
 
 #: saleor/checkout/forms.py:39
 msgctxt "Add to cart form field label"
 msgid "Quantity"
-msgstr ""
+msgstr "Jumlah"
 
 #: saleor/checkout/forms.py:43
 msgctxt "Add to cart form error"
 msgid "Sorry. This product is currently not available."
-msgstr ""
+msgstr "Maaf. Produk ini tidak tersedia saat ini."
 
 #: saleor/checkout/forms.py:46
 msgctxt "Add to cart form error"
 msgid "Sorry. This product is currently out of stock."
-msgstr ""
+msgstr "Maaf. Produk ini saat ini kehabisan stok."
 
 #: saleor/checkout/forms.py:48
 msgctxt "Add to cart form error"
 msgid "Oops. We could not find that product."
-msgstr ""
+msgstr "Ups. Kami tidak dapat menemukan produk itu."
 
 #: saleor/checkout/forms.py:51
 #, python-format
@@ -339,7 +341,7 @@ msgstr "Email"
 #: saleor/checkout/forms.py:213
 msgctxt "Shipping addresses form choice"
 msgid "Enter a new address"
-msgstr ""
+msgstr "Masukkan alamat baru"
 
 #: saleor/checkout/forms.py:216
 msgctxt "Shipping addresses form field label"
@@ -349,12 +351,12 @@ msgstr "Alamat"
 #: saleor/checkout/forms.py:233
 msgctxt "Billing addresses form choice"
 msgid "Enter a new address"
-msgstr ""
+msgstr "Masukkan alamat baru"
 
 #: saleor/checkout/forms.py:235
 msgctxt "Billing addresses form choice"
 msgid "Same as shipping"
-msgstr ""
+msgstr "Sama dengan pengiriman"
 
 #: saleor/checkout/forms.py:238
 msgctxt "Billing addresses form field label"
@@ -369,12 +371,12 @@ msgstr "Metode pengiriman"
 #: saleor/checkout/forms.py:309
 msgctxt "Voucher form error"
 msgid "Discount code incorrect or expired"
-msgstr ""
+msgstr "Kode diskon salah atau kedaluwarsa"
 
 #: saleor/checkout/forms.py:320
 msgctxt "Checkout discount form label for voucher field"
 msgid "Gift card or discount code"
-msgstr ""
+msgstr "Kartu hadiah atau kode diskon"
 
 #: saleor/checkout/utils.py:134
 msgctxt "Cart warning message"
@@ -382,166 +384,168 @@ msgid ""
 "Sorry. We don't have that many items in stock. Quantity was set to maximum "
 "available for now."
 msgstr ""
+"Maaf. Kami tidak memiliki banyak item dalam persediaan. Jumlah ditetapkan ke maksimum"
+"tersedia untuk sekarang."
 
 #: saleor/checkout/utils.py:646
 msgctxt "Voucher not applicable"
 msgid "Your order does not require shipping."
-msgstr ""
+msgstr "Pesanan Anda tidak membutuhkan pengiriman."
 
 #: saleor/checkout/utils.py:652
 msgctxt "Voucher not applicable"
 msgid "Please select a shipping method first."
-msgstr ""
+msgstr "Silakan pilih metode pengiriman terlebih dahulu."
 
 #: saleor/checkout/utils.py:660
 msgctxt "Voucher not applicable"
 msgid "This offer is not valid in your country."
-msgstr ""
+msgstr "Penawaran ini tidak berlaku di negara Anda."
 
 #: saleor/checkout/utils.py:682
 msgctxt "Voucher not applicable"
 msgid "This offer is only valid for selected items."
-msgstr ""
+msgstr "Penawaran ini hanya berlaku untuk item yang dipilih."
 
 #: saleor/checkout/utils.py:792
 msgctxt "Voucher not applicable"
 msgid "Voucher expired in meantime. Order placement aborted."
-msgstr ""
+msgstr "Vucher telah habis masa berlaku. Pesanan dibatalkan."
 
 #: saleor/checkout/utils.py:899
 msgctxt "order placement_error"
 msgid "Shipping method is not set"
-msgstr ""
+msgstr "Metode pengiriman belum diisi"
 
 #: saleor/checkout/utils.py:902
 msgctxt "order placement error"
 msgid "Shipping address is not set"
-msgstr ""
+msgstr "Alamat pengiriman belum diisi"
 
 #: saleor/checkout/utils.py:906
 msgctxt "order placement error"
 msgid "Shipping method is not valid for your shipping address"
-msgstr ""
+msgstr "Metode pengiriman tidak valid untuk alamat pengiriman Anda"
 
 #: saleor/checkout/utils.py:909
 msgctxt "order placement error"
 msgid "Checkout is not fully paid"
-msgstr ""
+msgstr "Harga tidak dibayar penuh"
 
 #: saleor/checkout/views/discount.py:62
 msgctxt "Checkout warning"
 msgid "This voucher has expired. Please review your checkout."
-msgstr ""
+msgstr "Voucher ini telah kedaluwarsa. Harap periksa kembali."
 
 #: saleor/checkout/views/summary.py:34
 msgctxt "Checkout warning"
 msgid "Please review your checkout."
-msgstr ""
+msgstr "Harap periksa harga pembayaran."
 
 #: saleor/core/__init__.py:55
 msgctxt "VAT rate type"
 msgid "accommodation"
-msgstr ""
+msgstr "akomodasi"
 
 #: saleor/core/__init__.py:57
 msgctxt "VAT rate type"
 msgid "admission to cultural events"
-msgstr ""
+msgstr "pajak masuk ke jenis budaya sosial"
 
 #: saleor/core/__init__.py:59
 msgctxt "VAT rate type"
 msgid "admission to entertainment events"
-msgstr ""
+msgstr "pajak masuk ke jenis acara hiburan"
 
 #: saleor/core/__init__.py:61
 msgctxt "VAT rate type"
 msgid "admission to sporting events"
-msgstr ""
+msgstr "pajak masuk ke acara olahraga"
 
 #: saleor/core/__init__.py:62
 msgctxt "VAT rate type"
 msgid "advertising"
-msgstr ""
+msgstr "periklanan"
 
 #: saleor/core/__init__.py:64
 msgctxt "VAT rate type"
 msgid "agricultural supplies"
-msgstr ""
+msgstr "pasokan pertanian"
 
 #: saleor/core/__init__.py:65
 msgctxt "VAT rate type"
 msgid "baby foodstuffs"
-msgstr ""
+msgstr "bahan makanan bayi"
 
 #: saleor/core/__init__.py:66
 msgctxt "VAT rate type"
 msgid "bikes"
-msgstr ""
+msgstr "sepeda"
 
 #: saleor/core/__init__.py:67
 msgctxt "VAT rate type"
 msgid "books"
-msgstr ""
+msgstr "buku"
 
 #: saleor/core/__init__.py:69
 msgctxt "VAT rate type"
 msgid "childrens clothing"
-msgstr ""
+msgstr "pakaian anak anak"
 
 #: saleor/core/__init__.py:70
 msgctxt "VAT rate type"
 msgid "domestic fuel"
-msgstr ""
+msgstr "bahan bakar domestik"
 
 #: saleor/core/__init__.py:72
 msgctxt "VAT rate type"
 msgid "domestic services"
-msgstr ""
+msgstr "layanan domestik"
 
 #: saleor/core/__init__.py:73
 msgctxt "VAT rate type"
 msgid "e-books"
-msgstr ""
+msgstr "e-book"
 
 #: saleor/core/__init__.py:74
 msgctxt "VAT rate type"
 msgid "foodstuffs"
-msgstr ""
+msgstr "bahan makanan"
 
 #: saleor/core/__init__.py:75
 msgctxt "VAT rate type"
 msgid "hotels"
-msgstr ""
+msgstr "hotel"
 
 #: saleor/core/__init__.py:76
 msgctxt "VAT rate type"
 msgid "medical"
-msgstr ""
+msgstr "medikal"
 
 #: saleor/core/__init__.py:77
 msgctxt "VAT rate type"
 msgid "newspapers"
-msgstr ""
+msgstr "surat kabar"
 
 #: saleor/core/__init__.py:79
 msgctxt "VAT rate type"
 msgid "passenger transport"
-msgstr ""
+msgstr "transportasi penumpang"
 
 #: saleor/core/__init__.py:81
 msgctxt "VAT rate type"
 msgid "pharmaceuticals"
-msgstr ""
+msgstr "obat-obatan"
 
 #: saleor/core/__init__.py:83
 msgctxt "VAT rate type"
 msgid "property renovations"
-msgstr ""
+msgstr "renovasi properti"
 
 #: saleor/core/__init__.py:84
 msgctxt "VAT rate type"
 msgid "restaurants"
-msgstr ""
+msgstr "restoran"
 
 #: saleor/core/__init__.py:85
 msgctxt "VAT rate type"
