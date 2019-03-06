@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Ramdhan Hidayat <ramdhan.h@gmail.com>, 2019
+# Chetabahana <admin@chetabahana.com>, 2019
 # 
 #, fuzzy
 msgid ""
