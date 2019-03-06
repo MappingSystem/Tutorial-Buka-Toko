@@ -6380,7 +6380,7 @@ msgstr ""
 #: templates/templated_email/source/confirm_payment.mjml:13
 msgctxt "Payment confirmation e-mail text"
 msgid "Hi!"
-msgstr ""
+msgstr "Hai!"
 
 #: templates/templated_email/source/confirm_payment.mjml:16
 #, python-format
@@ -6389,31 +6389,33 @@ msgid ""
 "Thank you for your payment. To see your payment details please visit: <a "
 "href=\"%(order_details_url)s\">%(order_details_url)s</a>"
 msgstr ""
+"Terima kasih atas pembayaran Anda. Untuk melihat detail pembayaran Anda, "
+"silakan kunjungi: <a href = \"% (url order_details \ ">% (url order_details </a>"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:11
 msgctxt "E-mail order lines summary table"
 msgid "Subtotal"
-msgstr ""
+msgstr "Subtotal"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:19
 msgctxt "E-mail order lines summary table"
 msgid "Shipping"
-msgstr ""
+msgstr "Pengiriman"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:28
 msgctxt "E-mail order lines summary table"
 msgid "Taxes (included)"
-msgstr ""
+msgstr "Sudah termasuk pajak"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:30
 msgctxt "E-mail order lines summary table"
 msgid "Taxes"
-msgstr ""
+msgstr "Pajak"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:40
 msgctxt "E-mail order lines summary table"
 msgid "Discount"
-msgstr ""
+msgstr "Diskon"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:49
 msgctxt "E-mail order lines summary table"
@@ -6423,27 +6425,27 @@ msgstr "Total"
 #: templates/templated_email/source/partials/_order_lines.mjml:58
 msgctxt "Ordered item name"
 msgid "Item"
-msgstr ""
+msgstr "Item"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:59
 msgctxt "Quantity ordered of a product"
 msgid "Quantity"
-msgstr ""
+msgstr "Jumlah"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:60
 msgctxt "Unit price of a product"
 msgid "Per unit"
-msgstr ""
+msgstr "Per unit"
 
 #: templates/templated_email/source/partials/_order_lines.mjml:61
 msgctxt "Ordered item subtotal (unit price * quantity)"
 msgid "Subtotal"
-msgstr ""
+msgstr "Subtotal"
 
 #: templates/templated_email/source/password_reset.mjml:13
 msgctxt "Password reset e-mail text"
 msgid "Hi!"
-msgstr ""
+msgstr "Hai!"
 
 #: templates/templated_email/source/password_reset.mjml:16
 #, python-format
@@ -6454,11 +6456,15 @@ msgid ""
 "if you did not request a password reset. Click the link below to reset your "
 "password."
 msgstr ""
+"Anda menerima email ini karena Anda atau orang lain telah meminta kata sandi "
+"untuk akun pengguna Anda di% (domain) s. <br/> Itu dapat diabaikan dengan aman"
+"jika Anda tidak meminta pengaturan ulang kata sandi. Klik tautan di bawah ini "
+"untuk mengatur ulang kata sandi Anda."
 
 #: templates/templated_email/source/promote_customer.mjml:13
 msgctxt "Promote customer to staff member confirmation e-mail text"
 msgid "Hi!"
-msgstr ""
+msgstr "Hai!"
 
 #: templates/templated_email/source/promote_customer.mjml:16
 #, python-format
@@ -6482,6 +6488,9 @@ msgid ""
 "customer account at %(domain)s.<br/> Click the link below to set up your "
 "password."
 msgstr ""
+"Anda menerima email ini karena Anda harus menetapkan kata sandi untuk akun"
+"anggota Anda di %(domain)s. <br/> Klik tautan di bawah ini untuk menyiapkan"
+"kata sandi."
 
 #: templates/templated_email/source/set_password.mjml:13
 msgctxt "Set password for staff member e-mail text"
@@ -6496,22 +6505,25 @@ msgid ""
 " member account at %(domain)s.<br/> Click the link below to set up your "
 "password."
 msgstr ""
+"Anda menerima email ini karena Anda harus menetapkan kata sandi untuk akun"
+"anggota Anda di %(domain)s. <br/> Klik tautan di bawah ini untuk menyiapkan"
+"kata sandi."
 
 #: templates/templated_email/source/shared/footer.mjml:4
 msgctxt "Base email text"
 msgid "This is an automatically generated email, please do not reply."
-msgstr ""
+msgstr "Ini adalah email yang dibuat secara otomatis, harap tidak balas."
 
 #: templates/templated_email/source/shared/footer.mjml:13
 #, python-format
 msgctxt "Base email footer"
 msgid "Sincerely, %(site_name)s"
-msgstr ""
+msgstr "Hormat kami,% (site_name) s"
 
 #: templates/templated_email/source/update_fulfillment.mjml:13
 msgctxt "Fulfillment update email text"
 msgid "Hi!"
-msgstr ""
+msgstr "Hai!"
 
 #: templates/templated_email/source/update_fulfillment.mjml:16
 msgctxt "Fulfillment update email text"
@@ -6519,3 +6531,5 @@ msgid ""
 "Your shipping status has been updated. Below is the list of ordered products"
 " that have been updated with new tracking number."
 msgstr ""
+"Status pengiriman Anda telah diperbarui. Di bawah ini adalah daftar produk yang dipesan"
+"yang telah diperbarui dengan nomor pelacakan baru."
