@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# Parameters
+while [[ "$1" != "" ]]; do
+    eval export "$1" &> /dev/null
+    shift
+done
+
+# Environtment
+get_workspace()
+{
+    echo Set Environtments..
+    export NAMESPACE=$(realpath ${0%/*})
+
+    # Namespace Environtments
+    INHERIT=$(dirname ${NAMESPACE})/__init__ 
+    if [[ -f $INHERIT ]]; then source $INHERIT; fi
+
+    # Workspace Environtments
+    if [[ -f $WORKSPACE/env_vars_to_export ]]
+    then
+        while read -r LINE; do
+            #Fetch variable names
+            EXPORT=$(sed -e 's/[[:space:]]*$//' <<<${LINE})
+            VAR=`echo $EXPORT | cut -d '=' -f1`;
+
+            #Verify each variables
+            ENV_VAR=$(echo $VAR)
+            if [[ -n ${ENV_VAR+set} ]]; then continue;
+            else eval export "$EXPORT" &> /dev/null; fi
+        done <$WORKSPACE/env_vars_to_export
+    fi
+
+    # Injected Environtments
+    if ( [[ -z $DATA ]] && [[ -n ${JSON_DATA+set} ]] && [[ -x "$(command -v cf_export)" ]] ); \
+    then echo $JSON_DATA > data.json && cf_export DATA=$(realpath data.json); fi
+}
+
+# Get private repository
+get_repository()
+{
+    # Set the workflows
+    echo Initializing Workflows..
+
+    # Set Google App Credentials
+    if [[ -x "$(command -v gcloud)" ]]
+    then
+        if [[ -z $(gcloud config get-value account 2> /dev/null) ]]
+        then
+            # Dependencies: GCP_ACCOUNT & GCP_SA_KEY
+            if [[ -z $GOOGLE_APPLICATION_CREDENTIALS ]]
+            then
+                echo $GCP_SA_KEY > .google-app-creds.json
+                export GOOGLE_APPLICATION_CREDENTIALS=$(realpath .google-app-creds.json)
+            fi
+
+            # Activate account
+            gcloud config set project $PROJECT_ID &> /dev/null
+            gcloud auth activate-service-account $GCP_ACCOUNT --project=$PROJECT_ID \
+            --key-file=$GOOGLE_APPLICATION_CREDENTIALS &> /dev/null
+
+            [[ -x "$(command -v cf_export)" ]] && cf_export $GCP_ACCOUNT=$GCP_ACCOUNT \
+            GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS
+        fi
+    fi
+
+    if [[ ! -d $WORKSPACE/.io ]]
+    then
+        if [[ -x "$(command -v gcloud)" ]]
+        then
+            # Dependencies: Set the repository in to Google Repository
+            # Name the target repo to be on top of the list and Set IAM role to clone it
+            export REPOSITORY=$(gcloud source repos list --limit=1 --format 'value(REPO_NAME)')
+            gcloud source repos clone --verbosity=none $REPOSITORY $WORKSPACE/.io &> /dev/null
+            [[ -x "$(command -v cf_export)" ]] && cf_export REPOSITORY=$REPOSITORY
+        fi
+    fi
+
+    # Send to environtment
+    [[ -d $WORKSPACE/.io ]] && cd $WORKSPACE/.io || exit 0;
+    [[ -z $REPOSITORY ]] && export REPOSITORY=$(git remote get-url origin)
+    export MATCH_REPOSITORY=${REPOSITORY##*_} RUNNER=$HOME/.local/bin/run
+
+    # Locate the branch
+    if [[ "$BRANCH_NAME" != "master" ]]
+    then
+        if grep -q origin/$BRANCH_NAME << EOF
+`git branch -r`
+EOF
+        then
+            git checkout $BRANCH_NAME
+        fi
+    fi
+
+    # Locate the files
+    if [[ ! -f $RUNNER ]]
+    then
+        for i in $(ls -d */)
+        do
+            mkdir -p $HOME/.local/$(basename ${i%%/})
+            cp -frpT ${i%%/} $HOME/.local/$(basename ${i%%/})
+        done
+    fi
+}
+
+# Run the current step
+while [[ -z $ORIGIN ]]
+do
+    # Loop for environtments
+    [[ $ENV == true ]] && printenv | sort
+    if [[ -z $WORKSPACE ]]; then get_workspace; 
+    elif [[ -z $MATCH_REPOSITORY ]]; then get_repository;
+    elif [[ $(command -v run) == $RUNNER ]]; then run $TAG_NAME; 
+    elif [[ $(command -v push) == $PUSHER ]]; then push $TAG_NAME; 
+    else echo "uncathed profiles and settings.."; fi
+
+    # Avoid unwanted iteration
+    [[ -z $num ]] && num=0 || (( num += 1 ))
+    if [[ $num > 1 ]]
+    then
+        [[ ! -d $HOME/.ssh ]] && echo "step was failed, halted to continue.."
+        exit 0;
+    fi
+done
