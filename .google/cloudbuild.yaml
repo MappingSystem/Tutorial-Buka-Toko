@@ -1,0 +1,32 @@
+steps:
+- name: gcr.io/cloud-builders/gcloud
+  entrypoint: /bin/bash
+  args: [$_INIT]
+  id: gcloud
+  env:
+  - TAG_NAME=gcloud
+    
+- name: gcr.io/cloud-builders/docker
+  entrypoint: /bin/bash
+  args: [$_INIT]
+  id: docker
+  env:
+  - TAG_NAME=docker
+
+options:
+  env:
+  - BUILD_ID=$BUILD_ID
+  - PROJECT_ID=$PROJECT_ID
+  - TAG_REPO=$_TAG_REPO
+  - REPO_NAME=$REPO_NAME
+  - BRANCH_NAME=$BRANCH_NAME
+  volumes:
+  - name: outputs-volume
+    path: /builder/outputs/volume
+  
+substitutions:
+  _INIT: .google/cloud/builders/__init__
+  _VERSION: v1-2007151218-5f0ef3e4363992085efa363a-gcp
+
+timeout: 300s
+tags: ['$_PR_NUMBER', '$_REPO_OWNER', '$_REPO', '$_SHA']

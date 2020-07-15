@@ -9,6 +9,7 @@
 !.flowconfig
 !.github
 !.gitignore
+!.google
 !.gqlconfig
 !.npmrc
 !.nvmrc

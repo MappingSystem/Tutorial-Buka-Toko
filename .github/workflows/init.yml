@@ -1,0 +1,23 @@
+name: Init CI
+on:
+  push:
+    branches:
+      - '*'
+      - '!master'
+      - '!deploy'
+      - '!compose'
+      - '!production'
+      - '!development'
+      - '!Chetabahana'
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Initializing Repositories
+      run: |
+        bash .github/workflows/builders/__init__
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        GCP_ACCOUNT: ${{ secrets.GCP_ACCOUNT }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

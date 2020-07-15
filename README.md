@@ -1,162 +1,102 @@
-![Saleor Commerce - A GraphQL-first platform for perfectionists](https://user-images.githubusercontent.com/249912/71523206-4e45f800-28c8-11ea-84ba-345a9bfc998a.png)
+<p align="center"> 
+<a href="https://chetabahana.com/">
+<img src="https://chetabahana.files.wordpress.com/2018/04/logoweb.png" alt="Chetabahana.com | Situs Belanja Jual-Beli Barang & Promo Aneka Produk Fashion, Busana Muslim, Bayi & Anak-anak, Kecantikan, Tas, Sepatu, Peralatan Rumah Tangga, Elektronik, Makanan & Minuman Kemasan, dll. Soon The E-Shop Market Leader Will Be Owned Here!"></a><br />
+<a href="https://github.com/MarketLeader">  
+WE ARE GOING TO WIN THE MARKET!
+</a><br /><br />
+</p>
 
-<div align="center">
-  <h1>Saleor Commerce</h1>
-</div>
+# Tutorial Buka Toko
 
-<div align="center">
-  <strong>Customer-centric e-commerce on a modern stack</strong>
-</div>
+:hand: Selamat datang di [Halaman Project](https://github.com/MarketLeader) untuk sesi [**Tutorial Buka Toko**](https://github.com/MarketLeader/Tutorial-Buka-Toko)
 
-<div align="center">
-  A headless, GraphQL-first e-commerce platform delivering ultra-fast, dynamic, personalized shopping experiences. Beautiful online stores, anywhere, on any device.
-</div>
+Sesi ini adalah sesi tutorial publikasi dari 
+[**Tim Chetabahana**](https://github.com/chetabahana) diperuntukkan bagi yang sudah ikuti sesi sebelumnya yaitu: [_Cara Buka Toko Online WinMarket dan Optimasi Internal_](https://chetabahana.blogspot.com/) serta [_Cara Optimasi Eksternal Toko dengan Shop SEO_](https://chetabahana.wordpress.com/).
 
-<br>
+Di sesi ini kami akan publikasikan [cara instalasi toko](https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki) menggunakan aplikasi e-commerce dari [**Saleor**](https://github.com/mirumee/saleor).
 
-<div align="center">
-  Join our active, engaged community: <br>
-  <a href="https://saleor.io/">Website</a>
-  <span> | </span>
-  <a href="https://medium.com/saleor">Blog</a>
-  <span> | </span>
-  <a href="https://twitter.com/getsaleor">Twitter</a>
-  <span> | </span>
-  <a href="https://gitter.im/mirumee/saleor">Gitter</a>
-  <span> | </span>
-  <a href="https://spectrum.chat/saleor">Spectrum</a>
-</div>
+## Pilosopi
+Pilosopi sederhananya bisa dijabarkan sesuai bagan dan alur kerja berikut dibawah ini:
+[![flow_diagram](https://chetabahana.files.wordpress.com/2018/05/diagram.png)](https://chetabahana.github.io/#chetabahana-skema)
+- Jalankan [Iklan Shopping di AdWords](https://chetabahana.wordpress.com/google-shopping/) untuk dapat data [_produk yang di rekomendasikan_](https://support.google.com/merchants/answer/6288242) via [Google Merchant](https://support.google.com/merchants/answer/188493).  
+- Kemudian dari [_peta situs toko_](https://chetabahana.com/sitemap.xml) kita saring [_daftar semua produk_](https://chetabahana.com/product?p=1&c=0&l=60) yang memenuhi kriteria via [Google AppEngine](https://github.com/MarketLeader/Tutorial-HelloWorld/wiki/Google-App-Engine).  
+- Hasilnya kita masukkan ke [Google Merchant](https://www.google.com/retail/solutions/merchant-center/) sehingga [_tersimpan menjadi database_](https://support.google.com/merchants/answer/7052112) via [Google Content API](https://developers.google.com/shopping-content/v2/quickstart).  
+- Dari database ini kita pilah lagi produk yang mempunyai hasil dan [_peluang terbaik_](https://support.google.com/merchants/answer/7228489?hl=id) via [Google AdWords API](https://developers.google.com/adwords/api/docs/guides/start).  
+- Selanjutnya kita tampilkan sebagai produk unggulan di [_Situs Toko dari Google Sites_](http://toko.chetabahana.com/) via [Google Sites API](https://developers.google.com/google-apps/sites/docs/developers_guide).  
 
-<br>
+## Manfaat
+Manfaat yang bisa diperoleh adalah sbb:
+- Menampilkan produk unggulan secara dinamis sesuai [Trend](https://support.google.com/adwords/answer/6325039?hl=id) dan [Rekomendasi](https://support.google.com/adwords/answer/3448398) di [Google AdWords](https://adwords.google.com/).
+- Tidak memerlukan database karena bisa [_akses dan pakai data_](https://developers.google.com/shopping-content/v2/making-requests) yg sudah dimasukkan di Google Merchant
+- Tidak perlukan hosting berbayar karena [Google Site](http://sites.google.com/) adalah Free dan [AppEngine](https://cloud.google.com/appengine/) bisa [_dijalankan secara gratis_](https://stackoverflow.com/questions/18101642/appengine-limit-the-number-of-instances/26654430#26654430).
+- Bisa [_Jalankan SEO_](https://support.google.com/webmasters/answer/7451184) untuk produk unggulan dari [Situs Toko](https://chetabahana.com/) via [Google Site](http://toko.chetabahana.com/) untuk berkompetisi di [Google Search](https://www.google.com/search?q=chetabahana)
+- Meraih data terkini untuk [_Update Setelan AdWords Secara Otomatis_](https://developers.google.com/adwords/api/docs/guides/start) guna peroleh sales return yang paling optimal.  
 
-<div align="center">
-  <a href="https://circleci.com/gh/mirumee/saleor">
-    <img src="https://circleci.com/gh/mirumee/saleor.svg?style=svg" alt="Build status" />
-  </a>
-  <a href="http://codecov.io/github/mirumee/saleor?branch=master">
-    <img src="http://codecov.io/github/mirumee/saleor/coverage.svg?branch=master" alt="Codecov" />
-  </a>
-  <a href="https://docs.saleor.io/">
-    <img src="https://img.shields.io/badge/docs-docs.saleor.io-brightgreen.svg" alt="Documentation" />
-  </a>
-  <a href="https://github.com/python/black">
-    <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black">
-  </a>
-</div>
+## Proses
+Alur dari [_pilosopi_](#pilosopi) diatur sbb:
+- [Proses ke-1](https://github.com/MarketLeader/Cloud-Site-API#proses): Pengelolaan hasil [_Optimasi Internal Toko_](https://developers.google.com/search/docs/guides/) sesuai dengan [_Publikasi Sesi yg Pertama_](https://chetabahana.blogspot.com/) via [Google Sites API](https://developers.google.com/google-apps/sites/docs/developers_guide).
+- [Proses ke-2](https://github.com/MarketLeader/Cloud-Tasks-API#proses): Pendataan hasil [_Optimasi Eksternal_](https://support.google.com/webmasters/answer/40349) sesuai dengan  [_Publikasi Sesi yg Kedua_](https://chetabahana.wordpress.com/) via [Google Content API](https://developers.google.com/shopping-content/v2/quickstart).
+- [Proses ke-3](https://github.com/MarketLeader/Google-Ads-API#proses): Pendataan hasil [_Optimasi Promosi_](https://support.google.com/adwords/answer/3455573?hl=id) dari kinerja proses ke-1 dan -2 via [Google AdWords API](https://developers.google.com/adwords/api/docs/guides/start).
+- [Proses ke-4](#struktur): Pengelolaan atas hasil [_Optimasi Penjualan_](https://support.google.com/adwords/answer/6167176) dari kinerja proses ke-3 via [Google AppEngine](https://cloud.google.com/appengine/).
+<p align="center"> 
+<a href="https://chetabahana.com/product?l=60&o=harga&group=0"><img src="https://user-images.githubusercontent.com/36441664/39117383-03b2a9a4-4711-11e8-9f72-1d1cb7d61634.png" alt="Analisis iklan aneka produk fashion, sepatu, makanan dll dari Toko Online Chetabahana dari Google AdWords"></a>Gambar-1: Analisis pangsa tayang <a href="https://chetabahana.com/product?l=60&o=harga&group=0">aneka produk Toko Online Chetabahana.com</a> di Iklan Belanja dari Google AdWords
+</p>
 
-## Table of Contents
+## Struktur
+Struktur dari alur dijalankan dengan [_asas terbalik_](https://en.wikipedia.org/wiki/Algorithm) sbb:
+```
+Proses ke-4: Google AppEngine (Top Directory)
+|-----README.md (File yang kontennya sedang Anda baca ini)
+|-----Proses ke-3: Google-Ads-API (Repo#3)
+      |----README.md
+      |----Proses ke-2: Cloud-Tasks-API (Repo#2)
+           |----README.md
+      |----Proses ke-1: Cloud-Site-API (Repo#1)
+           |----README.md
+```
 
-- [What makes Saleor special?](#what-makes-saleor-special)
-- [Features](#features)
-- [Installation](#installation)
-- [Documentation](#documentation)
-- [Demo](#demo)
-- [Contributing](#contributing)
-- [Translations](#translations)
-- [Your feedback](#your-feedback)
-- [License](#license)
+## Tujuan
+Alur dari [_proses_](#proses) menuju [_manfaat_](#manfaat) diatur sbb:
+- [Repo#1](https://github.com/MarketLeader/Cloud-Site-API#struktur): Mulai dari akses ke daftar produk, menyaring data sampai sunting untuk tampilkan produk.
+- [Repo#2](https://github.com/MarketLeader/Cloud-Tasks-API#struktur): Mulai dari akses ke saran produk, memilah barang sampai input menjadi database produk.
+- [Repo#3](https://github.com/MarketLeader/Google-Ads-API#struktur): Mulai dari akses ke database produk, kinerja penjualan sampai [optimasi setelan promosi](https://support.google.com/adwords).
+- [Top Directory](#struktur): Mengatur konfigurasi, penjadwalan, lalu-lintas data, dan analisa hasil dari [setelan](https://chetabahana.github.io/feed.json).
 
-## What makes Saleor special?
+## Repositori
+Hirarki dari Top Directory (Top_dir) disetel via [_remote_](https://git-scm.com/book/en/v2/Git-Basics-Working-with-Remotes) dari [_sumber_](https://github.com/MarketLeader/Tutorial-Buka-Toko/tree/master) ke Repositori ([_Repo_](https://help.github.com/articles/create-a-repo/)) sbb:
+- Top_dir/Repo#3/Repo#1: [MarketLeader/Cloud-Site-API](https://github.com/MarketLeader/Cloud-Site-API) » Dokumentasi [_wiki_](https://help.github.com/articles/about-github-wikis/) nya [_disini_](https://github.com/MarketLeader/Cloud-Site-API/wiki).
+- Top_dir/Repo#3/Repo#2: [MarketLeader/Cloud-Tasks-API](https://github.com/MarketLeader/Cloud-Tasks-API) » Dokumentasinya [_disini_](https://github.com/MarketLeader/Cloud-Tasks-API/wiki).
+- Top_dir/Repo#3: [MarketLeader/Google-Ads-API](https://github.com/MarketLeader/Google-Ads-API) » Dokumentasinya [_disini_](https://github.com/MarketLeader/Google-Ads-API/wiki).
+- Top_dir: [MarketLeader/Toko-Chetabahana](https://github.com/MarketLeader/Toko-Chetabahana) » Dokumentasinya [_disini_](https://github.com/MarketLeader/Toko-Chetabahana/wiki). 
 
-Saleor is a rapidly-growing open source e-commerce platform that has served high-volume companies from branches like publishing and apparel since 2012. Based on Python and Django, the latest major update introduces a modular front end powered by a GraphQL API and written with React and TypeScript.
-
-## Features
-
-- **PWA**: End users can shop offline for better sales and shopping experiences
-- **GraphQL API**: Access all data from any web or mobile client using the latest technology
-- **Headless commerce**: Build mobile apps, customize storefronts and externalize processes
-- **UX and UI**: Designed for a user experience that rivals even the top commercial platforms
-- **Dashboard**: Administrators have total control of users, processes, and products
-- **Orders**: A comprehensive system for orders, dispatch, and refunds
-- **Cart**: Advanced payment and tax options, with full control over discounts and promotions
-- **Payments**: Flexible API architecture allows integration of any payment method. It comes with Braintree support out of the box.
-- **Geo-adaptive**: Automatic localized pricing. Over 20 local languages. Localized checkout experience by country.
-- **SEO**: Packed with features that get stores to a wider audience
-- **Cloud**: Optimized for deployments using Docker
-- **Analytics**: Server-side Google Analytics to report e-commerce metrics without affecting privacy
-
-Saleor is free and always will be.
-Help us out… If you love free stuff and great software, give us a star! 🌟
-
-![Saleor Storefront - React-based PWA e-commerce storefront](https://user-images.githubusercontent.com/249912/71527146-5b6be280-28da-11ea-901d-eb76161a6bfb.png)
-![Saleor Dashboard - Modern UI for managing your e-commerce](https://user-images.githubusercontent.com/249912/71523261-8a795880-28c8-11ea-98c0-6281ea37f412.png)
-
-## Installation
-
-Saleor requires Python 3.8, Node.js 10.0+, PostgreSQL and OS-specific dependency tools.
-
-[See the Saleor docs](https://docs.saleor.io/docs/developer/installation) for step-by-step installation and deployment instructions.
-
-Note:
-The `master` branch is the development version of Saleor and it may be unstable. To use the latest stable version, download it from the [Releases](https://github.com/mirumee/saleor/releases/) page or switch to a release tag.
-
-The current stable version is 2.10 and you should use this version for all three components:
-
-- Saleor: https://github.com/mirumee/saleor/releases/tag/2.10.1
-- Dashboard: https://github.com/mirumee/saleor-dashboard/releases/tag/2.10.0
-- Storefront: https://github.com/mirumee/saleor-storefront/releases/tag/2.10.3
-
-## Documentation
-
-Saleor documentation is available here: [docs.saleor.io](https://docs.saleor.io)
-
-To contribute, please see the [`mirumee/saleor-docs` repository](https://github.com/mirumee/saleor-docs/).
-
-## Saleor Platform
-The easiest way to run all components of Saleor (API, storefront and dashboard) together on your local machine is to use the [saleor-platform](https://github.com/mirumee/saleor-platform) project. Go to that repository for instructions on how to use it.
-
-[View saleor-platform](https://github.com/mirumee/saleor-platform)
-
-## Storefront
-
-For PWA, single-page storefront go to the [saleor-storefront](https://github.com/mirumee/saleor-storefront) repository.
-
-[View storefront demo](https://pwa.saleor.io/)
-
-## Dashboard
-
-For dashboard go to the [saleor-dashboard](https://github.com/mirumee/saleor-dashboard) repository.
-
-[View dashboard demo](https://pwa.saleor.io/dashboard/)
-
-## Demo
-
-Want to see Saleor in action?
-
-[View Storefront](https://pwa.saleor.io/) | [View Dashboard (admin area)](https://pwa.saleor.io/dashboard/)
-
-Or launch the demo on a free Heroku instance.
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-Login credentials: `admin@example.com`/`admin`
-
-## Contributing
-
-We love your contributions and do our best to provide you with mentorship and support. If you are looking for an issue to tackle, take a look at issues labeled [`Help Wanted`](https://github.com/mirumee/saleor/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22).
-
-If nothing grabs your attention, check [our roadmap](https://github.com/mirumee/saleor/projects/12) or come up with your feature. Just drop us a line or [open an issue](https://github.com/mirumee/saleor/issues/new) and we’ll work out how to handle it.
-
-Get more details in our [Contributing Guide](https://docs.saleor.io/docs/developer/community/contributing).
-
-## Legacy views
-
-If you're interested in using the old version of Saleor, go the [legacy-views](https://github.com/mirumee/legacy-views) repository. It contains the 2.9.0 release, which includes Django-based views and HTML templates of Storefront 1.0 and Dashboard 1.0. Note: this version of Saleor is no longer officially maintained.
-
-
-## Your feedback
-
-Do you use Saleor as an e-commerce platform?
-Fill out this short survey and help us grow. It will take just a minute, but mean a lot!
-
-[Take a survey](https://mirumee.typeform.com/to/sOIJbJ)
+Catatan: Nama Direktori bebas, akan dideteksi via masing² [_File README.md_](#struktur).
 
 ## License
+[Creative Commons Attribution 4.0 International License](https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/LICENSE)  
+Original README dari [Mirumee Software](http://mirumee.com/) (Developer): [README_original.md](https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/README_original.md)  
+Developer Disclaimer: Everything you see [_here_](https://github.com/mirumee/saleor) is open and free to use as long as you comply with the [_license_](https://github.com/mirumee/saleor/blob/master/LICENSE).  
 
-Disclaimer: Everything you see here is open and free to use as long as you comply with the [license](https://github.com/mirumee/saleor/blob/master/LICENSE). There are no hidden charges. We promise to do our best to fix bugs and improve the code.
+## Pustaka
+<p align="center"> 
+<a href="https://chetabahana.com/#after_header1_3"><img src="https://user-images.githubusercontent.com/36441664/38942532-44c87736-4359-11e8-9ad4-56f7d2b68ced.png" alt="Alokasi Pustaka Online Chetabahana"></a>Gambar-2: Alokasi Pustaka Online <a href=https://chetabahana.com>Chetabahana</a>
+</p>
 
-Some situations do call for extra code; we can cover exotic use cases or build you a custom e-commerce appliance.
+Disarankan untuk disimak sebelum melangkah lebih jauh:  
+- [Cara Buka Toko Online WinMarket dan Optimasi Internal](https://chetabahana.blogspot.com/)
+- [Cara Optimasi Eksternal Toko dengan Shop SEO](https://chetabahana.wordpress.com/)
+- [Channel Youtube Chetabahana](https://www.youtube.com/channel/UCZlPku9beXzdROCknYLuRNg?view_as=subscriber)
+- [e-Books Chetabahana](https://www.scribd.com/user/401259110/Chetabahana)
 
-#### Crafted with ❤️ by [Mirumee Software](http://mirumee.com)
+## Penutup
+Berikut ini beberapa catatan sebagai penutup:  
+- Projek ini diprioriostaskan bagi peminat [e-Commerce di Indonesia](https://www.youtube.com/watch?v=dd__L8Jh2c4&t=25s) 🇮🇩
+- Status masih [pengembangan dan pengetesan implementasi](https://github.com/MarketLeader/Toko-Chetabahana/releases).
+- Syarat untuk bergabung silahkan [Daftar ID Chetabahana](https://www.chetabahana.com/layanan/mendaftarkan-produk.html)
+- Ingin [berdonasi](https://notepad-plus-plus.org/donate/donate-action.html)? welcome untuk bergabung.
 
-hello@mirumee.com
+Terimakasih atas kunjungannya.  
+Met menyimak.. :pray:  
+
+SALAM Sukses!  
+[**Chetabahana Project**](https://github.com/MarketLeader)  
+[![profile for Chetabahana on Stack Exchange, a network of free, community-driven Q&amp;A sites](https://stackexchange.com/users/flair/5054985.png)](https://stackoverflow.com/users/4058484/chetabahana?tab=profile)   
