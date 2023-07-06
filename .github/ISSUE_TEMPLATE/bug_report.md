@@ -1,22 +1,32 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a bug report
+title: ''
+labels: bug, needs triage
+assignees: ''
 
 ---
 
-### What I'm trying to achieve
-…
+**Description:**
+A clear and concise description of what the bug is.
 
-### Steps to reproduce the problem
-1. 
-2. 
+**Task version:**
+Specify the task version
 
-### What I expected to happen
-…
+**Platform:**
+- [ ] Ubuntu
+- [ ] macOS
+- [ ] Windows
 
-### Screenshots
-<!-- If applicable, add screenshots to help explain your problem. -->
+**Runner type:**
+- [ ] Hosted
+- [ ] Self-hosted
 
-**System information**
-Operating system: 
-Browser:
+**Repro steps:**  
+A description with steps to reproduce the issue. If your have a public example or repo to share, please provide the link.
+
+**Expected behavior:**
+A description of what you expected to happen.
+
+**Actual behavior:**
+A description of what is actually happening.

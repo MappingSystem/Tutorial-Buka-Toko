@@ -1,17 +1,16 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-
+title: ''
+labels: feature request, needs triage
+assignees: ''
 ---
 
-### What I'm trying to achieve
-…
+**Description:**
+Describe your proposal.
 
-### Describe a proposed solution
-...
+**Justification:**
+Justification or a use case for your proposal.
 
-### Other solutions I've tried and won't work
-…
-
-### Screenshots or mockups
-<!-- Please provide any illustrations that could help others understand the problem or the proposed solution. -->
+**Are you willing to submit a PR?**
+<!--- We accept contributions! -->
