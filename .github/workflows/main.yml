@@ -1,5 +1,5 @@
 # Deploy GitHub Pages
-name: Build and deploy ₠Quantum site
+name: Build and deploy eQuantum site
 
 # 💎 Runs on workflow_run.conclusion
 on:
