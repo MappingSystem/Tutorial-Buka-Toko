@@ -1,0 +1,13 @@
+Tahap terakhir dari sesi Tutorial ini adalah menjalankan program bantu API untuk mendapatkan hasil penjualan secara optimal sehingga Anda dapat menentukan untuk menjalankan akun berbayar dalam rentang waktu satu tahun kredit gratis dari Google.
+
+__TOC__
+==Langkah Uji==
+===Uji Kinerja===
+===Uji Website===
+===Uji Promosi===
+===Uji Pembelian===
+===Uji Pengiriman===
+==Referensi==
+* https://cloud.google.com/resource-manager/docs/cloud-asset-inventory/overview#asset
+* https://github.com/search?s=stars&type=Repositories&q=api
+* https://github.com/toddmotto/public-apis

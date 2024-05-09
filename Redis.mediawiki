@@ -1,0 +1,76 @@
+__TOC__
+https://redis.io/documentation
+```
+Successfully built b85b4246e9f8  
+Successfully tagged compose_app:latest  
+WARNING: Image for service app was built because it did not already exist. To rebuild this image you must use `docker-compose build` or `docker-compose up --build`.  
+Creating compose_redis_1 ... done  
+Creating compose_app_1   ... done  
+Attaching to compose_redis_1, compose_app_1  
+redis_1  | 1:C 08 Jul 18:12:21.851 # Warning: no config file specified, using the default config. In order to specify a config file use redis-server /path/to/redis.conf  
+redis_1  |                 _._  
+redis_1  |            _.-``__ ''-._  
+redis_1  |       _.-``    `.  `_.  ''-._           Redis 3.2.12 (00000000/0) 64 bit  
+redis_1  |   .-`` .-```.  ```\/    _.,_ ''-._  
+redis_1  |  (    '      ,       .-`  | `,    )     Running in standalone mode  
+redis_1  |  |`-._`-...-` __...-.``-._|'` _.-'|     Port: 6379  
+redis_1  |  |    `-._   `._    /     _.-'    |     PID: 1  
+redis_1  |   `-._    `-._  `-./  _.-'    _.-'  
+redis_1  |  |`-._`-._    `-.__.-'    _.-'_.-'|  
+redis_1  |  |    `-._`-._        _.-'_.-'    |           http://redis.io  
+redis_1  |   `-._    `-._`-.__.-'_.-'    _.-'  
+redis_1  |  |`-._`-._    `-.__.-'    _.-'_.-'|  
+redis_1  |  |    `-._`-._        _.-'_.-'    |  
+redis_1  |   `-._    `-._`-.__.-'_.-'    _.-'  
+redis_1  |       `-._    `-.__.-'    _.-'  
+redis_1  |           `-._        _.-'  
+redis_1  |               `-.__.-'  
+redis_1  |  
+redis_1  | 1:M 08 Jul 18:12:21.852 # WARNING: The TCP backlog 
+```
+
+==RDB snapshotting fails== 
+
+```
+MISCONF Redis is configured to save RDB snapshots, but it is currently not able to 
+persist on disk. Commands that may modify the data set are disabled, because this 
+instance is configured to report errors during writes if RDB snapshotting fails 
+(stop-writes-on-bgsave-error option). Please check the Redis logs for details 
+about the RDB error.
+
+ResponseError at /en/
+Request Method:	GET
+Django Version:	2.1.5
+Exception Type:	ResponseError
+Exception Location:	/env/lib/python3.7/site-packages/redis/connection.py in 
+read_response, line 629
+```
+===Compose===
+```
+redis_1 | 1:C 21 Mar 2019 00:51:04.418 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo
+redis_1 | 1:C 21 Mar 2019 00:51:04.418 # Redis version=5.0.4, bits=64, commit=00000000, 
+modified=0, pid=1, just started
+redis_1 | 1:C 21 Mar 2019 00:51:04.418 # Warning: no config file specified, using the 
+default config. In order to specify a config file use redis-server /path/to/redis.conf
+redis_1 | 1:M 21 Mar 2019 00:51:04.422 * Running mode=standalone, port=6379.
+redis_1 | 1:M 21 Mar 2019 00:51:04.422 # WARNING: The TCP backlog setting of 511 cannot 
+be enforced because /proc/sys/net/core/somaxconn is set to the lower value of 128.
+redis_1 | 1:M 21 Mar 2019 00:51:04.422 # Server initialized
+redis_1 | 1:M 21 Mar 2019 00:51:04.423 # WARNING overcommit_memory is set to 0! 
+Background save may fail under low memory condition. To fix this issue add 
+'vm.overcommit_memory = 1' to /etc/sysctl.conf and then reboot or run the command 
+'sysctl vm.overcommit_memory=1' for this to take effect.
+redis_1 | 1:M 21 Mar 2019 00:51:04.423 # WARNING you have Transparent Huge Pages (THP) 
+support enabled in your kernel. This will create latency and memory usage issues with 
+Redis. To fix this issue run the command 'echo never > /sys/kernel/mm/transparent_
+hugepage/enabled' as root, and add it to your /etc/rc.local in order to retain the 
+setting after a reboot. Redis must be restarted after THP is disabled.
+redis_1 | 1:M 21 Mar 2019 00:51:04.423 * Ready to accept connections
+```
+
+===Solusi===
+```
+$ docker ps
+CONTAINER ID  IMAGE             COMMAND                 PORTS                    
+d66073a577ee  redis:5.0-alpine  "docker-entrypoint.s…"  0.0.0.0:6379->6379/tcp 
+```

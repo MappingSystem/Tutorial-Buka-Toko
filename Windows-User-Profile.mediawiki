@@ -1,0 +1,19 @@
+[[Rename User Folder in Windows 7 Step-by-step|http://social.technet.microsoft.com/Forums/windows/en-US/dbf6dff3-a706-4047-8dbf-58b879a9af0b/how-to-rename-a-default-user-directory-after-changing-computer-name]]:
+
+* First of all change your user account name by accessing the Control panel. Click Start Menu then Control Panel.
+* On the Control Panel Windows click on user account name link
+* Type in your new user account on the box bellow your profile picture and then click on the “Change Name” Button
+* The next step would be to change your folder profile. First of all you need to create a new account with administrator rights to execute the next steps. This new account is  only needed to change the folder profile name. You may remove this account after you use it to change the folder profile name. To create a new account click Manage Another Account > Create a new Account
+* Type in the new account. Make sure you assign  “Administrator” right  for this new account. 
+
+Log off your computer and then log in with the newly-created account
+* Open Windows Explorer and then navigate to C:\users
+* Right click on the folder you want to rename and change it to the same name as your new  user profile with which you log in to your Windows 7
+* At this point you have successfully renamed your Windows 7 user folder but to avoid possible error you need to perform a registry edit. Go to registry editor by typing “Registry” (without quote) in Start Menu. Navigate to the following registry value:
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList .
+* Right click on the profile list and navigate to  “Find” Menu
+* Type in your old user in the search box and then hit ‘Find Next”.  Navigate to the “ProfileImagePath” located on the right pane of the registry editor and click twice on it
+* Edit  the registry value to rename it to your new user profile.
+* Done 
+
+See Also: [[How to Rename a Windows 7 User Account and Related Profile Folder|https://social.technet.microsoft.com/wiki/contents/articles/19834.how-to-rename-a-windows-7-user-account-and-related-profile-folder.aspx]]

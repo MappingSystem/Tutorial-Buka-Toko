@@ -1,0 +1,59 @@
+==Local==
+* [[Create a private local docker registry|https://medium.com/faun/create-a-private-local-docker-registry-5c79ce912620]]
+===Certificate===
+
+==Cleaning==
+* [[Container images delete|https://cloud.google.com/sdk/gcloud/reference/container/images/delete]]
+* [[How to remove a pushed image|https://stackoverflow.com/questions/31523945/how-to-remove-a-pushed-image-in-google-container-registry]]
+
+===Command===
+====Reguler====
+* [[determine if a variable is empty|https://www.cyberciti.biz/faq/unix-linux-bash-script-check-if-variable-is-empty/]]
+
+```
+$ gcloud container images list-tags gcr.io/chetabahana/backend
+7d6ce698cce2  latest  2019-04-12T14:13:16
+7c077a9ca45a          2019-04-12T14:00:38
+
+$ gcloud container images delete --quiet gcr.io/chetabahana/backend@DIGEST
+ERROR: (gcloud.container.images.delete) [gcr.io/chetabahana/backend@DIGEST] \
+DIGEST must be of the form "sha256:<digest>
+
+$ DIGEST=`gcloud container images list-tags gcr.io/chetabahana/backend \
+--filter='-tags:*' --format='get(digest)'`
+
+$ echo $DIGEST
+sha256:7c077a9ca45aea7134d8436a3071aceb5fa62758cc86eadec63f02692b7875f7
+
+$ [ -z "$DIGEST" ] && echo "No digest" || gcloud container images delete \
+--quiet gcr.io/chetabahana/backend@$DIGEST
+Digests:
+- gcr.io/chetabahana/backend@sha256:7c077a9ca45aea7134d8436a3071aceb5fa62758cc86.....
+Deleted [gcr.io/chetabahana/backend@sha256:7c077a9ca45aea7134d8436a3071aceb5fa62.....
+
+
+$ gcloud container images list-tags gcr.io/chetabahana/backend
+DIGEST        TAGS    TIMESTAMP
+7d6ce698cce2  latest  2019-04-12T14:13:16
+```
+====Recursive====
+* [[awk and xargs|https://stackoverflow.com/a/49409298/4058484]]
+```
+$ gcloud container images list-tags gcr.io/${PROJECT_ID/${IMAGE} \
+--filter='-tags:*' --format='get(digest)' --limit=unlimited | 
+awk '{print "gcr.io/${PROJECT_ID}/${IMAGE}@" $1}' | 
+xargs gcloud container images delete --quiet
+Digests:
+- gcr.io/chetabahana/backend@sha256:7c077a9ca45aea7134d8436a3071aceb5fa62758cc86.....
+Deleted [gcr.io/chetabahana/backend@sha256:7c077a9ca45aea7134d8436a3071aceb5fa62.....
+
+```
+===Scripts===
+
+====Particular====
+* [[Script to clean up before a particular date|https://gist.github.com/ahmetb/7ce6d741bd5baa194a3fac6b1fec8bb7]]
+
+====Dockertools====
+* [[drmi - a tool for cleaning up Docker images date|https://blog.osninja.io/drmi-image-clean-tool/]]
+==''Referensi''==
+* [[GCR.io Tips & Tricks|https://ahmet.im/blog/google-container-registry-tips/]]

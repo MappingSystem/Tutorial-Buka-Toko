@@ -1,0 +1,1 @@
+https://docs.saleor.io/docs/next/getting-started/docker/#using-local-assets

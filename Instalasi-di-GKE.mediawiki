@@ -1,0 +1,223 @@
+Sesi ini kita akan kupas tentang cara mempersiapkan [[Intalasi Saleor - Docker|https://docs.getsaleor.com/en/latest/customization/docker.html]] ke [[Apa Itu Kubernetes|GKE]].
+==Membuat Aplikasi==
+Langkah selanjutnya kita siapkan image untuk kita upload ke Google Kubernetes Engine (GKE). GKE ini dapat menerima image dari docker, untuk itu kita clone projek kita di GitHub sebagai berikut:
+
+[[<img src=https://cloud.google.com/compute/images/containers-gce-process.png>|https://cloud.google.com/compute/docs/containers/deploying-containers]]<br>
+
+===Update===
+```python
+gcloud components update
+```
+===Project ID===
+```python
+export PROJECT_ID="$(gcloud config get-value project -q)"
+echo "${PROJECT_ID}"
+
+git clone https://github.com/MarketLeader/Tutorial-Buka-Toko
+```
+===Siapkan Python & pip===
+https://linuxbrew.sh/
+```bash
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
+test -d ~/.linuxbrew && eval $(~/.linuxbrew/bin/brew shellenv)
+test -d /home/linuxbrew/.linuxbrew && eval $(/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+test -r ~/.bash_profile && echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.bash_profile
+echo "eval \$($(brew --prefix)/bin/brew shellenv)" >>~/.profile
+```
+
+https://docs.getsaleor.com/en/latest/customization/backend.html#managing-dependencies
+```bash
+brew install pipenv
+pip install --user --upgrade pipenv
+export PATH=$PATH:/home/chetabahana/.local/bin
+```
+
+https://docs.getsaleor.com/en/latest/customization/backend.html#managing-dependencies
+```bash
+cd Tutorial-Buka-Toko
+pipenv lock -r > requirements.txt
+pipenv lock -r --dev > requirements_dev.txt
+```
+==Registry==
+===Upload ke registry===
+Kemudian dengan menggunakan PROJECT_ID kita buat image docker yang akan ditempatkan di ''[[Google Container Registry|https://cloud.google.com/container-registry]]'' (GCR) sebagai berikut:
+```bash
+sudo usermod -a -G docker ${USER}
+pipenv lock
+docker run busybox date
+
+docker build -t chetabahana-app .
+docker images
+```
+Langkah ini akan menginstruksikan Google Cloud untuk mencari file yg bernama ''[[Dockerfile|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/Dockerfile]]'' kemudian membuat image sesuai konfigurasi di file tsb dan test hasil seperti berikut:
+```bash
+REPOSITORY             TAG   IMAGE ID       CREATED          SIZE
+chetabahana-app        v1    25cfadb1bf28   10 seconds ago   54 MB
+```
+===Upload ke registry===
+Kemudian kita upload image ini ke GCR sehingga dapat dijalankan oleh GKE:
+```bash
+gcloud auth configure-docker
+gcloud container images delete gcr.io/${PROJECT_ID}/chetabahana-app:latest --force-delete-tags
+docker tag chetabahana-app ${PROJECT_ID}/chetabahana-app:latest
+docker push gcr.io/${PROJECT_ID}/chetabahana-app:latest
+```
+
+==Kubernetes==
+===Menyiapkan Kluster===
+Jika akun Google Cloude Anda belum membuat Kluster silahkan klik gambar berikut kemudian tekan ''Buat Kluster'' pada Projek sesuai PROJECT_ID.
+[[<img src=https://chetabahana.files.wordpress.com/2019/01/kluster-kubernetes.png>|https://console.cloud.google.com/kubernetes/list?authuser=1&project=&folder&organizationId]]
+
+Setelah image yang ditempatkan di GCR dapat dijalankan oleh GKE maka kita perlu membuat ''[[Kluster|https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture]]''. Kluster ini menampung ''[[Instances|https://cloud.google.com/compute]]'' yang menjalankan ''[[Mesin Kubernetes|https://kubernetes.io/]]'' terdiri dari 1 Master dan beberapa Cabang ''[[(default=3 Nodes)|https://cloud.google.com/sdk/gcloud/reference/container/clusters/create#--num-nodes]]''.
+
+```bash
+gcloud container clusters create tutorial-cluster --num-nodes=3
+```
+Output
+```bash
+NAME              LOCATION       MASTER_VERSION  MASTER_IP      MACHINE_TYPE   NODE_VERSION   NUM_NODES  STATUS
+tutorial-cluster  us-central1-b  1.10.11-gke.1   35.202.195.36  n1-standard-1  1.10.11-gke.1  3          RUNNING
+```
+Untuk melihat detil
+```bash
+gcloud compute instances list
+```
+Output
+```bash
+NAME                                             ZONE           MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
+gke-tutorial-cluster-default-pool-f933fac2-23ww  us-central1-b  n1-standard-1               10.128.0.2   35.193.111.238  RUNNING
+gke-tutorial-cluster-default-pool-f933fac2-8mt4  us-central1-b  n1-standard-1               10.128.0.3   35.188.118.200  RUNNING
+gke-tutorial-cluster-default-pool-f933fac2-m2qn  us-central1-b  n1-standard-1               10.128.0.4   35.188.221.100  RUNNING
+```
+===Deploy ke kluster===
+```bash
+kubectl run tutorial-web --image=gcr.io/${PROJECT_ID}/tutorial-app:v1 --port 8080
+kubectl get pods
+```
+===Expose ke Internet===
+```bash
+kubectl expose deployment tutorial-web --type=LoadBalancer --port 80 --target-port 8080
+kubectl get service
+```
+===Scale up===
+```bash
+kubectl scale deployment tutorial-web  --replicas=3
+kubectl get deployment tutorial-web
+```
+
+==Compose==
+Build the containers using docker-compose
+```bash
+$ docker-compose build
+```
+Prepare the database
+```bash
+$ docker-compose run --rm web python3 manage.py migrate
+$ docker-compose run --rm web python3 manage.py collectstatic
+$ docker-compose run --rm web python3 manage.py populatedb --createsuperuser
+```
+The --createsuperuser argument creates an admin account for admin@example.com with the password set to admin.
+
+Run the containers
+```bash
+$ docker-compose up
+```
+By default, the application is started in debug mode and is configured to listen on port 8000.
+
+===Deploy versi terbaru===
+```bash
+docker build -t gcr.io/${PROJECT_ID}/tutorial-app:v2 .
+docker push gcr.io/${PROJECT_ID}/tutorial-app:v2
+kubectl set image deployment/tutorial-web tutorial-web=gcr.io/${PROJECT_ID}/tutorial-app:v2
+```
+===Unistall===
+```bash
+kubectl delete service tutorial-web
+gcloud container clusters delete tutorial-cluster
+```
+===Reistall===
+```bash
+SET PROJECT_ID="$(gcloud config get-value project -q)"
+
+kubectl delete service tutorial-web 
+gcloud container clusters delete cluster-zone-a --zone=asia-southeast1-a
+gcloud container clusters delete cluster-zone-b --zone=asia-southeast1-b
+gcloud container clusters delete cluster-zone-c --zone=asia-southeast1-c
+
+gcloud config set compute/region asia-southeast1
+export REGION="asia-southeast1"
+
+export CLUSTER="cluster-zone-a"
+gcloud config set compute/zone asia-southeast1-a
+export ZONE="asia-southeast1-a"
+
+gcloud config list
+gcloud container clusters create $CLUSTER \
+--zone=${ZONE} --num-nodes=1 --preemptible \
+--enable-autoscaling --min-nodes=1 --max-nodes=2 \
+--enable-autorepair --enable-autoupgrade --enable-basic-auth \
+--issue-client-certificate
+
+export CLUSTER="cluster-zone-b"
+gcloud config set compute/zone asia-southeast1-b
+export ZONE="asia-southeast1-b"
+
+gcloud config list
+gcloud container clusters create $CLUSTER \
+--zone=${ZONE} --num-nodes=1 --preemptible \
+--enable-autoscaling --min-nodes=1 --max-nodes=2 \
+--enable-autorepair --enable-autoupgrade --enable-basic-auth \
+--issue-client-certificate
+
+export CLUSTER="cluster-zone-c"
+gcloud config set compute/zone asia-southeast1-c
+export ZONE="asia-southeast1-c"
+
+gcloud config list
+gcloud container clusters create $CLUSTER \
+--zone=${ZONE} --num-nodes=1 --preemptible \
+--enable-autoscaling --min-nodes=1 --max-nodes=2 \
+--enable-autorepair --enable-autoupgrade --enable-basic-auth \
+--issue-client-certificate
+```
+Jalankan
+```bash
+kubectl get deployments --all-namespaces
+kubectl delete deployment chetabahana-web
+
+kubectl run chetabahana-web --image=gcr.io/${PROJECT_ID}/chetabahana-app:v1.0.0 --port 8080  --env="key=value"
+kubectl get pods
+
+kubectl delete service chetabahana-web
+kubectl expose deployment chetabahana-web --type=LoadBalancer --port 80 --target-port 8080
+kubectl get service
+
+kubectl scale deployment chetabahana-web --replicas=3
+kubectl get deployment chetabahana-web
+kubectl get pods
+
+
+gcloud compute instances list
+```
+Output
+```bash
+NAME                                           ZONE               MACHINE_TYPE   PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
+gke-cluster-zone-a-default-pool-6d271c23-2kn8  asia-southeast1-a  n1-standard-1  true         10.148.0.6   35.187.254.63   RUNNING
+gke-cluster-zone-b-default-pool-c91eed2b-1sq1  asia-southeast1-b  n1-standard-1  true         10.148.0.8   35.187.249.45   RUNNING
+gke-cluster-zone-b-default-pool-c91eed2b-lj4v  asia-southeast1-b  n1-standard-1  true         10.148.0.7   35.247.167.36   RUNNING
+gke-cluster-zone-c-default-pool-76541e4a-bs06  asia-southeast1-c  n1-standard-1  true         10.148.0.9   35.247.189.230  RUNNING
+gke-cluster-zone-c-default-pool-76541e4a-dgv2  asia-southeast1-c  n1-standard-1  true         10.148.0.10  35.198.221.75   RUNNING
+```
+===Setel Aplikasi===
+[[Penyetelan Aplikasi]]
+
+==Referensi==
+* [[Quickstart for Container Registry|https://cloud.google.com/container-registry/docs/quickstart]]''
+* https://github.com/mirumee/saleor/issues/3613
+* https://saleor.readthedocs.io/en/latest/deployment/docker.html
+* https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app
+* https://cloud.google.com/sdk/gcloud/reference/container/clusters/create
+* [[Packer builds Docker containers without the use of Dockerfiles|https://www.packer.io/docs/builders/docker.html]]
+* [[How To Remove Docker Containers, Images, Volumes, and Networks|https://linuxize.com/post/how-to-remove-docker-images-containers-volumes-and-networks/]]
+
+

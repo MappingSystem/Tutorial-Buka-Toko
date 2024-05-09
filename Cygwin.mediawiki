@@ -1,0 +1,444 @@
+__TOC__
+==Install==
+* [[Cygwin Installation|https://cygwin.com/install.html]]
+* [[Installing CYGWIN + SSHD on windows|https://gist.github.com/roxlu/5038729]]
+
+Pada dasarnya ada perbedaan signifikan antara sistem operasi dari pengguna internet dan penyedia internet. Sebagian besar client menggunakan [[Windows|https://id.wikipedia.org/wiki/Microsoft_Windows]] yang berawal mula dari sistem operasi [[DOS|https://id.wikipedia.org/wiki/MS-DOS]] sedangkan sisi server menggunakan [[Linux|https://id.wikipedia.org/wiki/Linux]] yang bekerja dengan sistem operasi [[Unix|https://id.wikipedia.org/wiki/Unix]].
+<br><br>
+Jika Anda mengembangkan projek dengan sistem Windows maka Anda akan banyak menemukan konflik konfigurasi dengan Linux. Untuk mengatasi hal ini maka kita perlu sistem dengan pola Unix yang bekerja dengan Sistem Windows. Salah satu projek yang dikenal adalah ''[[Cygwin|https://id.wikipedia.org/wiki/Cygwin]]''.
+<br><br>
+[[<img src=https://user-images.githubusercontent.com/36441664/56179202-08dde500-602f-11e9-9e99-6ada35ae31f1.png>|https://cygwin.com/install.html]]
+
+===Users===
+```
+$ id
+uid=197608(Chetabahana) 
+gid=197121(None) 
+groups=197121(None),544(Administrators),545(Users),4(INTERACTIVE),66049(CONSOLE LOGON),
+11(Authenticated Users),15(This Organization),4095(CurrentSession),66048(LOCAL),
+262154(NTLM Authentication),405504(High Mandatory Level)
+```
+===Groups===
+```
+$ groups
+None
+Administrators 
+Users 
+INTERACTIVE 
+CONSOLE LOGON 
+Authenticated Users 
+This Organization 
+CurrentSession 
+LOCAL 
+NTLM Authentication 
+High Mandatory Level
+```
+
+==Struktur==
+* [[Symbolic link|https://en.wikipedia.org/wiki/Symbolic_link]]: [[Windows - mklink|https://en.wikipedia.org/wiki/NTFS_symbolic_link]] vs [[Unix - ln|https://en.wikipedia.org/wiki/Ln_(Unix)]]
+* [[Cygwin Repositori Summary|https://cygwin.com/git/gitweb.cgi?p=newlib-cygwin.git;a=summary]]
+
+```
+C:\Users\Chetabahana> MKLINK
+Creates a symbolic link.
+
+MKLINK [[/D] | [/H] | [/J]] Link Target
+
+        /D      Creates a directory symbolic link.  Default is a file
+                symbolic link.
+        /H      Creates a hard link instead of a symbolic link.
+        /J      Creates a Directory Junction.
+        Link    specifies the new symbolic link name.
+        Target  specifies the path (relative or absolute) that the new link
+                refers to.
+```
+Cara membuat symbolic link untuk directory:
+* [[MKLINK “directory junction” vs “directory symbolic link”?|https://superuser.com/questions/343074/directory-junction-vs-directory-symbolic-link]]
+
+```
+C:\Users\Chetabahana>CD C:\
+C:\> MKDIR D:\Cygwin
+C:\> MKLINK /J cygwin D:\Cygwin
+Junction created for cwgwin <<===>> D:\Cygwin
+```
+
+[[<img src=https://chetabahana.github.io/images/cygwin/Cygwin-dir.png>|https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/mklink]]
+
+Cara membuat symbolic link untuk file:
+* [[How to create a symbolic/soft link to a file not a folder|https://superuser.com/a/661197/505363]]
+```
+C:\> cd "C:\Program Files\Google\Cloud SDK"
+
+C:\Program Files\Google\Cloud SDK>MOVE cloud_env.bat
+"C:\Users\Chetabahana\Documents\Project\Google\GCE\Shell\backend\windows\gcloud"
+
+C:\Program Files\Google\Cloud SDK>MKLINK cloud_env.bat 
+"C:\Users\Chetabahana\Documents\Project\Google\GCE\Shell\backend\windows\gcloud\cloud_env.bat"
+symbolic link created for cloud_env.bat <<===>> 
+C:\Users\Chetabahana\Documents\Project\GitHub\Chetabahana\backend\windows\gcloud\cloud_env.bat
+```
+Catatan: Bila timbul error karena masalah "permission", silahkan ulangi membuka jendela CMD dengan cara "[[Run As Administrator|https://winpoin.com/apa-itu-run-as-administrator-apa-fungsinya-dan-bagaimana-mengaktifkannya/]]".
+
+===System===
+
+Untuk menampilkan isi direktori, Anda dapat menggunakan perintah <code>ls</code> atau <code>dir</code>. <code>ls -la</code> akan memberikan rincian lebih lanjut, termasuk izin akses file, ukuran dan tanggal modifikasi.
+
+```
+$ uname -a | head -n 1
+CYGWIN_NT-6.1 Dekstop 3.0.7(0.338/5/3) 2019-04-30 18:08 x86_64 Cygwin
+
+$ pwd
+/home/Chetabahana
+
+$ ls /
+bin  Cygwin.bat  Cygwin.ico  Cygwin-Terminal.ico  dev  etc  home  lib  sbin  tmp  usr  var
+
+$ export CYGWIN="winsymlinks:native"
+
+$ ls -la /
+lrwxrwxrwx 1 Chetabahana None 18 Apr 14 14:41 / -> /cygdrive/d/Cygwin
+
+$ ls -la /cygdrive/d/Cygwin
+total 421
+drwxrwx---+ 1 Chetabahana None                0 Apr 16 11:55 .
+drwxrwx---+ 1 SYSTEM      SYSTEM              0 Apr 16 10:43 ..
+drwxr-xr-x+ 1 Chetabahana None                0 Apr 14 23:48 bin
+-rwxr-xr-x  1 Chetabahana Administrators     57 Apr 14 14:54 Cygwin.bat
+-rw-r--r--  1 Chetabahana Administrators 157097 Apr 14 14:54 Cygwin.ico
+-rw-r--r--  1 Chetabahana Administrators  53342 Apr 14 14:54 Cygwin-Terminal.ico
+drwxr-xr-x+ 1 Chetabahana None                0 Apr 14 14:49 dev
+drwxrwx---+ 1 Chetabahana None                0 Apr 14 23:49 etc
+drwxrwxrwt+ 1 Chetabahana None                0 Apr 14 14:57 home
+drwxr-xr-x+ 1 Chetabahana None                0 Apr 14 23:48 lib
+drwxr-xr-x+ 1 Chetabahana None                0 Apr 14 14:48 sbin
+drwxrwxrwt+ 1 Chetabahana None                0 Apr 16 10:36 tmp
+drwxr-xr-x+ 1 Chetabahana None                0 Apr 14 21:30 usr
+drwxrwx---+ 1 Chetabahana None                0 Apr 14 14:48 var
+
+```
+
+[[<img src=https://chetabahana.github.io/images/cygwin/Cygwin-Setup.png>|https://cygwin.com/cygwin-ug-net/cygwin-ug-net.html]]
+
+Perhatikan bahwa drive di Cygwin diperlakukan sebagai direktori, dan penggunaan garis miring di tempat backslash DOS (<code>d:/Cygwin</code> bukannya <code>d:\Cygwin</code>).
+
+===Cygdrive===
+* [[Enable native NTFS symbolic links for Cygwin|https://stackoverflow.com/questions/18654162/enable-native-ntfs-symbolic-links-for-cygwin/]]
+
+Anda dapat menggunakan spesifikasi direktori canonic Cygwin, yang memetakan semua drive ke subdirektori di direktori <code>/cygdrive/</code>. Contoh: <code>DOS C:</code> dapat diakses di Cygwin dengan <code>/cygdrive/c</code>, atau D: <code>/cygdrive/d</code>, dll.
+
+```
+$ ls /cygdrive
+c  d
+
+$ ls /cygdrive/c
+'$Recycle.Bin'  'Documents and Settings'     Recovery         autoexec.bat  
+grldr           'System Volume Information'  Boot             hiberfil.sys  
+bootmgr         Users                        BOOTSECT.BAK     pagefile.sys
+Windows         config.sys                   'Program Files'  winx.ld
+cygwin          ProgramData
+
+$ ls -la /cygdrive/c | grep "\->"
+lrwxrwxrwx  1 Chetabahana None    cygwin -> /cygdrive/d/Cygwin
+lrwxrwxrwx  1 SYSTEM      SYSTEM  Documents and Settings -> /cygdrive/c/Users
+
+$ ls -la /cygdrive/c/Users
+drwxr-xr-x+ 1 Administrators              .
+d---r-x---+ 1 NT SERVICE+TrustedInstaller ..
+lrwxrwxrwx  1 SYSTEM                      'All Users' -> /cygdrive/c/ProgramData
+drwxrwx---+ 1 Chetabahana                 Chetabahana
+drwxr-xr-x+ 1 Administrators              Default
+lrwxrwxrwx  1 SYSTEM                      'Default User' -> /cygdrive/c/Users/Default
+-rwxr-xr-x+ 1 SYSTEM                      desktop.ini
+drwxrwxrwx+ 1 Administrators              Public
+drwxrwx---+ 1 SYSTEM                      temp
+drwxrwx---+ 1 SYSTEM                      UpdatusUser
+
+$ ls /cygdrive/d
+'$RECYCLE.BIN'   Cygwin   Docker   GitHub   Google  'System Volume Information'
+
+$ ls -la /cygdrive/c/Users/Chetabahana | grep "\->"
+lrwxrwxrwx  1 Chetabahana    None  .docker -> /cygdrive/d/Docker
+
+$ mkdir /cygdrive/c/Users/Chetabahana/Documents/Project
+$ ln -s -v /cygdrive/d/GitHub /cygdrive/c/Users/Chetabahana/Documents/GitHub
+$ ln -s -v /cygdrive/d/Google /cygdrive/c/Users/Chetabahana/Documents/Google
+
+$ ls -l /cygdrive/c/Users/Chetabahana/Documents/Project
+lrwxrwxrwx 1 Chetabahana None 18 Apr 14 14:23 GitHub -> /cygdrive/d/GitHub
+lrwxrwxrwx 1 Chetabahana None 18 Apr 14 14:23 Google -> /cygdrive/d/Google
+```
+
+==Settings==
+===Default===
+* [[Mapping Windows accounts to POSIX|http://www.cygwin.com/cygwin-ug-net/ntsec.html#ntsec-mapping]]
+```
+$ mkpasswd
+SYSTEM:*:18:18:U-NT AUTHORITY\SYSTEM,S-1-5-18:/home/SYSTEM:/bin/bash
+LOCAL SERVICE:*:19:19:U-NT AUTHORITY\LOCAL SERVICE,S-1-5-19:/:/sbin/nologin
+NETWORK SERVICE:*:20:20:U-NT AUTHORITY\NETWORK SERVICE,S-1-5-20:/:/sbin/nologin
+Administrators:*:544:544:U-BUILTIN\Administrators,S-1-5-32-544:/:/sbin/nologin
+NT SERVICE+TrustedInstaller:*:328384:328384:U-NT SERVICE\TrustedInstaller,S-1-5-80-956008885-3418522649-1831038044-1853292631-2271478464:/:/sbin/nologin
+Administrator:*:197108:197121:U-Dekstop\Administrator,S-1-5-21-3900395517-206185552-2429368915-500:/home/Administrator:/bin/bash
+Chetabahana:*:197608:197121:U-Dekstop\Chetabahana,S-1-5-21-3900395517-206185552-2429368915-1000:/home/Chetabahana:/bin/bash
+cyg_server:*:197610:197121:U-Dekstop\cyg_server,S-1-5-21-3900395517-206185552-2429368915-1002:/home/cyg_server:/bin/bash
+Guest:*:197109:197121:U-Dekstop\Guest,S-1-5-21-3900395517-206185552-2429368915-501:/home/Guest:/bin/bash
+UpdatusUser:*:197609:197121:U-Dekstop\UpdatusUser,S-1-5-21-3900395517-206185552-2429368915-1001:/home/UpdatusUser:/bin/bash
+```
+===Permission===
+* [[Cygwin, access control, default groups|http://www.devgrok.com/2015/07/cygwin-access-control-default-groups.html]]
+```
+$ mkpasswd -l -u Chetabahana >> /etc/passwd
+
+$ cat /etc/passwd
+Chetabahana:*:197608:197121:U-Dekstop\Chetabahana,...
+
+$ sed -i "/197121/544/g" /etc/passwd && cat /etc/passwd
+Chetabahana:*:197608:544:U-Dekstop\Chetabahana,...
+
+$ id
+uid=197608(Chetabahana) 
+gid=544(Administrators) 
+groups=544(Administrators),197121(None),..
+
+$ chown -R Chetabahana:Administrators /* && cd ~ && ls -al
+drwxrwxr-x+ 1 Chetabahana Administrators    0 Jun  9 03:40 .
+drwxrwxrwt+ 1 Chetabahana Administrators    0 May 29 18:44 ..
+-rw-------  1 Chetabahana Administrators  265 Jun  9 02:44 .bash_history
+-rwxr-xr-x  1 Chetabahana Administrators 1494 May 29 18:42 .bash_profile
+-rwxr-xr-x  1 Chetabahana Administrators 5645 May 29 18:42 .bashrc
+drwxrwxr-x+ 1 Chetabahana Administrators    0 Jun  9 03:46 .config
+-rwxr-xr-x  1 Chetabahana Administrators 1919 May 29 18:42 .inputrc
+-rwxr-xr-x  1 Chetabahana Administrators 1236 Jun  9 04:18 .profile
+
+
+$ cd ~
+$ mkdir .config
+$ cat <<'EOF' >> .config/dacl
+user::rwx
+group::rwx
+other:r-x
+default:user::rwx
+default:group::rwx
+default:other:r-x
+EOF
+$ cd /bin && find $1 -type d -exec setfacl -f ~/.config/dacl {} \;
+$ getfacl .
+# file: .
+# owner: Chetabahana
+# group: Administrators
+user::rwx
+group::rwx
+other::r-x
+default:user::rwx
+default:group::rwx
+default:other::r-x
+
+$ ls -al /*
+-rwxr-xr-x+ 1 Chetabahana Administrators     88 May 29 18:42 /Cygwin.bat
+-rw-r--r--  1 Chetabahana Administrators 157097 May 29 18:44 /Cygwin.ico
+-rw-r--r--  1 Chetabahana Administrators  53342 May 29 18:44 /Cygwin-Terminal.ico
+
+/bin:
+total 36287
+drwxrwxr-x+ 1 Chetabahana    Administrators       0 Jun  9 03:38  .
+lrwxrwxrwx  1 Administrators None                18 May 29 14:55  .. -> /cygdrive/d/Cygwin
+-rwxr-xr-x  1 Chetabahana    Administrators   64019 Feb  4  2017 '[.exe'
+-rwxr-xr-x  1 Chetabahana    Administrators   51219 Mar 31 18:26  addftinfo.exe
+lrwxrwxrwx  1 Chetabahana    Administrators      10 May 29 18:41  apropos -> whatis.exe
+-rwxr-xr-x  1 Chetabahana    Administrators   29715 Feb  4  2017  arch.exe
+-rwxr-xr-x  2 Chetabahana    Administrators  100883 Feb 17  2017  ash.exe
+lrwxrwxrwx  1 Chetabahana    Administrators       8 May 29 18:41  awk -> gawk.exe
+...
+...
+```
+
+==Arsitektur==
+* [[About your profile|https://help.github.com/en/articles/about-your-profile]]
+* [[About your organization's profile|https://help.github.com/en/articles/about-your-organizations-profile]]
+
+===Public===
+* [[Chetabahana - User profile|https://github.com/chetabahana]]
+* [[MarketLeader - Organization profile|https://github.com/MarketLeader]]
+
+```
+$ ls /cygdrive/d/GitHub
+Chetabahana  MarketLeader
+
+$ ls /cygdrive/d/GitHub/Chetabahana
+backend  default  drupal  joomla  market  portfolio  wordpress
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/GitHub/Chetabahana
+backend  default  drupal  joomla  market  portfolio  wordpress
+
+$ ls /cygdrive/d/GitHub/MarketLeader
+Google-AdWords-API  Google-Sites-API    Google-Trends-API  Google-Content-API
+Toko-Chetabahana    Tutorial-Buka-Toko
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/GitHub/MarketLeader
+Google-AdWords-API  Google-Sites-API    Google-Trends-API  Google-Content-API
+Toko-Chetabahana    Tutorial-Buka-Toko
+```
+
+===Private===
+* [[Google Cloud Platform - Products|https://cloud.google.com/products/]]
+* [[Google Cloud Platform - Documentation|https://cloud.google.com/docs/]]
+
+Google Cloud Platform
+```
+$ ls /cygdrive/d/Google
+GAE  GCE  GCR  GCS
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google
+GAE  GCE  GCR  GCS
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GAE
+Java  Node  Php  Python
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Php
+drupal  joomla  wordpress
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python
+default  market  portfolio
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GCE
+Shell
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GCE/Shell
+backend
+```
+home
+```
+C:\ cd C:\Users\Chetabahana\Documents\Google\GCE\Shell\backend 
+C:\ mkdir -p windows/cygwin/home && cd windows/cygwin/home
+C:\ mklink /j Chetabahana D:\Cygwin\home\Chetabahana
+```
+
+==Konfigurasi==
+===Virtual-Env===
+* [[Python 'Virtual-Env' works to run Saleor on Cygwin|https://github.com/MarketLeader/Toko-Chetabahana/releases]]
+
+```
+$ ls /cygdrive/c/Users/Chetabahana/Documents/GitHub/MarketLeader/Toko-Chetabahana
+_config.yml  docs  LICENSE  README.md virtual-env
+
+$ cd /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python/market
+$ ln -s -v /cygdrive/c/Users/Chetabahana/Documents/GitHub/MarketLeader/Toko-Chetabahana/virtual-env virtual-en
+'virtual-en' -> '/cygdrive/c/Users/Chetabahana/Documents/GitHub/MarketLeader/Toko-Chetabahana/virtual-env'
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python/market/virtual-env
+bin   get-pip.py  include  lib  pyvenv.cfg  requirements.txt  share
+
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python/market/virtual-env/bin
+__pycache__      easy_install-3.7  pybabel       rst2man.py
+activate         faker             pycodestyle   rst2odt.py
+activate.csh     gprof2dot         pygmentize    rst2odt_prepstyles.py
+activate.fish    gunicorn          pyjwt         rst2pseudoxml.py
+autopep8         gunicorn_paster   python        rst2s5.py
+cairosvg         isympy            python3       rst2xetex.py
+celery           jp.py             raven         rst2xml.py
+chardetect       markdown_py       rst2html.py   rstpep2html.py
+django-admin     pip               rst2html4.py  sqlformat
+django-admin.py  pip3              rst2html5.py  uwsgi.exe
+easy_install     pip3.7            rst2latex.py  weasyprint
+
+```
+
+===Runtime Server===
+
+```
+$ ls /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python/market
+_common.env                  LICENSE               scripts
+apollo.config.js             locale                setup.cfg
+app.json                     manage.py             static
+app.yaml                     media                 templates
+CHANGELOG.md                 package.json          tests
+cloudbuild.yaml              package-lock.json     tox.ini
+common.env                   Procfile              tsconfig.json
+deployment                   README.md             tslint.json
+docker-compose.override.yml  requirements.txt      virtual-env
+docker-compose.yml           requirements_dev.txt  webpack.config.js
+Dockerfile                   runtime.txt           webpack.d.ts
+docs                         saleor                webpack-bundle.json
+
+$ ln -s -v /cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python/market /srv
+'/srv' -> '/cygdrive/c/Users/Chetabahana/Documents/Google/GAE/Python/market'
+
+$ ls /
+bin  dev  home  sbin  tmp  var  etc  lib  srv  usr
+
+$ ls -la / | grep "\->"
+lrwxrwxrwx 1 Chetabahana None 18 Apr 14 14:41 / -> /cygdrive/d/Cygwin
+
+$ ls /srv
+_common.env                  LICENSE               scripts
+apollo.config.js             locale                setup.cfg
+app.json                     manage.py             static
+app.yaml                     media                 templates
+CHANGELOG.md                 package.json          tests
+cloudbuild.yaml              package-lock.json     tox.ini
+common.env                   Procfile              tsconfig.json
+deployment                   README.md             tslint.json
+docker-compose.override.yml  requirements.txt      virtual-env
+docker-compose.yml           requirements_dev.txt  webpack.config.js
+Dockerfile                   runtime.txt           webpack.d.ts
+docs                         saleor                webpack-bundle.json
+
+$ cd /srv/virtual-env/bin
+$ ln -s /usr/bin/python python
+$ ln -s python python3
+
+$ ls -l /srv/virtual-env/bin/python*
+lrwxrwxrwx 1  /srv/virtual-env/bin/python -> /usr/bin/python
+lrwxrwxrwx 1  /srv/virtual-env/bin/python3 -> python
+
+$ chown -R Chetabahana:Administrators /bin
+
+$ ls -l /usr/bin/python*
+lrwxrwxrwx 1 Chetabahana Administrators /usr/bin/python3.7 -> python3.7m.exe
+-rwxr-xr-x 1 Chetabahana Administrators /usr/bin/python3.7m.exe
+
+$ ls -l /usr/bin/pip*
+-rwxr-xr-x 1 Chetabahana Administrators /usr/bin/pip3.7
+
+cd /usr/bin
+ln -s python3.7 python3
+ln -s python3 python
+ln -s pip3.7 pip
+
+$ which python
+/usr/bin/python
+
+$ which pip
+/usr/bin/pip
+
+pip install --user pipenv
+```
+
+==Pengembangan==
+* [[Bagan Projek|https://marketleader.github.io/#bagan-projek]]
+Struktur seperti yang diuraikan di atas dibuat sedemikian rupa untuk nantinya dikembangkan sebagai dasar dari ''[[Bagan Project|https://github.com/chetabahana/chetabahana.github.io/wiki/Bagan-Project]]'' yang sudah dibahas pada sesi sebelumnya.
+
+
+===Management===
+* [[How to manage a development project using Notepad++|http://docs.notepad-plus-plus.org/index.php/Project_Management]]
+
+Untuk menyusun repository ke bagan-projek maka nama folder dan file akan menjadi point penting. 
+<br><br>
+Dengan menggunakan module [[Workspace Management|http://docs.notepad-plus-plus.org/index.php/Project_Management#Workspace_management]] dari Notepad++ maka dari penyusunan file dan folder dapat dihasilkan ''[[Workspace files|https://raw.githubusercontent.com/MarketLeader/Google-Sites-API/master/kelola_atribut/data_terkini/Workspace]]'' sampai ke ukuran 10MB dengan cepat dan mudah. 
+<br><br>
+[[<img src=https://chetabahana.github.io/images/cygwin/Workspace.png>|https://chetabahana.github.io/images/cygwin/Workspace.png]]
+<br><br>
+Dengan [[plugin git|https://webdeveloperankitakulkarni.wordpress.com/2013/10/19/git-with-notepad/]] yang tersedia untuk dipasang di Notepad++ maka kita bisa update sekaligus build tanpa harus keluar dari editor untuk mencari repository yang terkait.
+<br><br>
+Dengan demikian penyusunan projek kedalam Workspace seperti ini akan memudahkan kita fokus untuk menyempurnakan setiap bagian yang diperlukan untuk sampai ke tujuan dari projek ini. 
+
+===Bagan Esekusi===
+Selanjutnya dengan penyusunan files dan folder ini bisa kembangkan untuk dijadikan ke Bagan Esekusi ''[[secara otomatis|https://github.com/chetabahana/chetabahana.github.io/wiki/Bagan-Project]]''. Hal ini dimungkinkan untuk dilakukan karena dalam Workspace kita bisa susun tanpa harus terikat susunan alphabet.
+
+Secara lengkap skema projek akan mengikuti bagan berikut:
+
+[[<img src=https://chetabahana.files.wordpress.com/2018/05/diagram.png>|https://chetabahana.github.io/#chetabahana-skema]]
+
+Untuk menuju ke pola ini maka kita perlu siapkan sarana dari tiap bagian bagan. 
+
+Pada sesi ini selanjutnya kita bahas secara detil untuk tema ''[[Home|Buka Toko]]'' sedangkan tema lain akan kita bahas pada sesi² berikutnya.

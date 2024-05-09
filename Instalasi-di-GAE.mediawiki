@@ -1,0 +1,361 @@
+Sesi ini kita akan kupas tentang cara mempersiapkan Instalasi [[Saleor|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Apa-Itu-Saleor]] di [[GAE|https://en.wikipedia.org/wiki/Google_App_Engine]]
+__TOC__
+==Deploy==
+Setelah kita selesai membuat [[Instalasi-di-PC|Aplikasi di PC]] maka kita bisa pasang [[Instalasi-di-GAE#via-source-code|via Source Code]] dan [[Instalasi-di-GAE#via-build-image|juga via Build Image]] baik secara ''[[Manual via Gcloud|https://cloud.google.com/appengine/docs/standard/python/getting-started/deploying-the-application]]'' maupun secara ''[[Otomatis via Cloud Build|https://cloud.google.com/source-repositories/docs/quickstart-triggering-builds-with-source-repositories]]''.
+
+===Via Source Code===
+Pemasangan [[Instalasi-di-PC#sumber-code|via Source Code]] di GAE akan mengikuti kaidah [[Apa-Itu-Saleor#Django|Django]] dimana berdasarkan tutorial ''[[<code>app.yaml</code>|https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/appengine/standard_python37/django/app.yaml]]'' bisa pakai <code>gunicorn</code>
+
+* Masukkan code <code>entrypoint: gunicorn -b :$PORT saleor.wsgi</code> kedalam file <code>app.yaml</code>
+* Tambahkan baris dengan code <code>gunicorn==19.7.1</code> kedalam file <code>requirements.txt</code>
+* Saleor butuh memory lebih dari 128MB. Minimum ''[[instance_class: F2/B2|https://cloud.google.com/appengine/docs/standard/python3/config/appref#scaling_elements]]''
+
+app.yaml
+```
+env: standard
+service: product
+runtime: python37
+entrypoint: gunicorn -b :$PORT saleor.wsgi
+
+instance_class: F2
+automatic_scaling:
+  max_instances: 1
+
+env_variables:
+  SECRET_KEY: [DJANGO_SECRET_KEY]
+  ALLOWED_HOSTS: product-dot-chetabahana.appspot.com,www.chetabahana.com
+  DATABASE_URL: postgresql://saleor:saleor@23.251.156.175/saleor
+  DEFAULT_CURRENCY: Rp
+  DEFAULT_COUNTRY: INDONESIA
+  CREATE_IMAGES_ON_DEMAND: False
+
+handlers:
+- url: /static
+  static_dir: static/
+
+- url: /.*
+  script: auto
+$ gcloud app deploy --version=v1-4
+```
+
+===Via Build Image===
+Setelan <code>app.yaml</code> lihat:
+* ''[[Gen - Config|https://cloud.google.com/sdk/gcloud/reference/beta/app/gen-config]]''
+* ''[[Runtimes - Custom|https://cloud.google.com/appengine/docs/flexible/custom-runtimes/]]''
+* ''[[Environment - Flexible|https://cloud.google.com/python/django/flexible-environment]]'
+* ''[[Resources - Three Simple Steps|https://medium.com/google-cloud/three-simple-steps-to-save-costs-when-prototyping-with-app-engine-flexible-environment-104fc6736495#5e8c]]''
+* ''[[Resources - f1-micro Bursting|https://cloud.google.com/compute/docs/machine-types#sharedcore]]''
+* ''[[Env Variables - Django’s Secret key setting|https://docs.djangoproject.com/en/2.1/ref/settings/#s-secret-key]]''
+* ''[[Env Variables - PostgreSQL Users|https://cloud.google.com/sql/docs/mysql/create-manage-users]]'': ubah default <code>saleor</code>: ''[[user/password|https://console.cloud.google.com/sql/instances/instance-postgres/users]]'', dan ''[[database|https://console.cloud.google.com/sql/instances/instance-postgres/databases]]''
+```bash
+docker run -d gcr.io/chetabahana/saleor
+CONTAINER_ID=$(docker ps -alq)
+docker cp $CONTAINER_ID:/app .
+docker stop $CONTAINER_ID
+cd app
+rm -rf Pipfile
+rm -rf Pipfile.lock
+cat 'gunicorn==19.7.1' > requirements.txt
+gcloud app deploy --version=v1-4
+```
+==Database==
+
+===Cloud SQL===
+* [[Cloud Deployment Options|https://github.com/mirumee/saleor/issues/2533#issuecomment-480592821]]
+Untuk jalankan Cloud SQL perlu Aktifkan ''[[Billing|https://console.cloud.google.com/project/_/settings]]'' dan ''[[SQL Admin API|https://console.cloud.google.com/flows/enableapi]]''
+
+```bash
+$ gcloud sql connect instance-postgres --user=saleor
+saleor >\q
+$ gcloud sql instances describe instance-postgres
+backendType: SECOND_GEN
+connectionName: chetabahana:us-central1:instance-postgres
+databaseVersion: POSTGRES_9_6
+etag: 326a754445644907a9c2fc3954599c801ffbdd802bab1fadcefadcc5ad3045ce
+gceZone: us-central1-c
+instanceType: CLOUD_SQL_INSTANCE
+ipAddresses:
+- ipAddress: 10.59.224.3
+  type: PRIVATE
+kind: sql#instance
+name: instance-postgres
+project: chetabahana
+region: us-central1
+selfLink: https://www.googleapis.com/sql/v1beta4/projects/chetabahana/instances/
+instance-postgres
+serverCaCert:
+  cert: |-
+    -----BEGIN CERTIFICATE-----
+    ...
+    ...
+    -----END CERTIFICATE-----
+  certSerialNumber: '0'
+  commonName: C=US,O=Google\, Inc,CN=Google Cloud SQL Server CA
+  createTime: '2019-02-25T18:07:19.716000+00:00'
+  expirationTime: '2029-02-22T18:08:19.716000+00:00'
+  instance: instance-postgres
+  kind: sql#sslCert
+  sha1Fingerprint: c1eb9bca950838b0fa8474211f80d5f2142866c9
+serviceAccountEmailAddress: hvbaq25vvnfp5bh2caeedqanyq@speckle-umbrella-pg-8.iam
+.gserviceaccount.com
+settings:
+  activationPolicy: NEVER
+  availabilityType: ZONAL
+  backupConfiguration:
+    binaryLogEnabled: false
+    enabled: true
+    kind: sql#backupConfiguration
+    replicationLogArchivingEnabled: false
+    startTime: 23:00
+  dataDiskSizeGb: '10'
+  dataDiskType: PD_SSD
+  ipConfiguration:
+    ipv4Enabled: false
+    privateNetwork: projects/chetabahana/global/networks/default
+  kind: sql#settings
+  locationPreference:
+    kind: sql#locationPreference
+    zone: us-central1-c
+  maintenanceWindow:
+    day: 0
+    hour: 0
+    kind: sql#maintenanceWindow
+  pricingPlan: PER_USE
+  replicationType: SYNCHRONOUS
+  settingsVersion: '14'
+  storageAutoResize: true
+  storageAutoResizeLimit: '0'
+  tier: db-custom-1-3840
+  userLabels:
+    component: database
+state: RUNNABLE
+```
+Lihat ''[[Connecting from App Engine|https://cloud.google.com/sql/docs/postgres/connect-app-engine#connecting_the_flexible_environment_to]]''. Supaya GAE Flexible bisa connect via localhost <code>127.0.0.1:5243</code>, copy dan isikan nilai <code>connectionName</code> di atas ke  <code>app.yaml</code> sbb:
+```bash
+beta_settings:
+  cloud_sql_instances: chetabahana:us-central1:instance-postgres=tcp:5432
+```
+
+Privat/Publik IP
+```bash
+$ gcloud sql connect instance-postgres
+Whitelisting your IP for incoming connection for 5 minutes...done.
+ERROR: (gcloud.sql.connect) It seems your client does not have ipv6 connectivity and the database instance does not have an ipv4 address. Please request an ipv4 address for this database instance.
+```
+Selajutnya Instance kita "Muat Ulang" lalu kita Aktifkan Public IP dan pilih jaringan yang muncul
+```bash
+sql connect at time 2019-02-26 10:42:41.811213+00:00
+```
+
+Simpan perubahan dan ulang koneksi
+```bash
+~$ gcloud sql connect instance-postgres
+Whitelisting your IP for incoming connection for 5 minutes...done.
+Connecting to database with SQL user [postgres].Password for user postgres:
+psql (9.6.10)
+SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES128-GCM-SHA256, bits: 128, compression: off)
+Type "help" for help.
+postgres=> \q
+
+~$ gcloud sql connect instance-postgres --user=saleor
+Whitelisting your IP for incoming connection for 5 minutes...done.
+Connecting to database with SQL user [saleor].Password for user saleor:
+psql: FATAL:  database "saleor" does not exist
+
+```
+Tes Koneksi
+Koneksi ke Database bisa dilakukan secara langsung maupun dilakukan via Cloud Proxy seperti terlihat di bagan berikut.
+[[<img src=https://cloud.google.com/sql/images/proxyconnection.svg>|https://cloud.google.com/sql/docs/postgres/sql-proxy]]
+
+```bash
+get https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+chmod +x cloud_sql_proxy
+./cloud_sql_proxy -instances="chetabahana:us-central1:instance-postgres"=tcp:5432
+
+virtualenv env
+source env/bin/activate
+pip install -r requirements.txt
+
+psql "host=127.0.0.1 sslmode=disable user=saleor dbname=saleor"
+```
+
+===Opsi via GCE===
+Lihat [[install-and-use-postgresql|https://www.digitalocean.com/community/tutorials/how-to-install-and-use-postgresql-on-ubuntu-16-04]]
+```bash
+(.venv) ~/MYAPP$ sudo apt-get update
+(.venv) ~/MYAPP$ sudo apt-get install postgresql postgresql-contrib
+********************************************************************************
+You are running apt-get inside of Cloud Shell. Note that your Cloud Shell
+machine is ephemeral and no system-wide change will persist beyond session end.
+
+You can customize your environment to permanently include this package by
+updating your environment at https://cloud.google.com/console/cloudshell/environment/view.
+********************************************************************************
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+Suggested packages:
+  postgresql-doc
+The following NEW packages will be installed:
+  postgresql postgresql-contrib
+0 upgraded, 2 newly installed, 0 to remove and 13 not upgraded.
+Need to get 112 kB of archives.
+After this operation, 123 kB of additional disk space will be used.
+Get:1 http://deb.debian.org/debian stretch/main amd64 postgresql all 9.6+181+deb9u2 [55.8 kB]
+Get:2 http://deb.debian.org/debian stretch/main amd64 postgresql-contrib all 9.6+181+deb9u2 [55.8 kB]
+Fetched 112 kB in 0s (5,494 kB/s)        
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package postgresql.
+(Reading database ... 46505 files and directories currently installed.)
+Preparing to unpack .../postgresql_9.6+181+deb9u2_all.deb ...
+Unpacking postgresql (9.6+181+deb9u2) ...
+Selecting previously unselected package postgresql-contrib.
+Preparing to unpack .../postgresql-contrib_9.6+181+deb9u2_all.deb ...
+Unpacking postgresql-contrib (9.6+181+deb9u2) ...
+Setting up postgresql-contrib (9.6+181+deb9u2) ...
+Setting up postgresql (9.6+181+deb9u2) ...
+~/MYAPP$ psql --version
+psql (PostgreSQL) 9.6.10
+```
+Aktifkan PostgreSQL di [[Cloud SQL|https://cloud.google.com/sql/docs/postgres/quickstart]], buat user/password/database: ''saleor''
+```bash
+(.venv) ~/MYAPP$ gcloud sql connect myinstance --user=saleor
+Whitelisting your IP for incoming connection for 5 minutes...done.
+Connecting to database with SQL user [saleor].Password for user saleor:
+psql (9.6.10)
+SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES128-GCM-SHA256, bits: 128, compression: off)
+Type "help" for help.
+
+saleor=> ^C
+(.venv) ~/MYAPP$
+```
+Lihat [[proxy-test|https://cloud.google.com/sql/docs/postgres/quickstart-proxy-test]]
+```bash
+(.venv) ~/MYAPP$ wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy
+(.venv) ~/MYAPP$ chmod +x cloud_sql_proxy
+(.venv) ~/MYAPP$ ./cloud_sql_proxy -instances=marketstore:us-central1:myinstance=tcp:5432
+2019/02/16 06:59:03 Rlimits for file descriptors set to {&{8500 1048576}}
+2019/02/16 06:59:04 Listening on 127.0.0.1:5432 for marketstore:us-central1:myinstance
+2019/02/16 06:59:04 Ready for new connections
+```
+Buka Cloud Shell baru
+```bash
+~$ psql "host=127.0.0.1 port=5432 sslmode=disable dbname=saleor user=saleor"
+Password:
+psql (9.6.10)
+Type "help" for help.
+
+saleor=> ^D
+~$ cd MYAPP && source .venv/bin/activate
+(.venv) ~/MYAPP$ export SECRET_KEY='PUT_SOME_BIG_AND_COMPLICATED_SECRET_KEY'
+(.venv) ~/MYAPP$ python manage.py makemigrations
+Migrations for 'page':
+  saleor/page/migrations/0006_auto_20190215_1817.py
+    - Alter field is_published on page
+Migrations for 'product':
+  saleor/product/migrations/0088_auto_20190215_1817.py
+    - Alter field is_published on collection
+(.venv) ~/MYAPP$ python manage.py migrate
+Operations to perform:
+  Apply all migrations: account, auth, checkout, contenttypes, discount, django_celery_results, django_prices_openexchangerates, django_prices_vatlayer, impersonate, menu, order, page, payment, product, sessions, shipping, site, sites, social_django
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  ...
+  ...
+  Applying shipping.0014_auto_20180920_0956... OK
+  Applying site.0019_sitesettings_default_weight_unit... OK
+  Applying social_django.0001_initial... OK
+  Applying social_django.0002_add_related_name... OK
+  Applying social_django.0003_alter_email_max_length... OK
+  Applying social_django.0004_auto_20160423_0400... OK
+  Applying social_django.0005_auto_20160727_2333... OK
+  Applying social_django.0006_partial... OK
+  Applying social_django.0007_code_timestamp... OK
+  Applying social_django.0008_partial_timestamp... OK
+```
+
+
+==Debug Instance==
+
+===Enable Debug===
+Lihat ''[[Debugging an Instance|https://cloud.google.com/appengine/docs/flexible/python/debugging-an-instance]]'' (Hanya bekerja pada type ''[[GAE Flexible|https://cloud.google.com/sdk/gcloud/reference/app/instances/enable-debug]]'').
+```bash
+$ gcloud app instances enable-debug
+Choosing [product] for service.
+
+Choosing [v1-1] for version.
+
+Choosing [product/v1-1/aef-product-v1--1-85rr] for instance.
+
+About to enable debug mode for instance
+[product/v1-1/aef-product-v1--1-85rr].
+
+Do you want to continue (Y/n)?  y
+
+Waiting for operation [apps/chetabahana/operations/599b6731-9413-4c64-8226-79d8
+d3c581a9] to complete...done.
+Enabling debug mode for instance [product/v1-1/aef-product-v1--1-85rr]...done.
+```
+
+Setelah semua OK kembalikan ke normal
+```bash
+$ gcloud app instances disable-debug
+```
+
+===Akses via SSH===
+Akses SSH di ''[[Halaman Instance|https://console.cloud.google.com/appengine/instances]]'', pilih servisnya. 
+```bash
+chetabahana_gmail_com@aef-product-v1--3-39p9:~$ sudo docker ps
+CONTAINER ID        IMAGE                                    COMMAND                  CREATED             STATUS              PORTS                                                                  NAMES
+ba72d25928cd        gcr.io/chetabahana/saleor                "uwsgi --ini /app/sa…"   5 hours ago         Up 5 hours          8000/tcp, 172.17.0.1:8080->8080/tcp                                    gaeapp
+c0fdcc8ecab0        gcr.io/google-appengine/api-proxy        "/proxy"                 5 hours ago         Up 5 hours                                                                                 api
+829f7a631c00        gcr.io/google-appengine/nginx-proxy      "/var/lib/nginx/bin/…"   5 hours ago         Up 5 hours          8080/tcp, 0.0.0.0:8443->8443/tcp, 8090/tcp, 0.0.0.0:10402->10402/tcp   nginx_proxy
+00b8be4f0ef4        gcr.io/google-appengine/iap-watcher      "./start_iap_watcher…"   5 hours ago         Up 5 hours                                                                                 iap_watcher
+b671d1701612        gcr.io/google-appengine/fluentd-logger   "/opt/google-fluentd…"   5 hours ago         Up 5 hours                                                                                 fluentd_logger
+
+chetabahana_gmail_com@aef-product-v1--3-39p9:~$ sudo docker logs cloudsql
+2019/02/26 14:31:42 Listening on 0.0.0.0:5432 for chetabahana:us-central1:instance-postgres
+2019/02/26 14:31:42 Ready for new connections
+
+chetabahana_gmail_com@aef-product-v1--3-39p9:~$ netstat -nlt
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 172.17.0.1:8080         0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp        0      0 172.17.0.1:5432         0.0.0.0:*               LISTEN
+tcp6       0      0 :::22                   :::*                    LISTEN
+tcp6       0      0 :::8443                 :::*                    LISTEN
+tcp6       0      0 :::10402                :::*                    LISTEN
+
+chetabahana_gmail_com@aef-product-v1--3-39p9:~$ sudo docker exec -it gaeapp /bin/bash
+root@id:/app# python manage.py migrate
+root@id:/app# python manage.py populatedb
+root@id:/app# python manage.py createsuperuser
+root@id:/app# exit
+```
+
+
+
+
+==Stop Instance==
+
+===GAE Instance===
+```bash
+$ gcloud app deploy --version dev
+$ gcloud app versions stop dev
+```
+
+===Cloud SQL===
+
+==Referensi==
+* [[GAE app.yaml|https://cloud.google.com/appengine/docs/standard/python3/config/appref]]
+* [[GAE  Enabling Cloud IAP|https://cloud.google.com/iap/docs/app-engine-quickstart#enabling_iap]]
+* [[Testing and deploying your application|https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app]]
+* [[Deploying a Django Application to Google App Engine|https://medium.com/@BennettGarner/deploying-a-django-application-to-google-app-engine-f9c91a30bd35]]
+* [[GAE Flexible - Deploying a Django + PostgreSQL + Google Storage|https://codeburst.io/beginners-guide-to-deploying-a-django-postgresql-project-on-google-cloud-s-flexible-app-engine-e3357b601b91]]
+* [[GAE Flexible - Google Cloud Container Builder|https://gweb-cloudblog-publish.appspot.com/products/gcp/google-cloud-container-builder-a-fast-and-flexible-way-to-package-your-software/amp/]]
+* [[GAE Flexible - Custom Docker Runtime & Cloud SQL Backen|https://medium.com/swift2go/serverless-google-app-engine-flex-docker-runtime-cloud-sql-backend-with-swift-vapor-web-alfian-c8310acfea0d]]

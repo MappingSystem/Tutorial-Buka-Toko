@@ -1,0 +1,19 @@
+https://gitforwindows.org/
+
+
+[[<img src=https://user-images.githubusercontent.com/36441664/59185882-c0105b80-8b9b-11e9-8154-2646276f2535.png>|https://gitforwindows.org/]]
+
+https://dotnet.microsoft.com/download/thank-you/net48
+
+https://desktop.github.com/
+
+[[<img src=https://chetabahana.github.io/images/github/skema/private.png>|https://chetabahana.github.io/images/github/skema/private.png]]
+
+https://github.com/desktop/desktop/issues/4054#issuecomment-367567297
+
+https://github.com/Microsoft/Git-Credential-Manager-for-Windows/releases/tag/1.18.5
+
+==''Referensi''==
+https://stackoverflow.com/questions/29542856/gitignore-blank-in-windows-explorer
+
+https://chrisjean.com/git-submodules-adding-using-removing-and-updating/

@@ -1,0 +1,253 @@
+__TOC__
+
+==Firewall==
+[[Connect Google App Engine and Google Compute Engine|https://stackoverflow.com/a/57571915/4058484]]
+
+Setiap jaringan VPC memiliki [[dua aturan firewall|https://cloud.google.com/vpc/docs/firewalls#default_firewall_rules]] yang berlaku tapi tidak ditampilkan di Console:
+
+* Aturan keluar: Akses internet diizinkan jika tidak ada aturan firewall lain yang menyangkal lalu lintas keluar dan jika instance memiliki alamat IP eksternal atau menggunakan instance NAT. Lihat persyaratan [[Private-IP#External|Akses External]].
+
+* Aturan masuk: Aturan masuk yang tindakannya ditolak, sumbernya adalah 0.0.0.0/0, dan prioritas adalah serendah mungkin (65.535) melindungi semua instance dengan memblokir lalu lintas masuk ke mereka.
+
+Aturan yang tersirat tidak dapat dihapus, tetapi mereka memiliki prioritas serendah mungkin. Aturan yang Anda buat dapat menimpanya selama aturan Anda memiliki prioritas lebih tinggi.
+
+===External===
+[[Akses internet|https://cloud.google.com/vpc/docs/vpc#internet_access_reqs]] hanya dapat dilakukan jika salah satu dari yang berikut ini terpenuhi:
+* Mesin virtual harus memiliki alamat [[IP Eksternal|https://console.cloud.google.com/networking/addresses/list]] yang ditugaskan ke sebuah instance ketika itu dibuat atau setelah itu dibuat.
+* Mesin virtual harus dapat menggunakan [[Cloud NAT|https://cloud.google.com/nat/docs]] atau proksi berbasis instance yang merupakan target untuk rute statis 0.0.0.0/0.
+
+===Internal===
+Anda dapat melakukan interkoneksi secara privat untuk [[VM Instance|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms]] atau [[Kubernetes Engine|https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters]] jika tidak, biaya berikut akan berlaku baik untuk IP Eksternal maupun Cloud NAT mulai 1 Januari 2020:
+
+[[<img src=https://user-images.githubusercontent.com/36441664/63338314-c295eb00-c36c-11e9-8f08-9339a1910396.png>|https://console.cloud.google.com/networking/addresses/list]]
+
+Privat IP memberikan [[sejumlah keunggulan|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms#introduction]] dibandingkan alamat IP publik (eksternal), termasuk:
+* Permukaan serangan berkurang. Menghapus alamat IP eksternal dari VM membuat lebih sulit bagi penyerang untuk mencapai VM dan mengeksploitasi kerentanan potensial.
+* Peningkatan fleksibilitas. Memperkenalkan lapisan abstraksi, seperti penyeimbang beban atau layanan NAT, memungkinkan pengiriman layanan yang lebih andal dan fleksibel bila dibandingkan dengan alamat IP eksternal statis.
+Koneksi untuk Privat IP bisa dilakukan dengan [[Cloud NAT|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms#deploying_cloud_nat_for_fetching]], [[Load Balancing|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms#creating_an_http_load-balanced_service_for_serving]] atau [[Via IAP|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms#configuring_iap_tunnels_for_interacting_with_instances]]. Khusus untuk Koneksi Via IAP [[tidak dikenakan biaya|https://cloud.google.com/iap/pricing]].
+
+==Koneksi==
+* [[Building internet connectivity for private VMs|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms]]
+Koneksi menggunakan IAP untuk TCP dilakukan via SSH dimulai dari remote host langsung ke VM. 
+
+===Cloud IAP===
+
+Keterbatasan Cloud IAP:
+
+* Bandwidth: Fitur Cloud IAP TCP forwarding tidak dimaksudkan untuk transfer data massal. Cloud IAP berhak membatasi pengguna yang dianggap menyalahgunakan layanan ini.
+* Panjang koneksi: Cloud IAP tidak akan memutuskan sesi aktif kecuali untuk pemeliharaan.
+* Protokol: Cloud IAP untuk TCP tidak mendukung UDP.
+
+
+Buat [[Firewall Rule|https://console.cloud.google.com/networking/firewalls/list]] dengan nama allow-ssh-from-iap:
+```
+gcloud compute firewall-rules create allow-ssh-from-iap \
+    --source-ranges 35.235.240.0/20 \
+    --target-tags http-tag \
+    --allow tcp:22
+```
+	
+Di Cloud Shell, tes koneksi ke instance www-1 via [[Cloud IAP|https://cloud.google.com/iap/docs/using-tcp-forwarding]]:
+```
+gcloud beta compute ssh www-1 \
+    --zone us-central1-b \
+    --tunnel-through-iap
+```
+
+Grant access untuk additional users  
+
+[[<img src=https://cloud.google.com/solutions/images/building-internet-connectivity-for-private-vms-iap-in-console.png>|https://console.cloud.google.com/security/iap]]
+* Security > Identity-Aware Proxy	
+* Select the SSH and TCP Resources tab
+* On the right-hand side, click Add Member.
+
+===Cloud NAT===
+
+Buat Cloud Router instances di setiap region:
+```
+gcloud compute routers create nat-router-us-central1 \
+    --network default \
+    --region us-central1
+```
+
+Atur setelan routers untuk [[Cloud NAT|https://console.cloud.google.com/projectselector2/net-services/nat/list]]:
+```
+gcloud compute routers nats create nat-config \
+    --router-region us-central1 \
+    --router nat-router-us-central1 \
+    --nat-all-subnet-ip-ranges \
+     --auto-allocate-nat-external-ips
+```
+
+Check di [[Cloud NAT Console|https://console.cloud.google.com/net-services/nat/list]] dan Test:
+```
+gcloud beta compute ssh www-1 --tunnel-through-iap
+curl example.com
+```
+===IAP connector===
+Untuk koneksi sumber daya Lokal / non-GCP Anda dapat menggunakan [[Konektor IAP|https://cloud.google.com/iap/docs/enabling-on-prem-howto]].
+
+Konektor Cloud IAP meneruskan permintaan ke backend lokal Anda setelah dikerahkan. Karena kebijakan akses Cloud IAM diberlakukan di konektor Cloud IAP, pastikan bahwa semua permintaan ke backend Anda telah diautentikasi dan diotorisasi oleh Cloud IAP.
+
+
+==VPC connector==
+* [[Connecting to a VPC network|https://cloud.google.com/appengine/docs/standard/python/connecting-vpc]]
+
+Mulai [[9 April 2019|https://cloud.google.com/appengine/docs/standard/python/release-notes#april_9_2019]], Anda dapat menggunakan [[konektor VPC tanpa server|https://cloud.google.com/vpc/docs/configure-serverless-vpc-access?hl=id]] untuk koneksi ke sumber daya internal di jaringan VPC Anda di Google Cloud Platform, seperti Compute Engine Mesin virtual VM, mesin Cloud Memorystore, dll ''dengan alamat IP internal''.
+
+[[<img src=https://cloud.google.com/vpc/images/serverless-vpc-access.svg>|https://cloud.google.com/vpc/docs/configure-serverless-vpc-access]]
+
+Akses VPC Tanpa Server dihargai sebagai berikut. Harga dapat berubah (dan mungkin meningkat) saat Serverless VPC Access dalam versi beta atau Ketersediaan Umum.
+
+[[https://user-images.githubusercontent.com/36441664/81759457-ff9fa000-94ee-11ea-8ce3-aa57562d465a.jpg]]
+
+===VPC Network===
+* [[Virtual Private Cloud (VPC) network overview|https://cloud.google.com/vpc/docs/vpc]]
+* [[Using VPC networks|https://cloud.google.com/vpc/docs/using-vpc]]
+Anda dapat memilih untuk [[membuat mode otomatis atau mode kustom|https://console.cloud.google.com/networking/networks/list]] jaringan VPC. Setiap jaringan baru yang Anda buat harus memiliki nama unik dalam proyek yang sama.
+```
+$ gcloud compute networks create NETWORK_NAME \
+    --subnet-mode=[auto|custom] \
+    --bgp-routing-mode=DYNAMIC_ROUTING_MODE
+
+$ gcloud compute networks list
+NAME     SUBNET_MODE  BGP_ROUTING_MODE  IPV4_RANGE  GATEWAY_IPV4
+default  AUTO         REGIONAL
+
+$ gcloud compute networks describe default
+autoCreateSubnetworks: true
+creationTimestamp: '2019-02-20T05:16:29.303-08:00'
+description: Default network for the project
+id: 'XXXXXXXXXXXXXXXXXXXXX'
+kind: compute#network
+name: default
+routingConfig:
+  routingMode: REGIONAL
+selfLink: https://www.googleapis.com/compute/v1/projects/chetabahana/global/networks/default
+subnetworks:
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/europe-west4/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/us-east1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/asia-east2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/us-west2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/australia-southeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/asia-south1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/asia-east1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/southamerica-east1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/us-east4/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/asia-southeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/asia-northeast2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/europe-west1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/europe-north1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/europe-west6/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/us-west1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/us-central1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/europe-west2/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/northamerica-northeast1/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/europe-west3/subnetworks/default
+- https://www.googleapis.com/compute/v1/projects/chetabahana/regions/asia-northeast1/subnetworks/default
+x_gcloud_bgp_routing_mode: REGIONAL
+x_gcloud_subnet_mode: AUTO
+```
+DYNAMIC_ROUTING_MODE dapat berupa global atau regional untuk mengontrol perilaku Cloud Router di jaringan. Untuk informasi lebih lanjut, lihat [[dynamic routing mode|https://cloud.google.com/vpc/docs/vpc#routing_for_hybrid_networks]].
+
+===IP Range===
+Setiap jaringan VPC terdiri dari satu atau lebih partisi rentang IP yang berguna yang disebut subnet. Setiap subnet dikaitkan dengan suatu wilayah. Sendiri, jaringan VPC tidak memiliki rentang alamat IP yang terkait dengannya. IP Range [[ditentukan untuk subnet|https://cloud.google.com/vpc/docs/vpc#manually_created_subnet_ip_ranges]].
+
+```
+$ gcloud compute networks subnets list --network=default
+NAME     REGION                   NETWORK  RANGE
+default  us-west2                 default  10.168.0.0/20
+default  asia-northeast1          default  10.146.0.0/20
+default  asia-northeast2          default  10.174.0.0/20
+default  us-west1                 default  10.138.0.0/20
+default  southamerica-east1       default  10.158.0.0/20
+default  europe-west6             default  10.172.0.0/20
+default  europe-west4             default  10.164.0.0/20
+default  asia-east1               default  10.140.0.0/20
+default  europe-north1            default  10.166.0.0/20
+default  asia-southeast1          default  10.148.0.0/20
+default  us-east4                 default  10.150.0.0/20
+default  europe-west1             default  10.132.0.0/20
+default  europe-west2             default  10.154.0.0/20
+default  europe-west3             default  10.156.0.0/20
+default  australia-southeast1     default  10.152.0.0/20
+default  asia-south1              default  10.160.0.0/20
+default  us-east1                 default  10.142.0.0/20
+default  us-central1              default  10.128.0.0/20
+default  asia-east2               default  10.170.0.0/20
+default  northamerica-northeast1  default  10.162.0.0/20
+
+```
+Perintah gcloud berikut membuat subnet baru di jaringan yang diberikan.
+```
+$ gcloud compute networks subnets create SUBNET_NAME \
+    --network=NETWORK \
+    --range=PRIMARY_RANGE \
+    --region=REGION
+```
+Perluas rentang IP primer dan sekunder dari sebuah subnet dengan perintah gcloud berikut:
+```
+$ gcloud compute networks subnets expand-ip-range SUBNET_NAME \
+  --region=REGION \
+  --prefix-length=PREFIX_LENGTH
+$ gcloud compute networks subnets update SUBNET_NAME \
+  --region=REGION \
+  --add-secondary-ranges=SECONDARY_RANGE_NAME=SECONDARY_RANGE
+```
+Anda dapat mengonversi jaringan mode otomatis ke jaringan mode kustom:
+```
+$ gcloud compute networks update NETWORK_NAME \
+    --switch-to-custom-subnet-mode
+$ gcloud compute networks update NETWORK_NAME \
+    --bgp-routing-mode=DYNAMIC_ROUTING_MODE
+```
+===Deploy===
+
+Untuk membuat konektor dapat dilakukan via [[console|https://console.cloud.google.com/marketplace/details/google/vpcaccess.googleapis.com]] atau command sbb:
+```
+$ gcloud services enable vpcaccess.googleapis.com
+$ gcloud beta compute networks vpc-access connectors create CONNECTOR_NAME \
+--network VPC_NETWORK --region REGION --range IP_RANGE
+
+```
+Anda dapat melihat rentang IP mana yang saat ini dicadangkan di [[GCP Console|https://console.cloud.google.com/networking/networks/list]]. Anda dapat memilih rentang IP CIDR / 28 [[yang tidak digunakan|https://cloud.google.com/appengine/docs/standard/python/connecting-vpc#creating_a_connector]] untuk digunakan untuk konektor Anda, misalnya, 10.8.0.0/28.
+<br><br>
+Contoh: Perintah berikut membuat konektor Akses VPC dengan nama 'my-vpc-connector' di wilayah 'us-central1' di jaringan 'my-network' dengan IP Kisaran CIDR '10.8.0.0/28'.
+```
+$ gcloud beta compute networks vpc-access connectors create my-vpc-connector \
+--region=us-central1 --range=10.8.0.0/28
+Create request issued for: [my-vpc-connector]
+Waiting for operation [66bba903-ccad-4ad5-a5f4-a6b784d60575] to complete...done.
+Created connector [my-vpc-connector]
+
+$ gcloud beta compute networks vpc-access connectors describe my-vpc-connector \
+--region=us-central1
+ipCidrRange: 10.8.0.0/28
+maxThroughput: 1000
+minThroughput: 200
+name: projects/<project>/locations/us-central1/connectors/my-vpc-connector
+network: default
+state: READY
+```
+Untuk menghubungkan konektor Anda ke layanan, tambahkan ini ke file app.yaml layanan Anda:
+```
+vpc_access_connector:
+  name: "projects/PROJECT_ID/locations/REGION/connectors/CONNECTOR_NAME"
+```
+Kemudian deploy dengan menjalankan gcloud components install beta:
+```
+$ gcloud beta app deploy
+```
+Catatan: Untuk menggunakan Akses VPC Tanpa Server, pastikan Anda menggunakan gcloud beta mendapatkan akses ke perintah beta dengan menjalankan gcloud components install beta. Anda juga dapat melakukannya via [[Google Cloud Build|https://cloud.google.com/cloud-build/docs/build-config]]  dengan setelan ''cloudbuild.yaml'' sbb: 
+```
+steps:
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['beta', 'app', 'deploy', '--version=$_VERSION']
+```
+Setelah Anda menggunakan layanan Anda, ia dapat mengirim permintaan ke alamat [[IP internal|https://cloud.google.com/vpc/docs/shared-vpc#ip_addresses]] atau [[Nama DNS|https://cloud.google.com/compute/docs/ip-addresses/#instancenames]] untuk mengakses sumber daya di [[Private-IP#VPC_Network|jaringan VPC]] Anda.
+
+
+==''Referensi''==
+* [[Building internet connectivity for private VMs|https://cloud.google.com/solutions/building-internet-connectivity-for-private-vms]]
+* [[Setting up a private cluster|https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters]]

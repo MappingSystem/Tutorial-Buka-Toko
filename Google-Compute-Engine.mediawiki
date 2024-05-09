@@ -1,0 +1,306 @@
+__TOC__
+
+==Install==
+Lihat:
+* Setel [[variabel lingkungan|https://stackoverflow.com/a/55072517/4058484]]
+
+===Instal Apache2===
+Lihat [[Setting Up LAMP|https://cloud.google.com/community/tutorials/setting-up-lamp]]
+```bash
+$ sudo apt-get install apache2 php libapache2-mod-php
+$ sudo /usr/sbin/apachectl start
+$ sudo chkconfig apache2ctl on
+$ sudo sh -c 'echo "<?php phpinfo();?>" > /var/www/html/phpinfo.php'
+```
+
+Cek [[<code>http://[IP_ADDRESS]</code>|http://apache2.chetabahana.com]] dan [[<code>http://[IP_ADDRESS]/phpinfo.php</code>|http://php.chetabahana.com/phpinfo.php]] 
+```bash
+/etc/apache2/
+|-- apache2.conf
+|       `--  ports.conf
+|-- mods-enabled
+|       |-- *.load
+|       `-- *.conf
+|-- conf-enabled
+|       `-- *.conf
+|-- sites-enabled
+|       `-- *.conf
+```
+
+Konfigurasi Apache2 Ubuntu 
+
+* File konfigurasi utama adalah <code>apache2.conf</code>. Ini menempatkan potongan-potongan bersama dengan memasukkan semua file konfigurasi yang tersisa ketika memulai server web, <code>* ports.conf</code> selalu disertakan dari file konfigurasi utama. Ini digunakan untuk menentukan port mendengarkan untuk koneksi masuk, dan file ini dapat disesuaikan kapan saja.
+* File-file konfigurasi di direktori-direktori <code>mod-enabled /</code>, <code>conf-enabled /</code> dan <code>enabled-enabled /</code> berisi cuplikan-cuplikan konfigurasi tertentu yang masing-masing mengelola modul, fragmen konfigurasi global, atau konfigurasi host virtual. Mereka diaktifkan dengan menghubungkan file-file konfigurasi yang tersedia dari masing-masing <code>* -tersedia /</code> rekan. Ini harus dikelola dengan menggunakan <code>a2enmod</code> pembantu kami, <code>a2dismod</code>, <code>a2ensite</code>, <code>a2dissite</code>, dan <code>a2enconf</code>, <code>a2disconf</code>. Lihat halaman manual masing-masing untuk informasi terperinci.
+* Biner disebut <code>apache2</code>. Karena penggunaan variabel lingkungan, dalam konfigurasi default, <code>apache2</code> perlu dimulai / dihentikan dengan <code>/etc/init.d/apache2</code> atau <code>apache2ctl</code>. Memanggil <code>/ usr / bin / apache2</code> secara langsung tidak akan berfungsi dengan konfigurasi default.
+* Root Dokumen Secara default, Ubuntu tidak mengizinkan akses melalui browser web ke file apa pun selain dari yang terletak di <code>/ var / www</code>, direktori <code>public_html (bila diaktifkan) dan <code>/ usr / share</code> (untuk aplikasi web). Jika situs Anda menggunakan root dokumen web yang terletak di tempat lain (seperti di <code>/ srv)</code>, Anda mungkin perlu memasukkan daftar putih direktori root dokumen Anda di <code>/etc/apache2/apache2.conf</code>.
+* Root dokumen default Ubuntu adalah <code>/ var / www / html. Anda dapat membuat host virtual sendiri di bawah <code>/ var / www</code>. Ini berbeda dengan rilis sebelumnya yang memberikan keamanan yang lebih baik.
+
+Dokumen Lengkap <code>apache2-doc</code> tersedia di: <code>/usr/share/doc/apache2/README.Debian.gz</code>
+
+===Instal Postgres===
+Lihat ''[[Setting up PostgreSQL|https://cloud.google.com/community/tutorials/setting-up-postgres#setting-up-postgresql]]''
+```bash
+$ sudo apt-get -y install postgresql postgresql-client postgresql-contrib
+$ sudo -s
+root@instance-sql:~# sudo -u postgres psql postgres 
+postgres=# SELECT version();
+                                                   version                                                    
+--------------------------------------------------------------------------------------------------------------
+PostgreSQL 9.3.24 on x86_64-unknown-linux-gnu, compiled by gcc (Ubuntu 4.8.4-2ubuntu1~14.04.4) 4.8.4, 64-bit
+(1 row)
+```
+
+Untuk ubah versi lihat ''[[Cek Port|https://serverfault.com/a/325947/366042]]'', ''[[Ubah Port|https://askubuntu.com/a/33231/486942]]'' atau ''[[Disable Versi|https://serverfault.com/a/582718/366042]]''
+```bash
+$ pg_lsclusters
+Ver Cluster Port Status Owner    Data directory               Log file
+9.3 main    5432 online postgres /var/lib/postgresql/9.3/main /var/log/postgresql/postgresql-9.3-main.log
+9.5 main    5433 online postgres /var/lib/postgresql/9.5/main /var/log/postgresql/postgresql-9.5-main.log
+10  main    5434 online postgres /var/lib/postgresql/10/main  /var/log/postgresql/postgresql-10-main.log
+
+$ sudo nano /etc/postgresql/9.3/main/start.conf 
+#ubah 'auto' ke 'disabled'
+
+$ sudo nano /etc/postgresql/10/main/start.conf 
+#ubah 'auto' ke 'disabled'
+```
+
+Edit File [[<code>pg_hba.conf</code> dan <code>postgresql.conf</code>|https://cloud.google.com/community/tutorials/setting-up-postgres#configure-postgresql-remote-access]]
+```bash
+$ sudo nano /etc/postgresql/9.5/main/postgresql.conf 
+#hapus tagar dan ubah 'localhost' ke '*' dan
+#ubah '5433' ke '5432'
+
+$ sudo nano /etc/postgresql/9.5/main/pg_hba.conf
+#tambahkan di baris paling bawah
+#host    all             all           0.0.0.0/0        trust
+```
+
+Restart postgres dan cek database
+```bash
+$ sudo service postgresql restart
+$ sudo -s
+root@instance-sql:~# sudo -u postgres psql postgres 
+postgres=# SELECT version();
+                                                      version                                                      
+-------------------------------------------------------------------------------------------------------------------
+ PostgreSQL 9.5.14 on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 5.4.0-6ubuntu1~16.04.10) 5.4.0 20160609, 64-bit
+(1 row)
+postgres=# \password postgres
+postgres=# CREATE EXTENSION adminpack;
+CREATE EXTENSION
+postgres=# \q
+root@instance:~# exit
+exit
+$
+```
+
+Buat Superuser dan database <code>saleor</code>
+```bash
+$ psql "host=127.0.0.1 sslmode=disable dbname=saleor user=saleor"
+saleor=# CREATE EXTENSION adminpack;
+saleor=# \q
+```
+
+Koneksi
+```bash
+$ gcloud compute instances add-tags instance-sql --tags postgres-server
+$ gcloud compute firewall-rules create "postgres-remote-access" \
+    --allow tcp:5432 --source-tags "postgres-client" \
+    --target-tags "postgres-server"
+$ psql "host=[IPV4_ADDRESS] port=5432 Modesto=disable dbname=saleor user=saleor"
+$ psql -h [IPV4_ADDRESS] -p 5432 -U saleor
+
+$ psql postgresql://saleor:saleor@[IPV4_ADDRESS]:5432/saleor
+$ psql postgres://saleor:saleor@[IPV4_ADDRESS]/saleor
+```
+
+===Instal MySQL===
+Lihat [[Set Up MySQL|https://cloud.google.com/solutions/setup-mysql]] dan [[connect to MySQL|https://stackoverflow.com/a/1559992/4058484]]
+
+```bash
+$ sudo apt-get -y install mysql-server
+$ sudo mysql_secure_installation
+$ sudo mysql --user=root -p[ROOT_PASSWORD] -e "show databases"
+$ sudo mysql -u root -p admin
+mysql> CREATE DATABASE dbname;
+mysql> CREATE USER 'monty'@'localhost' IDENTIFIED BY 'some_pass';
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'monty'@'localhost' WITH GRANT OPTION;
+mysql> CREATE USER 'monty'@'%' IDENTIFIED BY 'some_pass';
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'monty'@'%' WITH GRANT OPTION;
+mysql> SELECT User FROM mysql.user;
+mysql > exit
+$ sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+cat bind-address            = 0.0.0.0
+$ sudo service mysql restart
+```
+
+Firewall
+```bash
+$ gcloud compute instances add-tags instance-sql --tags mysql-server
+$ gcloud compute firewall-rules create "mysql-remote-access" \
+    --allow tcp:3306 --source-tags "mysql-client" \
+    --target-tags "mysql-server"
+$ mysql --host=[IPV4_ADDRESS] -u wordpress -p
+MySQL > exit
+```
+
+===Instal Redis===
+Lihat [[Set Up Redis|https://cloud.google.com/community/tutorials/setting-up-redis]]
+```bash
+$ sudo apt-get -y install redis-server
+$ ps -f -u redis
+
+```
+Edit [[<code>redis.conf</code>|https://cloud.google.com/community/tutorials/setting-up-redis#configure-redis-remote-access]] dan restart server
+```bash
+sudo service redis-server restart
+$ ps -f -u redis
+```
+Buat [[Firewall|https://cloud.google.com/community/tutorials/setting-up-redis#open-the-network-port-optional]] dan cek redis
+```bash
+$ sudo apt install redis-tools
+$ redis-cli -h [REDIS_IPV4_ADDRESS] ping
+PONG
+$ (printf "PING\r\n";) | nc [REDIS_IPV4_ADDRESS] 6379 
++PONG
+$ curl -w '\n' http://[REDIS_IPV4_ADDRESS]:6379/ping
+{"ping":"PONG"}
+$ exec 3<>/dev/tcp/[REDIS_IPV4_ADDRESS]/6379 && echo -e "PING\r\n" >&3 && head -c 7 <&3
++PONG
+```
+
+Firewall
+```bash
+$ gcloud compute instances add-tags instance-sql --tags redis-server
+$ gcloud compute firewall-rules create "redis-remote-access" \
+    --allow tcp:6379 --source-tags "redis-client" \
+    --target-tags "redis-server"
+```
+
+Cara Koneksi lihat ''[[Cek Redis|https://redis.io/topics/quickstart#check-if-redis-is-working]]''
+```bash
+$ redis-cli -h [IPV4_ADDRESS]                                                   
+redis> ping
+PONG
+redis> set mykey somevalue
+OK
+redis> get mykey
+"somevalue"
+redis> exit
+```
+
+===Instal Git===
+Lihat ''[[Install Git Server Linux|https://www.linux.com/learn/how-run-your-own-git-server]]'' dan ''[[Setel Git Server|https://git-scm.com/book/it/v2/Git-on-the-Server-Setting-Up-the-Server]]''
+
+===Upgrade===
+```bash
+$ do-release-upgrade
+$ sudo apt-get update
+```
+
+===Service===
+```bash
+$ sudo netstat -plnt
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address Foreign Address State  PID/Program name    
+tcp        0      0 0.0.0.0:6379  0.0.0.0:*       LISTEN 874/redis-server 0. 
+tcp        0      0 127.0.0.53:53 0.0.0.0:*       LISTEN 636/systemd-resolve 
+tcp        0      0 0.0.0.0:22    0.0.0.0:*       LISTEN 1065/sshd           
+tcp        0      0 0.0.0.0:5432  0.0.0.0:*       LISTEN 902/postgres        
+tcp6       0      0 :::3306       :::*            LISTEN 905/mysqld          
+tcp6       0      0 :::80         :::*            LISTEN 891/apache2         
+tcp6       0      0 :::22         :::*            LISTEN 1065/sshd           
+tcp6       0      0 :::5432       :::*            LISTEN 902/postgres
+```
+
+==Issue==
+Setiap Anda update server atau component sebaiknya Anda cek startup atau booting nya
+
+===Error NXDOMAIN===
+Stop Instance, tunggu sampai berhenti, lalu start dan konek ke serial-port
+```
+$ gcloud compute connect-to-serial-port <nama-instance> --zone=<nama-zone>
+```
+Cek error berikut
+```
+instance systemd-resolved[882]: Server returned error NXDOMAIN, \
+mitigating potential DNS violation DVE-2018-0001, \
+retrying transaction with reduced feature level UDP.
+```
+
+Ini dikarenakan ada konfigurasi lama yang masih aktif.
+
+Cara cari solusi: [[Googling: [SOLVED] Server returned error NXDOMAIN|https://www.google.com/search?newwindow=1&safe=active&q=%5BSOLVED%5D+Server+returned+error+NXDOMAIN&nirf=%5BRESOLVED%5D+Server+returned+error+NXDOMAIN]]
+
+Arternatif solusinya antara lain sbb
+* [[Server returned error NXDOMAIN|https://askubuntu.com/questions/1058750/new-alert-keeps-showing-up-server-returned-error-nxdomain-mitigating-potential]]
+* [[[SOLVED]Problems with DNS name resolution|https://ubuntuforums.org/showthread.php?t=2371249]]
+* [[Domain resolving with NXDOMAIN or incorrect IP address|https://support.opendns.com/hc/en-us/articles/227986767-Domain-resolving-with-NXDOMAIN-or-incorrect-IP-address]]
+* [[[SOLVED]Ubuntu 18.04 systemd-resolved error NXDOMAIN|https://askubuntu.com/questions/1115882/ubuntu-18-04-systemd-resolved-error-nxdomain]]
+
+Dari alrenatif di atas salah satu langkah yang bisa dilakukan adalah sbb
+```
+$  ls -l /etc/resolv.conf
+lrwxrwxrwx 1 root root 29 Feb 9 /etc/resolv.conf -> ../run/resolvconf/resolv.conf
+
+$ sudo nano /run/resolvconf/resolv.conf
+# Dynamic resolv.conf(5) file for glibc resolver(3) generated by resolvconf(8)
+#     DO NOT EDIT THIS FILE BY HAND -- YOUR CHANGES WILL BE OVERWRITTEN
+# 127.0.0.53 is the systemd-resolved stub resolver.
+# run "systemd-resolve --status" to see details about the actual nameservers.
+nameserver 127.0.0.53
+search <zone>.c.<prject-id>.internal c.<prject-id>.internal google.internal sql
+options edns0
+
+$ test -e /run/systemd/resolve/resolv.conf && echo file exists || echo file not found
+file exists
+
+$ sudo nano /run/systemd/resolve/resolv.conf
+# This file is managed by man:systemd-resolved(8). Do not edit.
+#
+# This is a dynamic resolv.conf file for connecting local clients directly to
+# all known uplink DNS servers. This file lists all configured search domains.
+#
+# Third party programs must not access this file directly, but only through the
+# symlink at /etc/resolv.conf. To manage man:resolv.conf(5) in a different way,
+# replace this symlink by a static file or a different symlink.
+#
+# See man:systemd-resolved.service(8) for details about the supported modes of
+# operation for /etc/resolv.conf.
+
+nameserver XXX.XXX.XXX.XXX
+search <zone>.c.<prject-id>.internal c.<prject-id>.internal google.internal sql
+options edns0
+
+$ sudo ln -fs /run/systemd/resolve/resolv.conf /etc/resolv.conf
+$ ls -l /etc/resolv.conf
+lrwxrwxrwx 1 root root 32 Mar 11 /etc/resolv.conf -> /run/systemd/resolve/resolv.conf
+```
+Stop instance dan cek kembali seperti langkah semula.<br>
+Jika ternyata masih ada Warning seperti ini
+```
+Mar 11 04:02:57 instance resolvconf[341]: /etc/resolvconf/update.d/libc: 
+Warning: /etc/resolv.conf is not a symbolic link to /run/resolvconf/resolv.conf
+```
+Maka lalukan peintah berikut..
+```
+$ sudo dpkg-reconfigure resolvconf
+ls -l /etc/resolv.conf
+```
+
+==ToDo==
+* https://serverfault.com/questions/895580/open-443-on-google-compute-instance
+* Ubuntu's Kubernetes 1.14 distributions can bypass Docker and use containerd
+   directly, see https://bit.ly/ubuntu-containerd or try it now with
+
+     snap install microk8s --channel=1.14/beta --classic
+
+* Get cloud support with Ubuntu Advantage Cloud Guest:
+    http://www.ubuntu.com/business/services/cloud
+
+
+==''Referensi''==
+* [[GCP Free Tier|https://cloud.google.com/free/docs/gcp-free-tier?hl=in]]
+* [[Always Free Products|https://cloud.google.com/free/?hl=in]]
+* [[Google Compute Engine Pricing|https://cloud.google.com/compute/pricing?hl=in]]

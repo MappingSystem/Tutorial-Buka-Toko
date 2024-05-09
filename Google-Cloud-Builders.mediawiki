@@ -1,0 +1,571 @@
+Seperti halnya dengan [[GitHub Actions|https://github.com/chetabahana/chetabahana.github.io/wiki/Akun-GitHub-Actions]] dan [[Apa-Itu-Codefresh|Codefresh]] maka Proyek ini juga meggunakam layanan CI/CD dari [[Google Cloud Builders|https://cloud.google.com/cloud-build/]].
+
+__TOC__
+
+==Fiture==
+Google Cloud Build memungkinkan Anda membuat bangunan cepat, konsisten, dan andal di semua bahasa pemrograman secara otomatis dalam membuat kontainer atau artefak non-kontainer. 
+
+===Keistimewaan===
+* Support Build dengan ''Docker'' dari ''Docker Hub'' atau ''Registry''
+* Gratis ''120 build-menit'' per hari dan hingga ''10 build'' bersamaan
+* Hasil build dilengkapi build ''errors'' dab ''warnings'' mudah ''debugging''
+* Scan kerentanan hasil build untuk Mesin ''Ubuntu'', ''Debian'', and ''Alpine''.
+* Dapat dijalankan secara lokal untuk ''debug'' sebelum mengirimkan ke cloud.
+
+===Ragam Cara/Opsi===
+* Selesai dalam hitungan menit dengan trigger di ''[[GitHub|https://github.com/marketplace/google-cloud-build]]'', ''Cloud Source'', atau ''Bitbucket''
+* Build Kontainer ''Docker'' atau non-kontainer via ''Maven'', ''Gradle'', ''webpack'', ''Go'', atau ''Bazel''
+* Deploy ke ''Kubernetes'', ''App Engine'', ''Cloud Fuctions'', dan ''Firebase'' via ''Spinnaker'' pipelines
+* ''[[Kontrol via API|https://cloud.google.com/cloud-build/docs/api/reference/rest/]]'' atas langkah-langkah kustom membangun, menguji, dan menggunakan. 
+* Hak cipta dari create, view, source code diamankan oleh ''Google Cloud security''
+
+==Konfigurasi==
+* ''[[Konfigurasi build|https://cloud.google.com/cloud-build/docs/build-config]]'' yg dapat ditrigger via ''[[manual|https://cloud.google.com/cloud-build/docs/running-builds/start-build-manually]]'' dan ''[[otomatis|https://cloud.google.com/cloud-build/docs/running-builds/automate-builds]]''.
+
+* [[Building, testing, and deploying|https://cloud.google.com/cloud-build/docs/configuring-builds/build-test-deploy-artifacts]]
+Berikan izin ke akun layanan Cloud Build Anda:
+```
+$ gcloud services enable compute.googleapis.com
+$ export PROJECT=$(gcloud info --format='value(config.project)')
+$ export MEMBER=$(gcloud projects describe $PROJECT --format \
+'value(projectNumber)')@cloudbuild.gserviceaccount.com
+$ gcloud projects add-iam-policy-binding $PROJECT --member=serviceAccount:$MEMBER \
+--role='roles/compute.admin'
+$ gcloud projects add-iam-policy-binding $PROJECT --member=serviceAccount:$MEMBER \
+--role='roles/iam.serviceAccountUser'
+```
+
+===YAML Syntax===
+```
+steps:
+- name: string
+  args: [string, string, ...]
+  env: [string, string, ...]
+  dir: string
+  id: string
+  waitFor: string
+  entrypoint: string
+  secretEnv: string
+  volumes: object(Volume)
+  timeout: string (Duration format)
+- name: string
+  ...
+- name: string
+  ...
+timeout: string (Duration format)
+logsBucket: string
+options:
+ sourceProvenanceHash: enum(HashType)
+ machineType: enum(MachineType)
+ diskSizeGb: string (int64 format)
+ substitutionOption: enum(SubstitutionOption)
+ logStreamingOption: enum(LogStreamingOption)
+ logging: enum(LoggingMode)
+substitutions: map (key: string, value: string)
+tags: [string, string, ...]
+secrets: object(Secret)
+images:
+- [string, string, ...]
+artifacts: object (Artifacts)
+```
+
+===Global Pattern===
+* Setelan dengan [[Ekspresi global|https://en.wikipedia.org/wiki/Glob_(programming]] memiliki lebih banyak opsi. 
+* Dapat dilakukan juga di [[Apa-Itu-Codefresh|Codefresh]] lihat [[di dokumentasi|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/git-triggers/#using-the-modified-files-field-to-constrain-triggers-to-specific-folderfiles]].
+
+Misal untuk trigger terhadap semua perubahan kecuali di folder <code>.git</code>, <code>.github</code>, <code>.google</code> tapi jangan masukan folder system <code>.</code> dan <code>..</code> bisa pakai syntax berikut:
+
+```
+{[!.g]*,[!.g]*/**}
+```
+==Builders==
+
+===Official Builders===
+[[Official builders|https://github.com/GoogleCloudPlatform/cloud-builders]] tersedia di [[gcr.io/cloud-builders/|https://console.cloud.google.com/gcr/images/cloud-builders/GLOBAL]] meliputi:
+
+* bazel: https://bazel.io/
+* curl: https://curl.haxx.se/
+* docker: https://docker.com/
+* dotnet: https://docs.microsoft.com/dotnet/core/tools/
+* gcloud: https://cloud.google.com/sdk/gcloud/
+* git: https://git-scm.com/
+* go: https://golang.org/cmd/go
+* gradle: https://gradle.org/
+* gsutil: https://cloud.google.com/storage/docs/gsutil
+* java: https://www.oracle.com/java/
+* javac: https://docs.oracle.com/javase/
+* kubectl: https://kubernetes.io/docs/user-guide/kubectl-overview/
+* metadata: 
+* mvn: https://maven.apache.org/
+* npm: https://docs.npmjs.com/
+* nodejs: https://nodejs.org/en/
+* wget: https://www.gnu.org/software/wget/
+* yarn: https://yarnpkg.com/
+
+```
+$ docker images --all
+REPOSITORY                                        TAG                                              IMAGE ID            CREATED             SIZE
+us.gcr.io/fn-img/converter-go112                  next__cloudbuild_cache_1460320609597786623       641cc0cfbe56        3 days ago          2.6GB
+us.gcr.io/fn-img/converter-go112                  next_cloudbuild_cache                            641cc0cfbe56        3 days ago          2.6GB
+us.gcr.io/fn-img/builder-nodejs8-canary           next__cloudbuild_cache_2933568871211445515       6f0cbf09e4ee        3 days ago          1.81GB
+us.gcr.io/fn-img/builder-nodejs8-canary           next_cloudbuild_cache                            6f0cbf09e4ee        3 days ago          1.81GB
+us.gcr.io/fn-img/builder-nodejs8                  next__cloudbuild_cache_7504504064263669287       f33bfa0219b4        3 days ago          1.81GB
+us.gcr.io/fn-img/builder-nodejs8                  next_cloudbuild_cache                            f33bfa0219b4        3 days ago          1.81GB
+us.gcr.io/fn-img/converter-java11                 next__cloudbuild_cache_3902890183311134652       34191f10130f        3 days ago          791MB
+us.gcr.io/fn-img/converter-java11                 next_cloudbuild_cache                            34191f10130f        3 days ago          791MB
+us.gcr.io/fn-img/builder-python37                 next__cloudbuild_cache_7955079406183515637       94b941a548dd        3 days ago          1.91GB
+us.gcr.io/fn-img/builder-python37                 next_cloudbuild_cache                            94b941a548dd        3 days ago          1.91GB
+us.gcr.io/fn-img/builder-nodejs6-canary           next__cloudbuild_cache_894385949183117216        eb5c7497eb03        3 days ago          507MB
+us.gcr.io/fn-img/builder-nodejs6-canary           next_cloudbuild_cache                            eb5c7497eb03        3 days ago          507MB
+us.gcr.io/fn-img/converter-php72                  next__cloudbuild_cache_2601737961087659062       981de4990a63        3 days ago          443MB
+us.gcr.io/fn-img/converter-php72                  next_cloudbuild_cache                            981de4990a63        3 days ago          443MB
+us.gcr.io/fn-img/converter-java8                  next__cloudbuild_cache_6382800227808658932       85f16c147fda        3 days ago          791MB
+us.gcr.io/fn-img/converter-java8                  next_cloudbuild_cache                            85f16c147fda        3 days ago          791MB
+us.gcr.io/fn-img/builder-go                       next__cloudbuild_cache_6941261091797652072       5111206cc537        3 days ago          3GB
+us.gcr.io/fn-img/builder-go                       next_cloudbuild_cache                            5111206cc537        3 days ago          3GB
+us.gcr.io/fn-img/builder-nodejs                   next__cloudbuild_cache_6334824724549167320       6fb3db4cc413        3 days ago          507MB
+us.gcr.io/fn-img/builder-nodejs                   next_cloudbuild_cache                            6fb3db4cc413        3 days ago          507MB
+golang                                            alpine_cloudbuild_cache                          4e4b7a8b9495        3 days ago          350MB
+microsoft/dotnet                                  1.1-sdk_cloudbuild_cache                         c07e02565815        4 days ago          979MB
+microsoft/dotnet                                  2.2-sdk_cloudbuild_cache                         155911c343f3        4 days ago          1.74GB
+microsoft/dotnet                                  2.1-sdk_cloudbuild_cache                         c4944162fecb        4 days ago          1.74GB
+alpine                                            cloudbuild_cache                                 4d90542f0623        4 days ago          5.58MB
+gcr.io/kaniko-project/executor                    latest__cloudbuild_cache_6129484611666145821     900080124131        4 days ago          49MB
+gcr.io/kaniko-project/executor                    latest_cloudbuild_cache                          900080124131        4 days ago          49MB
+gradle                                            cloudbuild_cache                                 fe8f7d0df9f5        5 days ago          538MB
+ubuntu                                            cloudbuild_cache                                 4c108a37151f        5 days ago          64.2MB
+php                                               alpine_cloudbuild_cache                          97f75b027653        6 days ago          79.6MB
+php                                               apache_cloudbuild_cache                          731c760de792        6 days ago          378MB
+php                                               cloudbuild_cache                                 f0357c41bff5        6 days ago          367MB
+us.gcr.io/gcp-runtimes/php/gen-dockerfile         cloudbuild_cache                                 78d6bdf08a65        6 days ago          787MB
+us.gcr.io/google-appengine/php                    cloudbuild_cache                                 feb11d7fd261        6 days ago          779MB
+us.gcr.io/google-appengine/php72                  cloudbuild_cache                                 a2cfa073f116        6 days ago          779MB
+us.gcr.io/google-appengine/php71                  cloudbuild_cache                                 fe5268480716        6 days ago          779MB
+us.gcr.io/gcp-runtimes/python/gen-dockerfile      cloudbuild_cache                                 8182054ed315        6 days ago          1.06GB
+us.gcr.io/google-appengine/python                 cloudbuild_cache                                 5ee27cbaba01        6 days ago          1.04GB
+us.gcr.io/google-appengine/nodejs                 cloudbuild_cache                                 5446f4e68684        7 days ago          684MB
+gcr.io/cloud-builders/gcs-uploader                latest                                           3690ef5b20f4        7 days ago          31.3MB
+gcr.io/cloud-builders/gcs-fetcher                 latest                                           ac80df89efdc        7 days ago          31.6MB
+gcr.io/cloud-builders/kubectl                     latest                                           1153202a8bc5        7 days ago          1.7GB
+gcr.io/cloud-builders/git                         latest                                           7eaf386ca190        7 days ago          2.72GB
+gcr.io/cloud-builders/gsutil                      latest                                           6292f63a7ced        7 days ago          1.01GB
+gcr.io/cloud-builders/gradle                      3.5-jdk-8                                        cb7e83519023        7 days ago          1.13GB
+gcr.io/cloud-builders/gradle                      latest                                           80bb0c5f83ff        7 days ago          1.13GB
+gcr.io/cloud-builders/gradle                      4.0-jdk-8                                        96bf802286dc        7 days ago          1.12GB
+gcr.io/cloud-builders/mvn                         latest                                           ced735413c03        7 days ago          614MB
+us.gcr.io/fn-img/builder-java11                   next__cloudbuild_cache_4990765271833742716       ced735413c03        7 days ago          614MB
+us.gcr.io/fn-img/builder-java11                   next_cloudbuild_cache                            ced735413c03        7 days ago          614MB
+gcr.io/cloud-builders/mvn                         3.5.0-jdk-8                                      030232badc4d        7 days ago          750MB
+us.gcr.io/fn-img/builder-java8                    next__cloudbuild_cache_732830328053361739        030232badc4d        7 days ago          750MB
+us.gcr.io/fn-img/builder-java8                    next_cloudbuild_cache                            030232badc4d        7 days ago          750MB
+gcr.io/cloud-builders/mvn                         3.3.9-jdk-8                                      163b7c061fe0        7 days ago          653MB
+gcr.io/cloud-builders/gcloud                      latest                                           020f2b102881        7 days ago          2.72GB
+gcr.io/cloud-builders/bazel                       latest                                           7723656489af        7 days ago          2.38GB
+gcr.io/cloud-builders/javac                       8                                                b929ca27a0d1        7 days ago          1.04GB
+gcr.io/cloud-builders/javac                       latest                                           b929ca27a0d1        7 days ago          1.04GB
+gcr.io/cloud-builders/gcloud-slim                 latest                                           73dd55c64436        7 days ago          1.01GB
+gcr.io/cloud-builders/go                          debian                                           6fd0e134fb1d        7 days ago          794MB
+gcr.io/cloud-builders/go                          alpine                                           b4ee0925e76b        7 days ago          591MB
+gcr.io/cloud-builders/go                          latest                                           b4ee0925e76b        7 days ago          591MB
+gcr.io/cloud-builders/npm                         latest                                           35d310f20dad        7 days ago          670MB
+gcr.io/cloud-builders/yarn                        latest                                           930db469ed27        7 days ago          670MB
+gcr.io/cloud-builders/wget                        latest                                           04378ed6f918        7 days ago          308MB
+gcr.io/cloud-builders/curl                        latest                                           eb1dfcc036ce        7 days ago          309MB
+gcr.io/cloud-builders/dotnet                      latest                                           14e87b9cb9ab        7 days ago          1.74GB
+gcr.io/cloud-builders/docker                      18.09.6                                          f343724ca812        7 days ago          808MB
+gcr.io/cloud-builders/docker                      latest                                           f343724ca812        7 days ago          808MB
+gcr.io/cloud-builders/metadata                    latest                                           691928eafecb        7 days ago          13.4MB
+busybox                                           cloudbuild_cache                                 e4db68de4ff2        9 days ago          1.22MB
+busybox                                           latest                                           e4db68de4ff2        9 days ago          1.22MB
+golang                                            cloudbuild_cache                                 9fe4cdc1f173        12 days ago         774MB
+maven                                             cloudbuild_cache                                 067b65acf67a        12 days ago         614MB
+node                                              cloudbuild_cache                                 b074182f4154        13 days ago         906MB
+python                                            2_cloudbuild_cache                               37093962fbf5        13 days ago         914MB
+python                                            3_cloudbuild_cache                               34a518642c76        13 days ago         929MB
+python                                            cloudbuild_cache                                 34a518642c76        13 days ago         929MB
+ruby                                              cloudbuild_cache                                 877a53569182        13 days ago         870MB
+debian                                            cloudbuild_cache                                 e1de74e67cc7        13 days ago         101MB
+us.gcr.io/fn-img/converter-go112                  current__cloudbuild_cache_261049867304784443     b934f450e892        2 weeks ago         2.55GB
+us.gcr.io/fn-img/converter-go112                  current_cloudbuild_cache                         b934f450e892        2 weeks ago         2.55GB
+us.gcr.io/fn-img/builder-nodejs8-canary           current__cloudbuild_cache_3510942875414458836    52ef9b4956f9        2 weeks ago         1.81GB
+us.gcr.io/fn-img/builder-nodejs8-canary           current_cloudbuild_cache                         52ef9b4956f9        2 weeks ago         1.81GB
+us.gcr.io/fn-img/builder-python37                 current__cloudbuild_cache_5263531936693774911    778784d6f1f4        2 weeks ago         1.91GB
+us.gcr.io/fn-img/builder-python37                 current_cloudbuild_cache                         778784d6f1f4        2 weeks ago         1.91GB
+us.gcr.io/fn-img/builder-nodejs8                  current__cloudbuild_cache_4751997750760398084    779e2258b907        2 weeks ago         1.81GB
+us.gcr.io/fn-img/builder-nodejs8                  current_cloudbuild_cache                         779e2258b907        2 weeks ago         1.81GB
+us.gcr.io/fn-img/converter-java11                 current__cloudbuild_cache_2568779411109623071    fc9251dd831f        2 weeks ago         791MB
+us.gcr.io/fn-img/converter-java11                 current_cloudbuild_cache                         fc9251dd831f        2 weeks ago         791MB
+us.gcr.io/fn-img/builder-nodejs6-canary           current__cloudbuild_cache_1443635317331776148    be479ecef867        2 weeks ago         506MB
+us.gcr.io/fn-img/builder-nodejs6-canary           current_cloudbuild_cache                         be479ecef867        2 weeks ago         506MB
+us.gcr.io/fn-img/builder-go                       current__cloudbuild_cache_2740103009342231109    966203a0b3cd        2 weeks ago         3.04GB
+us.gcr.io/fn-img/builder-go                       current_cloudbuild_cache                         966203a0b3cd        2 weeks ago         3.04GB
+us.gcr.io/fn-img/converter-php72                  current__cloudbuild_cache_2338498362660772719    3dcd780a6ceb        2 weeks ago         438MB
+us.gcr.io/fn-img/converter-php72                  current_cloudbuild_cache                         3dcd780a6ceb        2 weeks ago         438MB
+us.gcr.io/fn-img/converter-java8                  current__cloudbuild_cache_545291762129038907     a743216863d4        2 weeks ago         791MB
+us.gcr.io/fn-img/converter-java8                  current_cloudbuild_cache                         a743216863d4        2 weeks ago         791MB
+us.gcr.io/fn-img/builder-nodejs                   current__cloudbuild_cache_3916589616287113937    6ddc6198e3d7        2 weeks ago         506MB
+us.gcr.io/fn-img/builder-nodejs                   current_cloudbuild_cache                         6ddc6198e3d7        2 weeks ago         506MB
+us.gcr.io/fn-img/builder-java11                   current__cloudbuild_cache_1598098976185383115    fd3425ba87ff        2 weeks ago         614MB
+us.gcr.io/fn-img/builder-java11                   current_cloudbuild_cache                         fd3425ba87ff        2 weeks ago         614MB
+us.gcr.io/fn-img/builder-java8                    current__cloudbuild_cache_8995016276575641803    dac7f5c2535b        2 weeks ago         750MB
+us.gcr.io/fn-img/builder-java8                    current_cloudbuild_cache                         dac7f5c2535b        2 weeks ago         750MB
+node                                              alpine_cloudbuild_cache                          d4edda39fb81        2 weeks ago         77.8MB
+gcr.io/gae-runtimes/php72_app_builder             argo_next_cloudbuild_cache                       6f512a13e5bd        3 weeks ago         2.34GB
+gcr.io/gae-runtimes/nodejs10_app_builder          argo_next_cloudbuild_cache                       19f577da815e        3 weeks ago         1.82GB
+gcr.io/gae-runtimes/php73_app_builder             argo_next_cloudbuild_cache                       b1a7777cf3ab        3 weeks ago         2.34GB
+gcr.io/gae-runtimes/nodejs12_app_builder          argo_next_cloudbuild_cache                       6bb1b31503df        3 weeks ago         1.82GB
+gcr.io/gae-runtimes/go111_app_builder             argo_next_cloudbuild_cache                       8bc1d1898d05        3 weeks ago         2.06GB
+gcr.io/gae-runtimes/nodejs8_app_builder           argo_next_cloudbuild_cache                       65ab51d909fe        3 weeks ago         1.81GB
+gcr.io/gae-runtimes/go112_app_builder             argo_next_cloudbuild_cache                       cc3e6d5e3dcd        3 weeks ago         2.08GB
+us.gcr.io/fn-img/converter-nodejs10               next__cloudbuild_cache_2703387474910584091       7173867bce79        3 weeks ago         285MB
+us.gcr.io/fn-img/converter-nodejs10               next_cloudbuild_cache                            7173867bce79        3 weeks ago         285MB
+gcr.io/gae-runtimes/ruby25_app_builder            argo_next_cloudbuild_cache                       9d76b7d7ddcc        3 weeks ago         1.98GB
+us.gcr.io/fn-img/converter-go112                  previous__cloudbuild_cache_4831389563158288344   f08b43a3f175        3 weeks ago         2.43GB
+us.gcr.io/fn-img/converter-go112                  previous_cloudbuild_cache                        f08b43a3f175        3 weeks ago         2.43GB
+us.gcr.io/fn-img/builder-nodejs8-canary           previous__cloudbuild_cache_1976235410884491574   9857d5b1519d        3 weeks ago         1.8GB
+us.gcr.io/fn-img/builder-nodejs8-canary           previous_cloudbuild_cache                        9857d5b1519d        3 weeks ago         1.8GB
+us.gcr.io/fn-img/builder-nodejs8                  previous__cloudbuild_cache_2775422040480279449   94a7f5bb11da        3 weeks ago         1.8GB
+us.gcr.io/fn-img/builder-nodejs8                  previous_cloudbuild_cache                        94a7f5bb11da        3 weeks ago         1.8GB
+us.gcr.io/fn-img/builder-python37                 previous__cloudbuild_cache_3328451335138149956   af89d39ef444        3 weeks ago         1.91GB
+us.gcr.io/fn-img/builder-python37                 previous_cloudbuild_cache                        af89d39ef444        3 weeks ago         1.91GB
+us.gcr.io/fn-img/converter-php72                  previous__cloudbuild_cache_4893789450120281907   22a753fdd87a        3 weeks ago         453MB
+us.gcr.io/fn-img/converter-php72                  previous_cloudbuild_cache                        22a753fdd87a        3 weeks ago         453MB
+us.gcr.io/fn-img/converter-java11                 previous__cloudbuild_cache_5018949295715050020   d0b831147f07        3 weeks ago         791MB
+us.gcr.io/fn-img/converter-java11                 previous_cloudbuild_cache                        d0b831147f07        3 weeks ago         791MB
+us.gcr.io/fn-img/builder-nodejs6-canary           previous__cloudbuild_cache_605394647632969758    b45b3f92ae0d        3 weeks ago         506MB
+us.gcr.io/fn-img/builder-nodejs6-canary           previous_cloudbuild_cache                        b45b3f92ae0d        3 weeks ago         506MB
+us.gcr.io/fn-img/converter-nodejs10               current__cloudbuild_cache_2610529275472644968    0f9d026a543b        3 weeks ago         285MB
+us.gcr.io/fn-img/converter-nodejs10               current_cloudbuild_cache                         0f9d026a543b        3 weeks ago         285MB
+us.gcr.io/fn-img/converter-java8                  previous__cloudbuild_cache_5486140987150761883   15cf0b195a1c        3 weeks ago         791MB
+us.gcr.io/fn-img/converter-java8                  previous_cloudbuild_cache                        15cf0b195a1c        3 weeks ago         791MB
+us.gcr.io/fn-img/builder-go                       previous__cloudbuild_cache_2703501726821866378   9bf1d2d1dc1c        3 weeks ago         3GB
+us.gcr.io/fn-img/builder-go                       previous_cloudbuild_cache                        9bf1d2d1dc1c        3 weeks ago         3GB
+us.gcr.io/fn-img/builder-nodejs                   previous__cloudbuild_cache_4037200794235010051   52e99fb7708e        3 weeks ago         506MB
+us.gcr.io/fn-img/builder-nodejs                   previous_cloudbuild_cache                        52e99fb7708e        3 weeks ago         506MB
+us.gcr.io/gcp-runtimes/java/runtime-builder       cloudbuild_cache                                 96ea7a38c0b5        3 weeks ago         1.33GB
+us.gcr.io/google-appengine/openjdk                _cloudbuild_cache_685213522303989579             3bb262d5cb3b        3 weeks ago         315MB
+us.gcr.io/google-appengine/openjdk                cloudbuild_cache                                 3bb262d5cb3b        3 weeks ago         315MB
+us.gcr.io/fn-img/builder-java11                   previous__cloudbuild_cache_2781055864473387780   7b49d6a1d7d3        3 weeks ago         613MB
+us.gcr.io/fn-img/builder-java11                   previous_cloudbuild_cache                        7b49d6a1d7d3        3 weeks ago         613MB
+us.gcr.io/fn-img/builder-java8                    previous__cloudbuild_cache_5600924393587988459   96f7552efb25        3 weeks ago         750MB
+us.gcr.io/fn-img/builder-java8                    previous_cloudbuild_cache                        96f7552efb25        3 weeks ago         750MB
+gcr.io/gae-runtimes/python37_app_builder          argo_next_cloudbuild_cache                       ea3376963e5d        3 weeks ago         1.96GB
+us.gcr.io/fn-img/converter-nodejs10               previous__cloudbuild_cache_4324745483838182873   937236f2f08e        4 weeks ago         285MB
+us.gcr.io/fn-img/converter-nodejs10               previous_cloudbuild_cache                        937236f2f08e        4 weeks ago         285MB
+gcr.io/gae-runtimes/nodejs12_app_builder          argo_current_cloudbuild_cache                    2c736d14bc34        4 weeks ago         1.82GB
+gcr.io/gae-runtimes/nodejs12_app_builder          argo_previous2_cloudbuild_cache                  2c736d14bc34        4 weeks ago         1.82GB
+gcr.io/gae-runtimes/nodejs12_app_builder          argo_previous_cloudbuild_cache                   2c736d14bc34        4 weeks ago         1.82GB
+gcr.io/gae-runtimes/nodejs10_app_builder          argo_current_cloudbuild_cache                    580280f46c1b        5 weeks ago         1.81GB
+gcr.io/gae-runtimes/php73_app_builder             argo_current_cloudbuild_cache                    a4ec20278ad0        5 weeks ago         2.34GB
+gcr.io/gae-runtimes/php72_app_builder             argo_current_cloudbuild_cache                    1eac9ed5649d        5 weeks ago         2.33GB
+gcr.io/gae-runtimes/go111_app_builder             argo_current_cloudbuild_cache                    bcf67c38e7dd        5 weeks ago         2.05GB
+gcr.io/gae-runtimes/python37_app_builder          argo_current_cloudbuild_cache                    d8b7ae3fd847        5 weeks ago         1.96GB
+gcr.io/gae-runtimes/ruby25_app_builder            argo_current_cloudbuild_cache                    2ee5dd3ef982        5 weeks ago         1.97GB
+gcr.io/gae-runtimes/nodejs8_app_builder           argo_current_cloudbuild_cache                    ab820514f33c        5 weeks ago         1.8GB
+gcr.io/gae-runtimes/go112_app_builder             argo_current_cloudbuild_cache                    9d9e933eac7a        5 weeks ago         2.07GB
+maven                                             alpine_cloudbuild_cache                          7445f83cd169        6 weeks ago         122MB
+gradle                                            alpine_cloudbuild_cache                          8017d8c2ba74        6 weeks ago         204MB
+ruby                                              alpine_cloudbuild_cache                          17e954cb9555        6 weeks ago         50.9MB
+python                                            alpine_cloudbuild_cache                          fe3ef29c73f3        6 weeks ago         87MB
+us.gcr.io/google-appengine/jetty                  _cloudbuild_cache_2050257992909156333            dac4353b3a0c        6 weeks ago         375MB
+us.gcr.io/google-appengine/jetty                  cloudbuild_cache                                 dac4353b3a0c        6 weeks ago         375MB
+gcr.io/gae-runtimes/php72_app_builder             argo_previous_cloudbuild_cache                   65d901c17170        7 weeks ago         2.32GB
+gcr.io/gae-runtimes/php73_app_builder             argo_previous_cloudbuild_cache                   c5f6aea5b961        7 weeks ago         2.33GB
+gcr.io/gae-runtimes/go111_app_builder             argo_previous_cloudbuild_cache                   3d45006860fd        7 weeks ago         2.05GB
+gcr.io/gae-runtimes/nodejs8_app_builder           argo_previous_cloudbuild_cache                   03a6f4b0ecc4        7 weeks ago         1.8GB
+gcr.io/gae-runtimes/nodejs10_app_builder          argo_previous_cloudbuild_cache                   96295fc8e2fd        8 weeks ago         1.8GB
+gcr.io/gae-runtimes/java11_app_builder            argo_current_cloudbuild_cache                    23e30557a725        8 weeks ago         1.72GB
+gcr.io/gae-runtimes/java11_app_builder            argo_next_cloudbuild_cache                       23e30557a725        8 weeks ago         1.72GB
+gcr.io/gae-runtimes/go112_app_builder             argo_previous_cloudbuild_cache                   ba93d5b38fd0        8 weeks ago         2.06GB
+gcr.io/gae-runtimes/ruby25_app_builder            argo_previous_cloudbuild_cache                   725a5235c2be        8 weeks ago         1.96GB
+us.gcr.io/google-appengine/php56                  cloudbuild_cache                                 ce5287279d4d        2 months ago        945MB
+us.gcr.io/google-appengine/php70                  cloudbuild_cache                                 fe936f83494d        2 months ago        945MB
+gcr.io/gae-runtimes/php72_app_builder             argo_previous2_cloudbuild_cache                  4e60fe609c21        2 months ago        2.33GB
+gcr.io/gae-runtimes/php73_app_builder             argo_previous2_cloudbuild_cache                  5a8f369e0c70        2 months ago        2.33GB
+gcr.io/gae-runtimes/nodejs10_app_builder          argo_previous2_cloudbuild_cache                  3d3c79f6888f        2 months ago        1.78GB
+gcr.io/gae-runtimes/nodejs8_app_builder           argo_previous2_cloudbuild_cache                  1ae48dcfc44b        2 months ago        1.78GB
+gcr.io/gae-runtimes/go111_app_builder             argo_previous2_cloudbuild_cache                  fea8283983b3        2 months ago        2.03GB
+gcr.io/gae-runtimes/go112_app_builder             argo_previous2_cloudbuild_cache                  da9bc2235079        2 months ago        2.05GB
+gcr.io/gae-runtimes/ruby25_app_builder            argo_previous2_cloudbuild_cache                  9e983fb57620        2 months ago        1.96GB
+gcr.io/gae-runtimes/python37_app_builder          argo_previous_cloudbuild_cache                   2e2bb0ab6d3d        2 months ago        1.93GB
+gcr.io/gae-runtimes/python37_app_builder          argo_previous2_cloudbuild_cache                  eec20ab246a7        3 months ago        1.95GB
+us.gcr.io/fn-img/builder-go112                    current__cloudbuild_cache_7981306761429961588    50f66d5b5bfe        3 months ago        2.04GB
+us.gcr.io/fn-img/builder-go112                    current_cloudbuild_cache                         50f66d5b5bfe        3 months ago        2.04GB
+us.gcr.io/fn-img/builder-go112                    next__cloudbuild_cache_6426100070888298971       50f66d5b5bfe        3 months ago        2.04GB
+us.gcr.io/fn-img/builder-go112                    next_cloudbuild_cache                            50f66d5b5bfe        3 months ago        2.04GB
+us.gcr.io/fn-img/builder-go112                    previous__cloudbuild_cache_1905388747193831650   50f66d5b5bfe        3 months ago        2.04GB
+us.gcr.io/fn-img/builder-go112                    previous_cloudbuild_cache                        50f66d5b5bfe        3 months ago        2.04GB
+us.gcr.io/gcp-runtimes/nodejs/gen-dockerfile      cloudbuild_cache                                 1e42f4fb7625        3 months ago        768MB
+centos                                            cloudbuild_cache                                 9f38484d220f        3 months ago        202MB
+us.gcr.io/fn-img/builder-nodejs10                 current__cloudbuild_cache_2015796113853353331    79e8e1e182ca        3 months ago        1.77GB
+us.gcr.io/fn-img/builder-nodejs10                 current_cloudbuild_cache                         79e8e1e182ca        3 months ago        1.77GB
+us.gcr.io/fn-img/builder-nodejs10                 next__cloudbuild_cache_1874068156324778273       79e8e1e182ca        3 months ago        1.77GB
+us.gcr.io/fn-img/builder-nodejs10                 next_cloudbuild_cache                            79e8e1e182ca        3 months ago        1.77GB
+us.gcr.io/fn-img/builder-nodejs10                 previous__cloudbuild_cache_6263450610539110790   79e8e1e182ca        3 months ago        1.77GB
+us.gcr.io/fn-img/builder-nodejs10                 previous_cloudbuild_cache                        79e8e1e182ca        3 months ago        1.77GB
+gcr.io/gae-runtimes/java11_app_builder            argo_previous_cloudbuild_cache                   ad0025656bda        3 months ago        1.7GB
+us.gcr.io/gcp-runtimes/go1-builder                1.9_cloudbuild_cache                             02ca9616cd4c        3 months ago        536MB
+us.gcr.io/gcp-runtimes/go1-builder                1.10_cloudbuild_cache                            7c94be651eb8        3 months ago        530MB
+gcr.io/gae-runtimes/java11_app_builder            argo_previous2_cloudbuild_cache                  60fee5ba6cce        4 months ago        1.78GB
+hello-world                                       latest                                           fce289e99eb9        5 months ago        1.84kB
+gcr.io/kaniko-project/executor                    v0.6.0__cloudbuild_cache_8674665223082153551     0d8eef3519f8        7 months ago        46MB
+gcr.io/kaniko-project/executor                    v0.6.0_cloudbuild_cache                          0d8eef3519f8        7 months ago        46MB
+us.gcr.io/fn-img/builder-php72                    current__cloudbuild_cache_3337066551442961397    dd74c231b8a6        9 months ago        1.75GB
+us.gcr.io/fn-img/builder-php72                    current_cloudbuild_cache                         dd74c231b8a6        9 months ago        1.75GB
+us.gcr.io/fn-img/builder-php72                    next__cloudbuild_cache_8121576815539813105       dd74c231b8a6        9 months ago        1.75GB
+us.gcr.io/fn-img/builder-php72                    next_cloudbuild_cache                            dd74c231b8a6        9 months ago        1.75GB
+us.gcr.io/fn-img/builder-php72                    previous__cloudbuild_cache_7273596521315663110   dd74c231b8a6        9 months ago        1.75GB
+us.gcr.io/fn-img/builder-php72                    previous_cloudbuild_cache                        dd74c231b8a6        9 months ago        1.75GB
+us.gcr.io/google-appengine/ubuntu-php56           cloudbuild_cache                                 edebd39e6323        12 months ago       420MB
+us.gcr.io/google-appengine/ubuntu-php             cloudbuild_cache                                 9f04949b8199        12 months ago       430MB
+us.gcr.io/google-appengine/ubuntu-php70           cloudbuild_cache                                 af9a489d9b03        12 months ago       433MB
+us.gcr.io/google-appengine/ubuntu-php72           cloudbuild_cache                                 3456a3b1c31a        12 months ago       438MB
+us.gcr.io/google-appengine/ubuntu-php71           cloudbuild_cache                                 8998706fd9a6        12 months ago       430MB
+us.gcr.io/gcp-runtimes/ruby/generate-dockerfile   cloudbuild_cache                                 b7884ec904ab        13 months ago       734MB
+us.gcr.io/gcp-runtimes/ruby/build-tools           cloudbuild_cache                                 e05dc37d438f        13 months ago       176MB
+us.gcr.io/google-appengine/ruby                   cloudbuild_cache                                 ffdb84c9dd34        13 months ago       734MB
+us.gcr.io/google-appengine/golang                 _cloudbuild_cache_898860202204764712             56521497699d        14 months ago       418MB
+us.gcr.io/google-appengine/golang                 cloudbuild_cache                                 56521497699d        14 months ago       418MB
+us.gcr.io/google-appengine/base                   _cloudbuild_cache_8249030965139585917            018b76ff63bc        15 months ago       132MB
+us.gcr.io/google-appengine/base                   cloudbuild_cache                                 018b76ff63bc        15 months ago       132MB
+us.gcr.io/gcp-runtimes/go1-builder                1.8_cloudbuild_cache                             332341929bbf        15 months ago       486MB
+us.gcr.io/google-appengine/java-compat            _cloudbuild_cache_9010467728050264449            008b788b3014        23 months ago       312MB
+us.gcr.io/google-appengine/java-compat            cloudbuild_cache                                 008b788b3014        23 months ago       312MB
+gcr.io/distroless/base                            _cloudbuild_cache_2740376916591569721            a0cfcd4cc98a        49 years ago        16.9MB
+gcr.io/distroless/base                            cloudbuild_cache                                 a0cfcd4cc98a        49 years ago        16.9MB
+
+```
+
+===Community Builders===
+Builders yang dikontribusikan oleh publik tersedia di [[Cloud Community repo|https://github.com/GoogleCloudPlatform/cloud-builders-community]] antara lain:
+
+* android: https://developer.android.com/studio/
+* ansible: https://docs.ansible.com/
+* composer: https://getcomposer.org/
+* docker-compose: https://docs.docker.com/compose/
+* firebase: https://firebase.google.com/docs/cli/
+* glide: https://glide.sh/
+* helm: https://helm.sh/docs/
+* hub: https://hub.github.com/
+* kaniko: https://github.com/GoogleContainerTools/kaniko
+* pylint: https://www.pylint.org/
+* tar: https://linux.die.net/man/1/tar
+* traceroute: https://packages.debian.org/jessie/traceroute
+
+===SSH Remote-Builder===
+[[Remote-Builder|https://github.com/GoogleCloudPlatform/cloud-builders-community/blob/master/remote-builder]] ini adalah salah satu kontribusi ke [[Google-Cloud-Builders#Community-Builders|Community Builders]] sebagai alternatif solusi menangani beberapa beban kerja integrasi berkelanjutan yang membutuhkan jenis pembangun khusus bagi Anda yang mungkin memerlukan hal-hal seperti:
+
+* Mesin CPU / Memori tinggi
+* Gambar khusus
+* GPU terpasang
+* Disk cepat atau besar
+* Mesin dalam jaringan tertentu
+* Pre-emptibility
+
+Dalam kasus ini, Anda dapat memanfaatkan Pembuat Kontainer untuk memicu bangunan Anda dan mengelola alur kerjanya tetapi menjalankan langkah-langkah pembangunan yang sebenarnya pada sebuah instance dengan konfigurasi persis yang Anda butuhkan.
+[[<img src=https://github.com/GoogleCloudPlatform/cloud-builders-community/blob/master/remote-builder/docs/arch.png>|https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/remote-builder]]<br>
+Bagaimana caranya?<br>
+Saat menggunakan builder, [[Kunci SSH sementara|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/SSH-Key#buat-baru]] akan [[dibuat di Workspace|https://github.com/GoogleCloudPlatform/cloud-builders-community/blob/master/remote-builder/run-builder.sh#L19]] Builder Anda:
+```
+KEYNAME=builder-key
+# TODO Need to be able to detect whether a ssh key was already created
+ssh-keygen -t rsa -N "" -f ${KEYNAME} -C ${USERNAME} || true
+chmod 400 ${KEYNAME}*
+
+cat > ssh-keys <<EOF
+${USERNAME}:$(cat ${KEYNAME}.pub)
+EOF
+```
+
+* Sebuah instance akan diluncurkan dengan flag yang Anda konfigurasikan
+* Workspace akan disalin ke instance jarak jauh
+* Perintah Anda akan dijalankan di dalam Workspace instance itu
+* Workspace akan disalin kembali ke Workspace Container Builder Anda
+
+
+==Implementasi==
+* [[Cloud Build API-Developer Library|https://developers.google.com/resources/api-libraries/documentation/cloudbuild/v1/python/latest/cloudbuild_v1.projects.builds.html]]
+===Non Kontainer===
+Opsi ini kita ambil ke ''App Engine'' untuk Aplikasi ''[[non build|https://medium.com/google-cloud/continuous-delivery-in-google-cloud-platform-cloud-build-with-app-engine-8355d3a11ff5]]''.
+
+===Pre Shell Script===
+Opsi ini kita ambil untuk ''[[Aplikasi Mobile|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Setel-Mobile]]'' via npm. ''[[Build di shell|https://cloud.google.com/cloud-build/docs/quickstart-docker]]'' sebelum deploy.
+
+
+```bash
+steps:
+
+- name: 'gcr.io/cloud-builders/npm'
+  args: [ 'install' ]
+
+- name: 'gcr.io/cloud-builders/npm'
+  args: [ 'run', 'build', '--prod' ]
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: [ 'app', 'deploy', '--version=v1-1' ]
+```
+
+===Pre Run Docker===
+* [[Google App Engine Standard Python Cloud Build|https://stackoverflow.com/a/52819249/4058484]]
+* [[GC Cloud Build custom build process with internal repostory|https://stackoverflow.com/a/53228467/4058484]]
+Opsi ini kita ambil untuk ''Aplikasi Saleor''. ''[[Run build image|https://cloud.google.com/cloud-build/docs/create-custom-build-steps]]'' dari registry sebelum deploy.
+
+app.yaml:
+```
+runtime: python
+env: flex
+entrypoint: python main.py
+service: service-name
+runtime_config:
+  python_version: 3
+```
+cloudbuild.yaml:
+```
+steps:
+# Move our code to instance inside the project to have access to the private repo
+- name: gcr.io/${PROJECT_NAME}/remote-builder
+  env:
+  - COMMAND=sudo bash workspace/download-dependencies.bash:
+  - ZONE=us-east1-b
+  - INSTANCE_NAME=remote-cloud-build
+  - INSTANCE_ARGS=--image-project centos-cloud --image-family centos-7
+#Build image with downloaded deps
+- name: gcr.io/cloud-builders/docker
+  args: ['build', '-t', 'gcr.io/${PROJECT_NAME}/${APP_NAME}', '.']
+#Push image to project repo
+- name: gcr.io/cloud-builders/docker
+  args: ['push', 'gcr.io/${PROJECT_NAME}/${APP_NAME}']
+#Deploy image to AppEngine
+- name: gcr.io/cloud-builders/gcloud
+  args: ['app', 'deploy', 'app.yaml', '--image-url=gcr.io/${PROJECT_NAME}/${APP_NAME}']
+images: ['gcr.io/${PROJECT_NAME}/${APP_NAME}']
+timeout: '1800s'
+```
+
+download-dependencies.bash
+```
+#!/usr/bin/env bash
+easy_install pip
+
+pip install --upgrade pip
+pip install --upgrade setuptools
+pip install wheel
+#Download private deps and save it to volume (share folder between steps)
+pip wheel --no-deps -r workspace/private-dependencies.txt -w workspace/lib --no-binary :all:
+```
+Dockerfile:
+```
+FROM gcr.io/google-appengine/python
+COPY . /${APP_NAME}
+RUN virtualenv /env
+
+ENV VIRTUAL_ENV /env
+ENV PATH /env/bin:$PATH
+
+RUN pip install -r /${APP_NAME}/workspace/public-dependencies.txt
+#Install private deps from volume
+RUN pip install -f /${APP_NAME}/workspace/lib --no-index ${LIBRARY_NAME}
+
+CMD gunicorn -b :$PORT main:app
+```
+
+===Step Transfer===
+* [[Set an environment or substitution variable via a step in Google Cloud Build?|https://stackoverflow.com/questions/52337831/how-do-i-set-an-environment-or-substitution-variable-via-a-step-in-google-cloud/56939316#56939316]]
+```
+steps:
+- name: 'ubuntu'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+        bash test.bash
+
+- name: gcr.io/cloud-builders/docker
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+        bash result.bash
+```
+test.bash
+```
+#!/bin/bash
+SHORT_SHA=myvar
+date -u +%Y%m%dT%H%M_$SHORT_SHA > /workspace/myfile.txt
+```
+result.bash
+```
+#!/bin/bash
+_BUILD_TAG=`cat /workspace/myfile.txt`
+echo "the transferred value is: $_BUILD_TAG"
+```
+Output
+```
+BUILD
+Starting Step #0
+Step #0: Pulling image: ubuntu
+Step #0: Using default tag: latest
+Step #0: latest: Pulling from library/ubuntu
+Step #0: Digest: sha256:eb70667a801686f914408558660da753cde27192cd036148e58258819b927395
+Step #0: Status: Downloaded newer image for ubuntu:latest
+Finished Step #0
+Starting Step #1
+Step #1: Already have image (with digest): gcr.io/cloud-builders/docker
+Step #1: the transferred value is: 20190708T1706_myvar
+Finished Step #1
+PUSH
+DONE
+```
+===Deploy GCE/GKE===
+Lihat continuous-deployment ke GCE ''[[via scp|https://documentation.codeship.com/pro/continuous-deployment/google-compute-engine/]]'' dan ''[[cloud build|https://medium.com/google-cloud/continuous-delivery-in-google-cloud-platform-cloud-build-with-compute-engine-a95bf4fd1821]]''
+
+[[<img src=https://cdn-images-1.medium.com/max/800/1*7jgRq7Octg2ZpS7i4vpKxw.png>|https://medium.com/google-cloud/continuous-delivery-in-google-cloud-platform-cloud-build-with-compute-engine-a95bf4fd1821]]
+
+==Syncing Upstream==
+Secara umum GitHub tidak sediakan fasilitas untuk update otomatis ke upstream. Kita hanya dapat melakukannya manual.
+
+Sejauh ini cara yang paling mungkin sesuai diskusi di ''[[stackoverflow|https://stackoverflow.com/a/38802129/4058484]]'' adalah via ''[[backstroke|https://github.com/1egoman/backstroke]]'' di input sebagai url payload untuk Webhook.
+
+[[<img src=https://i.stack.imgur.com/gKtEX.png>|https://stackoverflow.com/a/38171158/4058484]]
+
+===Subscribe===
+Subscibe dengan GMail. 
+```txt
+Subject: [mirumee/saleor] 2.3.1
+
+Fix access to private variant fields in API - #3773 by maarcingebala
+
+—
+You are receiving this because you are subscribed to this thread.
+View it on GitHub or unsubscribe from all notifications for this repository.
+```
+Email ini kemudian kita filter pakai ''[[Penerusan dan POP/IMAP|https://mail.google.com/mail/u/0/#settings/fwdandpop]]'' untuk dikirim ke alamat email dari ''[[IAM Akun Admin|https://console.cloud.google.com/iam-admin/iam]]'' di Google Cloud.
+
+===Filter Email===
+Kemudian kita gunakan cara kirim email ke script sbb:
+* pakai ''[[CLI SAPI|http://php.net/manual/en/features.commandline.io-streams.php]]'' untuk kirim ke ''[[php script|http://harrybailey.com/2009/02/send-or-pipe-an-email-to-a-php-script/]]'' atau
+* pakai ''[[FeedParser API|http://docs.python.org/2/library/email.parser.html#feedparser-api]]'' untuk kirim ke ''[[python script|https://stackoverflow.com/a/14389780/4058484]]''.
+
+===Update Master===
+Pada script yang dituju kita buat perintah yang dijalankan di shell script untuk ''[[Penyetelan-Aplikasi#Force_Update_Master|update master]]''.
+```bash
+$ REPO_URL=https://source.developers.google.com/p/chetabahana/r/github_chetabahana_saleor
+$ cloudshell_open --repo_url "REPO_URL" \
+                --page "editor" --open_in_editor "./" \
+                --git_branch "master"
+```
+
+Setelah repo di update maka [[Google-Cloud-Builders#implementasi|Cloud Builder]] otomatis akan ditrigger untuk deploy versi terbaru.
+==Hasil Build==
+===Lihat Hasil===
+Lihat ''[[Viewing build results|https://cloud.google.com/cloud-build/docs/view-build-results]]'' dan ''[[cara kirim notifikasi|https://cloud.google.com/cloud-build/docs/send-build-notifications]]''
+
+===Debug Hasil===
+Lihat ''[[lokal debug|https://cloud.google.com/cloud-build/docs/build-debug-locally]]''
+
+===Percepat Hasil===
+Lihat ''[[Speeding up your Builds|https://cloud.google.com/cloud-build/docs/speeding-up-builds]]''
+
+==''Referensi''==
+* [[Cloud Build pricing|https://cloud.google.com/cloud-build/#cloud-build-pricing]]
+* [[Cloud Build documentation|https://cloud.google.com/cloud-build/docs/]]

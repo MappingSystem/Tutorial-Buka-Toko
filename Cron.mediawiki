@@ -1,0 +1,9 @@
+__TOC__
+
+https://cloud.google.com/appengine/docs/standard/python/config/cronref#syntax
+https://console.cloud.google.com/appengine/cronjobs
+
+==Referensi==
+* [[Reference for cron.yaml|https://cloud.google.com/appengine/docs/standard/python/config/cronref]]
+* [[Scheduling Jobs with cron.yaml|https://cloud.google.com/appengine/docs/standard/python3/scheduling-jobs-with-cron-yaml]]
+* [[Google App engine needs periodic restarting|https://stackoverflow.com/a/35290296/4058484]]

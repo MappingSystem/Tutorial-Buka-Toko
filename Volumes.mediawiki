@@ -1,0 +1,92 @@
+__TOC__
+
+
+===Binding===
+
+* [[<img src=https://docs.docker.com/storage/images/types-of-mounts-bind.png>|https://docs.docker.com/storage/bind-mounts/]]
+
+====Cara Pasang==== 
+* Cara pasang [[volumes|https://docs.docker.com/compose/compose-file/#volumes]]
+* Special volume: [[external|https://docs.docker.com/compose/compose-file/#external]], [[driver|https://docs.docker.com/compose/compose-file/#driver]], [[shared z: / Z:|https://stackoverflow.com/a/35222815/4058484]]
+```
+volumes:
+  # Just specify a path and let the Engine create a volume
+  - /var/lib/mysql
+
+  # Specify an absolute path mapping
+  - /opt/data:/var/lib/mysql
+
+  # Path on the host, relative to the Compose file
+  - ./cache:/tmp/cache
+
+  # User-relative path
+  - ~/configs:/etc/configs/:ro
+
+  # Named volume
+  - datavolume:/var/lib/mysql
+```
+
+====Propagation==== 
+* [[Configure bind propagation|https://docs.docker.com/storage/bind-mounts/#configure-bind-propagation]]
+* [[add bind-propagation to docker-compose|https://github.com/moby/moby/issues/34936#issuecomment-485236908]]
+
+<table>
+  <thead><tr><th>Jenis</th><th>Deskripsi</th></tr></thead>
+  <tbody>  
+    <tr><td><code>shared</code></td><td>Sub-mount dari mount asli terkena replika mount, dan sub-mount dari replika mount juga disebarkan ke mount asli.</td></tr>
+    <tr><td><code>slave</code></td><td>mirip dengan <code>shared</code>, tetapi hanya dalam satu arah. Jika mount asli memperlihatkan sub-mount, replika mount dapat melihatnya. Namun, jika mount replika memperlihatkan sub-mount, mount asli tidak dapat melihatnya.</td></tr>
+    <tr><td><code>private</code></td><td>Mount bersifat <code>private</code>. Sub-mount di dalamnya tidak terkena replika mount, dan sub-mount replika mount tidak terkena mount asli.</td></tr>
+    <tr><td><code>rshared</code></td><td>Sama seperti <code>shared</code>, tetapi propagasi juga meluas ke dan dari titik pemasangan yang bersarang di dalam salah satu titik pemasangan asli atau replika.</td></tr>
+    <tr><td><code>rslave</code></td><td>Sama seperti <code>rslave</code>, tetapi propagasi juga meluas ke dan dari titik mount yang bersarang di dalam salah satu titik mount asli atau replika.</td></tr>
+    <tr><td><code>rprivate</code></td><td>Default. Sama seperti <code>private</code>, yang berarti bahwa tidak ada titik pemasangan di mana pun di dalam titik pemasangan asli atau replika merambat di kedua arah.</td></tr>
+   </tbody>
+</table>
+
+
+```
+$ docker run -d \
+  -it \
+  --name devtest \
+  -v "$(pwd)"/target:/app \
+  -v "$(pwd)"/target:/app2:ro,rslave \
+  nginx:latest
+
+$ docker run -d -it --name saleor_media -v /tmp/volume/media/:/app/media:rw,rshared saleor
+
+`docker-compose.yml` and `docker-compose.override.yml`
+
+version: "3.2"
+
+services:
+  container:
+    volumes: 
+      - /tmp/volume/media/:/app/media:rw,rshared
+```
+
+Describe volume
+```
+$ docker inspect container_1
+..
+..
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/tmp/volume/media",
+                "Destination": "/app/media",
+                "Mode": "rw,rshared",
+                "RW": true,
+                "Propagation": "rshared"
+            }
+```
+
+===Selinux===
+* [[Configure selinux label|https://docs.docker.com/storage/bind-mounts/#configure-the-selinux-label]]
+* [[Introduction to SELinux|https://web.mit.edu/rhel-doc/5/RHEL-5-manual/Deployment_Guide-en-US/ch-selinux.html]]
+
+```
+$ docker run -d \
+  -it \
+  --name devtest \
+  -v "$(pwd)"/target:/app:z \
+  nginx:latest
+```

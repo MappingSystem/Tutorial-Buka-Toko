@@ -1,0 +1,12 @@
+__TOC__
+==Layanan==
+===App Engine===
+<source lang="Ruby">
+from google.auth import app_engine 
+credentials = app_engine.Credentials()
+client = Client(credentials=credentials)
+</source>
+
+===Compute Engine===
+
+==''Referensi''==

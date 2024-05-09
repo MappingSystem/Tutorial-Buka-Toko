@@ -1,0 +1,25 @@
+__TOC__
+
+==Cek Setelan==
+* https://viewdns.info/
+* https://dnsspy.io/scan
+
+Daftarkan aplikasi Anda untuk Google Cloud DNS API di Google Cloud Platform
+Google Cloud Platform memungkinkan Anda untuk mengelola aplikasi dan memantau penggunaan API.
+
+Pilih sebuah project di mana aplikasi Anda akan didaftarkan
+Anda dapat menggunakan salah satu project untuk mengelola semua aplikasi, atau Anda dapat membuat project berbeda untuk setiap aplikasi.
+
+[[<img src="https://cloud.google.com/load-balancing/images/basic-http-load-balancer.svg?hl=in">|https://cloud.google.com/load-balancing/docs/backend-service?hl=in]]
+
+* [[Domain Google|https://domains.google.com/]]
+* [[Meneruskan domain Google Anda|https://support.google.com/domains/answer/4522141?hl=id#301-302]]
+* [[GAE Standard - How Requests are Routed| https://cloud.google.com/appengine/docs/standard/python/how-requests-are-routed?hl=in]]
+* [[GAE Standard - Securing Custom Domains with SSL|https://cloud.google.com/appengine/docs/standard/python/securing-custom-domains-with-ssl]]
+* https://cloud.google.com/dns/zones/?hl=in
+* https://cloud.google.com/dns/docs/quickstart
+* https://console.cloud.google.com/flows/enableapi?apiid=dns
+* https://cloud.google.com/docs/authentication/production?hl=in
+* https://www.onepagezen.com/transfer-domain-google-cloud-platform/
+* [[Configuring Domain Names with Static IP Addresses|https://cloud.google.com/kubernetes-engine/docs/tutorials/configuring-domain-name-static-ip]]
+* [[Configuring HTTPS to a Web Service on Google Kubernetes Engine|https://estl.tech/configuring-https-to-a-web-service-on-google-kubernetes-engine-2d71849520d]]

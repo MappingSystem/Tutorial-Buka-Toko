@@ -1,0 +1,113 @@
+__TOC__
+
+==Saleor==
+https://github.com/facebook/create-react-app
+```
+my-app
+├── .gitignore
+├── README.md
+├── node_modules
+├── package.json
+├── public
+│   ├── favicon.ico
+│   ├── index.html
+│   └── manifest.json
+└── src
+    ├── App.css
+    ├── App.js
+    ├── App.test.js
+    ├── index.css
+    ├── index.js
+    ├── logo.svg
+    └── serviceWorker.js
+```
+
+===Update===
+'''
+Lihat [[fresh installation of laravel|https://github.com/JeffreyWay/laravel-mix/issues/623#issuecomment-289682729]]
+run composer install;
+npm install;
+npm install cross-env -D (read it from laravel/framework#18446);
+npm run dev <script>
+'''
+
+===Build===
+Lihat
+* [[npm install express --save|https://medium.com/monplan/nodejs-on-app-engine-standard-c4092efc7eab]]
+```sh
+$ BACKEND_URL="https://product-dot-chetabahana.appspot.com"
+$ export BACKEND_URL
+
+$ cd ~ && rm -rf saleor-storefront
+$ git clone https://github.com/mirumee/saleor-storefront.git && cd saleor-storefront
+$ sudo apt-get install -y libpng12-dev
+
+$ rm -rf node_modules
+$ rm package-lock.json yarn.lock
+$ npm cache clear --force
+	
+$ npm install cross-env -D
+$ npm install webpack --save
+
+$ npm run tslint
+$ npm run build --prod
+...
+Child webapp-webpack-plugin:
+     1 asset
+    Entrypoint favicon.png = e4fd59d214d218045643
+    [0] ./node_modules/cache-loader/dist/cjs.js?{"cacheDirectory":
+"/home/circleci/app/node_modules/.cache/webapp-webpack-plugin"}!
+./node_modules/webapp-webpack-plugin/src/loader.js?{"prefix":
+"images/favicons/","options":{"appName":"Saleor","appDescription":
+"Storefront for the Saleor e-commerce platform","display":"standalone",
+"developerURL":null,"background":"#ddd","theme_color":"#333",
+"version":"0.5.0","developerName":"Mirumee"},"path":"/"}!
+./src/images/favicon.png 1.06 MiB {0} [built]
+Persisting to Workspace
+
+$ npm start 
+
+```
+===Deploy===
+Lihat 
+* Konfigurasi File [[app.yaml|https://cloud.google.com/appengine/docs/standard/nodejs/config/appref]]
+* Gunakan [[npm run deploy|https://github.com/GoogleCloudPlatform/nodejs-docs-samples/tree/master/appengine/hello-world/standard]]
+
+```bash
+#gcloud app deploy --version=v1-1
+env: standard
+service: mobnile
+runtime: nodejs10
+instance_class: F1
+
+env_variables:
+  BACKEND_URL: 'https://product-dot-chetabahana.appspot.com'
+
+handlers:
+  - url: /.*
+    script: auto
+```
+
+===Debug===
+====Entrypoint====
+```
+{"severity": "WARNING", "message": "Entrypoint "cross-env NODE_ENV=develop \
+webpack-dev-server --history-api-fallback --watch --port 3000 --mode development" \
+requires a shell program to be the parent process. This will make the program \
+slower to start and may cause unexpected behavior  when shutting down. \
+To avoid this, remove any occurrences of "&", "|", ";", "=" in your command."}
+events.js:174
+```
+
+Lihat:
+* [[port 3000|https://github.com/mirumee/saleor-storefront/search?q=port+3000&unscoped_q=port+3000]] package.json baris [[ke 100|https://github.com/mirumee/saleor-storefront/blob/e11493e25027cf82360c91060ed7a8c23e2ad2ed/package.json#L100]]
+* [[deploy react to gae|https://www.reddit.com/r/reactjs/comments/6oo9x0/trouble_deploying_react_app_to_google_app_engine/]]
+* Gunakan [[process.env.port|https://medium.com/monplan/nodejs-on-app-engine-standard-c4092efc7eab]]
+* [[nodejs8-standard-environment|https://stackoverflow.com/questions/52195854/how-to-configure-a-google-app-engine-nodejs8-standard-environment-for-react-app]]
+* [[next.js|https://stackoverflow.com/a/53655095/4058484]]
+```
+JSON
+    "start": "cross-env NODE_ENV=develop webpack-dev-server --history-api-fallback -\
+-watch --port 3000 --mode development"
+```
+

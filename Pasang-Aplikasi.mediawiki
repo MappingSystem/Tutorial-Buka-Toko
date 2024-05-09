@@ -1,0 +1,83 @@
+Pada sesi ini kita akan bahas tentang bagaimana memasang dan mengelola aplikasi yang kita perlukan untuk menjalankan bisnis eCommerce.
+__TOC__
+
+==Tahap Awal==
+Setelah kita mendapatkan gambaran tentang aplikasi yang akan kita pasang maka tahap selanjutnya adalah mempertimbangkan apakah kita akan memasang aplikasi ini.
+
+===Always Free===
+Pada sesi sebelumnya kita sudah mempertimbangkan untuk pasang aplikasi eCommerce di ''[[Google Cloud Platform (GCP)|https://id.wikipedia.org/wiki/Google_Cloud_Platform]]''.
+
+Lalu bagaimana tentang masalah pembiayaan? Untuk itu kita perlu ketahui terlebih dahulu penawaran ''[[GCP Free Tier|https://cloud.google.com/free/]]'' tentang ''Always Free'' (fitur gratis selamanya) dan ''Free Extended Trial'' (fitur berbayar, ''12-month $300 free trial''). 
+
+===Analisa Pasang===
+Dari kebutuhan minimum Aplikasi kita bisa analisa apalah kita bisa pasang dengan fitur gratis. Setelah dianalisa dari ''[[limit fitur gratis|https://cloud.google.com/free/docs/gcp-free-tier#always-free-usage-limits]]'' hanya satu fitur yang tidak gratis yaitu ''[[Cloud SQL|https://cloud.google.com/sql/]]''.
+
+''Postgress'' termasuk di fitur ini. Untuk fitur berbayar kita harus mendaftar dengan ''[[kartu kredit|https://cloud.google.com/free/docs/gcp-free-tier#credit_card_verification]]'' atau ''[[akun bank|https://cloud.google.com/free/docs/gcp-free-tier#no_credit_card]]''. Jenis termurah adalah ''[[Test instance, stopped when not in use|https://cloud.google.com/sql/pricing#pg-examples]]'', ongkosnya sekitar US$ 3 per bulan, jika Anda memutuskan untuk ambil Anda bisa lanjut ke tahap pasang.
+==Tahap Pasang==
+Sebelum mendaftar sebaiknya Anda coba dahulu jalankan [[Instalasi di PC|aplikasi di komputer]], setelah yakin aplkasinya sesuai maka kita bisa bisa pasang di GCP. 
+
+Setelah siap untuk mengetes jalannya aplikasi di GCP Anda daftarkan terlebih dahulu di Akun Penagihan. Jika belum siap maka Anda bisa pasang terlebih dahulu komponen lain dari eCommerce seperti [[Menyiapkan Frontend|website]] dan [[Menjalankan Backend API|program bantu]] di fitur gratis. 
+===Estimasi Biaya===
+Dalam tahap mengetes aplikasi Anda bisa memperkirakan biaya jalannya Aplikasi di server. Untuk melihat ''[[detil biaya|https://cloud.google.com/billing/docs/how-to/bq-examples?hl=in]]'' maka Anda bisa ''[[membuat label|https://cloud.google.com/resource-manager/docs/creating-managing-labels?hl=in]]'' di tiap layanan.
+
+Tahun pertama Anda bisa menjalankan dengan kredit gratis sebesar [[$300 selama satu tahun|https://cloud.google.com/free/docs/gcp-free-tier#free-trial]] tergantung mana yang lebih dahulu tercapai.
+===Perjalanan Waktu===
+Dengan berjalannya waktu Anda bisa mempersiapkan segala sesuatu yang berhubungan dengan aplikasi. Jika Anda siap maka Anda bisa segera promosikan bisnis Anda. 
+
+Jika temukan masalah dengan produk dari Google Anda bisa googling, atau gabung [[Google Groups|https://groups.google.com/forum/#!forum/google-appengine]] bahkan [[kirim Issue|https://issuetracker.google.com/]] atau [[feedback|https://googlecloudplatform.uservoice.com/users/885631432-chetabahana]] tentang detil permasalahannya ke Google langsung..
+[[<img src=https://developers.google.com/issue-tracker/images/public/homepage.png>|https://developers.google.com/issue-tracker/guides/access-ui]]
+
+Jikapun belum siap maka setelah kredit gratis berakhir Anda setel disesuaikan konfigurasi jalannya aplikasi dengan kondisi bisnisnya.
+===Kebutuhan Tenaga===
+Saat berjalannya bisnis maka Anda perlu juga mempersiapkan tim Anda.  
+
+Tahap awal sebaiknya belajar atau kerjasama dengan yang sudah berpengalaman. 
+
+Cek bila ada seminar² yang berhubungan dengan pengetahuan yang Anda perlukan untuk jalankan bisnis. Diaitu Anda bisa mendapat kolega yang sejalan dan cocok untuk bekerjasama.
+
+==Langkah Pasang==
+Berikut kita akan bahas tentang [[cara pemasangan|https://cloud.google.com/docs/tutorials]] di Google Cloud Platform (GCP).
+
+===Pemasangan Web===
+Untuk [[pemasangan Web|https://cloud.google.com/solutions/web-serving-overview]] baik halaman statis maupun dinamis bisa disimak di jenis ''[[Compute|https://cloud.google.com/products/compute/]]''. 
+
+[[<img src=https://cloud.google.com/images/05_ContentMgmt_ArchDiagram.png>|https://cloud.google.com/solutions/web-serving-overview#building_content_management_systems]]
+Ada 3 jenis produk utama yaitu ''[[Google Application Engine (GAE)|https://cloud.google.com/appengine/]]'', kemudian ''[[Google Compute Engine (GCE)|https://cloud.google.com/compute/]]'', dan terakhir ''[[Google Kubernetes Engine (GKE)|https://cloud.google.com/kubernetes-engine/]]''.
+
+* GAE adalah jenis untuk aplikasi yang tidak memerlukan akses root. Bekerja berdasarkan satu ''[[platform bahasa program|https://cloud.google.com/appengine/docs/]]'' dari python, java, php, go, node.js, ruby dll yang dipilih pengguna.
+* GCE adalah jenis dengan akses root sehingga dapat dikelola untuk aplikasi yang memerlukan virtual mesin sendiri dengan skala yang bisa diatur tingkat kinerjanya.
+* GKE adalah jenis untuk aplikasi yang dibundel dalam suatu kontainer sehingga dapat dijalankan kedalam satu atau lebih GCE secara bersamaan.
+
+Jika Anda sulit paham ''[[membedakan antara ketiga jenis|https://cloud.google.com/docs/choosing-a-compute-option]]'' tersebut, dapat dianalogikan seperti misalnya taruhlah kita berperan sebagai penyewa properti, maka:
+<br><br>
+* GAE adalah seperti sewa kamar dengan jenis ikut aturan empunya rumah, 
+* GCE adalah seperti sewa rumah atau apartemen, bisa atur kamar² dan ruang lainnya
+* GKE adalah seperti sewa kompleks dengan rumah² atau gedung dengan apartemen² yang semuanya bisa dikelola dengan satu aturan.
+
+Diskusi menarik bisa Anda simak ''[[disini|https://stackoverflow.com/questions/22697049/what-is-the-difference-between-google-app-engine-and-google-compute-engine]]''.<br><br>
+
+Untuk tahap awal ''[[Apa itu Saleor|Aplikasi Saleor]]'' bisa kita [[Instalasi di GAE|jalankan di GAE]]. Namun jika harus bekerja dengan skala lebih tinggi maka akan memerlukan platform bantu untuk meningkatkan kinerja sebagai sebuah server yang mandiri sehingga harus  ''[[ditempatkan di GCE/GKE|https://medium.com/google-cloud/app-engine-flex-container-engine-946fbc2fe00a]]''.
+
+Atau bahkan perlu dibuat ''[[Otomatisasi Pemasangan|https://codelabs.developers.google.com/codelabs/cloud-builder-gke-continuous-deploy/index.html]]'' bila bekerja dengan skala bisnis lebih besar yang perlu banyak server..
+[[<img src=https://cloud.google.com/images/01_WebApp_ArchDiagram.png>|https://cloud.google.com/solutions/web-serving-overview#app-engine]]
+
+===Pemasangan Cloud SQL===
+''[[Cloud SQL|https://cloud.google.com/sql/]]'' menawarkan dua jenis Database dengan ''[[Model Relasional (RDBMS)|https://id.wikipedia.org/wiki/Sistem_manajemen_basis_data_relasional]]'' yang populer yaitu ''[[PostgreSQL|https://id.wikipedia.org/wiki/PostgreSQL]]'' dan ''[[MySQL|https://id.wikipedia.org/wiki/MySQL]]''. Diantara ''[[kedua jenis ini|https://www.i-3.co.id/2017/05/03/postgresql-vs-mysql-mana-yang-terbaik-dan-cocok-untuk-infrastruktur-anda/]]'' pengembang ''[[Apa itu Saleor|Aplikasi Saleor]]'' memilih [[Postgress|https://github.com/mirumee/saleor/issues/633]]''.
+
+Tidak seperti halnya GAE maka Untuk menjalankan Postsgres tidak ada [[Free Daily Quota|https://cloud.google.com/appengine/quotas#Instances]] untuk setel penghentian secara otomatis dalam rangka [[kelola quota|https://stackoverflow.com/a/26654430/4058484]]''.
+
+Dengan demikian jika hanya bertujuan untuk mengetes jalannya aplikasi Anda perlu ketahui ''[[cara stop manual|https://cloud.google.com/sql/docs/postgres/start-stop-restart-instance#stop]]'' untuk menghentikannya saat tidak diperlukan.
+
+===Skenario Step Pemasangan===
+Skenario pemasangan akan diprioritaskan untuk dapat menjalankan ''Aplikasi Saleor'' dengan target ''[[tagihan|https://cloud.google.com/pricing/list]]'' bulanan serendah mungkin namun dapat secara mudah ditingkatkan mengikuti perkembangan bisnis.
+
+# Menjalankan aplikasi di PC untuk mengecek mengecek tampilan aplikasi dan melengkapi data produk yang akan dipasarkan.
+# [[Memasang|https://cloud.google.com/appengine/docs/standard/python/testing-and-deploying-your-app]] halaman ''[[web|https://teknojurnal.com/menggunakan-google-app-engine-sebagai-content-delivery-network-cdn-pembuatan-aplikasi/]]'' di ''[[Standard GAE|https://cloud.google.com/appengine/docs/standard/python3/serving-static-files]]'' dengan ''[[dokumentasi|https://github.com/sphinx-doc/sphinx/blob/master/README.rst]]'' dan setel ''[[ssl untuk akses https|https://cloud.google.com/appengine/docs/standard/python/securing-custom-domains-with-ssl]]''.
+# Memasang Database dengan instance yang diaktifkan oleh akses ke halaman web, dan ''[[dinonaktifkan|https://cloud.google.com/sql/docs/postgres/start-stop-restart-instance#stop]]'' oleh idle time.
+#  [[Memasang|https://cloud.google.com/appengine/docs/flexible/python/testing-and-deploying-your-app]] Saleor dalam ''[[Kontainer Docker|https://stackoverflow.com/questions/45389919/how-to-auto-deploy-google-app-engine-flexible-using-container-registry-with-buil]]'' di ''[[Flexible GAE|https://cloud.google.com/appengine/docs/flexible/python/serving-static-files]]'' dengan akses domain/subdomain yang sama dengan halaman static spt Load Balancer.
+# [[Review|https://blog.stephanbehnke.com/3-years-on-google-app-engine-an-epic-review/]] pemasangan ''[[GCE/GKE|https://codelabs.developers.google.com/codelabs/cloud-compute-engine/index.html]]'', otomasi ''[[Cloud Build|https://cloud.google.com/cloud-build/]]'', Load Balancing, Redis, dan Graph SQL. 
+
+Berikutnya kita akan bahas secara detil tentang langkah² ini..
+
+==Referensi==
+* [[Google Developers - Codelab|https://codelabs.developers.google.com/]]

@@ -1,0 +1,22 @@
+===Service (bot)===
+
+Saleor memiliki [[API yang mendukung dashboard|https://github.com/mirumee/saleor/issues/3343]]. API juga akan menjadi integrasi (bahkan jika saat ini kehilangan beberapa mutasi yang berguna) untuk layanan pihak ketiga seperti 
+
+* manajemen stok eksternal atau 
+* sinkronisasi harga. 
+
+===Kapasitas Akun===
+* Izin baru akan memungkinkan admin untuk membuat, mengedit, dan menghapus (menonaktifkan?) Akun layanan.
+* Akun layanan akan menggunakan izin dengan cara yang sama seperti akun biasa.
+* Akun layanan tidak akan diizinkan menggunakan kata sandi untuk mengautentikasi.
+* Detail akun layanan harus menghasilkan token JWT yang tidak pernah kedaluwarsa yang dapat digunakan untuk mengautentikasi dengan API GraphQL.
+* Token JWT harus berbeda dari token login biasa karena itu akan memasukkan kata sandi / token / bidang lainnya saat ini sebagai muatan. Saat mengautentikasi bidang ini akan dibandingkan dengan nilai saat ini di database untuk memastikan mereka cocok.
+* Layar perincian akun harus menyertakan tombol yang membuat ulang kata sandi / token / bidang lain dari akun dan karenanya menghasilkan token JWT baru. Ini dikombinasikan dengan hal di atas memungkinkan token yang bocor secara tidak sah dibatalkan oleh staf.
+* Dasbor harus menyertakan ikon yang menunjukkan bahwa akun yang diberikan adalah akun layanan saat menampilkan namanya ("dibuat oleh robotSalesForce Robot", "diedit terakhir oleh robotSlack Integration" dll.). Ikon itu sendiri adalah TBD.
+
+===Alur kerja===
+Alur kerja yang diusulkan untuk integrasi adalah (alih-alih membangunnya menjadi Saleor) menyebarkannya sebagai fungsi AWS Lambda atau wadah Node kecil.
+
+Fungsi atau wadah ini masing-masing menggunakan akun layanan khusus dengan serangkaian izin yang dirancang khusus untuk berbicara dengan GraphQL API.
+
+Namun masih perlu metode yang kuat untuk menjalankan API tersebut dalam konfigurasi S2S.

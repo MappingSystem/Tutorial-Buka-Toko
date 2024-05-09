@@ -1,0 +1,10 @@
+Deskripsi
+__TOC__
+==Arsitektur==
+[[<img src=https://miro.medium.com/max/3563/1*MLkTe5tPVv5BhXERsOO-MQ.png>|https://medium.com/weareservian/3-best-features-of-google-cloud-run-546e367242ea]]
+==Konfigurasi==
+[[<img src=https://user-images.githubusercontent.com/36441664/68624994-aee0c780-050a-11ea-9c49-c89432a9dce9.png>|https://cloud.google.com/run/pricing]]
+
+==Pengembangan==
+==''Referensi''==
+* [[Mediawiki - Cara format|https://m.mediawiki.org/wiki/Help:Formatting]]

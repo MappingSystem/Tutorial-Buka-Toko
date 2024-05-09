@@ -1,0 +1,103 @@
+Setelah Anda berhasil membuat dan menjalankan image menjadi aplikasi di Google Cloud maka tahap berikutnya adalah mengatur fiturnya supaya dapat ditampakkan sebagai layanan.
+
+__TOC__
+
+==Penyetelan==
+===Target Kerja===
+Pada sesi ini selanjutnya kita akan bahas secara detil tentang apa saja yang perlu kita setel setelah Aplikasi Saleor berhasil kita pasang. 
+
+===Langkah Kerja===
+Kita akan padukan aplikasi ini dengan aplikasi lain yang bisa menunjang kinerjanya di Google Cloud sebagai etalase eCommerce utamanya dari segi tampilan (''[[Menyiapkan-Frontend|Frontend]]'').
+
+Kemudian kita lakukan otomatisasi dari semua langkahnya itu dengan menggunakan fasilitas dari ''[[Google-Cloud-Builders|Google Cloud Builders]]'' dan ''[[Google=Cloud-Functions|Google Cloud Functions]]'' yang dijalankan di ''[[Google-Compute-Engine|Google Compute Engine]]''.
+
+
+==Otomatisasi Kerja==
+Dalam menyetel aplikasi sesuai dengan kebutuhan maka Anda akan membuat langkah yang berulang². Untuk itu jangan segan² untuk mempelajari cara otomatis dalam mengulangi langkah rutinitas karena itu akan sangat membantu Anda menghemat waktu.
+
+===Cloud Builder===
+Contoh ''[[cloudbuild.yaml|https://cloud.google.com/cloud-build/docs/configuring-builds/create-basic-configuration]]'' 
+```bash
+steps:
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy", '--version=v1-1']
+timeout: "1600s"
+```
+
+Dapat kita lihat bahwa langkah di atas adalah simulasi dari perintah deploy:
+```bash
+gcloud app deploy --version=v1-1
+```
+Dengan demikian langkah apapun di ''[[Google Cloud SDK|https://cloud.google.com/sdk/gcloud/reference/]]'' dapat kita gabungkan di ''[[Google-Cloud-Builders|Google Cloud Builders]]''. Sebelum melangkah kesitu maka kita perlu ''[[Penyetelan-Aplikasi#mencatat-langkah|catat semua langkah]]'' yang kita perlukan,
+
+===Buat Repository===
+Lihat ''[[creating a new repository|https://cloud.google.com/source-repositories/docs/quickstart]]''
+```bash
+git add .
+git commit -m "Initial commit"
+git push origin master
+```
+
+===Download Code===
+Untuk download Aplikasi pakai ''[[appcfg.py download_app|https://cloud.google.com/appengine/docs/standard/python/tools/appcfg-arguments#download_app]]''
+
+```bash
+$ cd 'C:\Program Files\Google\Cloud SDK\google-cloud-sdk\platform\google_appengine'
+$ appcfg.py --application=[APPLICATION_ID] --version=[VERSION_ID] \
+   --module=[SERVICE_ID] download_app <TARGET_PATH>
+```
+
+==Cara Kolaborasi==
+
+===Menjaga Master===
+* [[git push origin HEAD|https://stackoverflow.com/a/41542674/4058484]]
+
+Jika Anda berkolaborasi dengan suatu tim dalam mengembangkan aplikasi secara bersama maka sebaiknya Anda fork sumbernya sebagai master. Kemudian buat lagi cabang dari master tsb untuk di <code>clone</code> sebagai tempat Anda bekerja sehingga tidak akan interferensi Master. 
+
+Contoh <code>clone</code>: 
+
+```bash
+Chetabahana@Desktop MINGW32 /d/GitHub/MarketLeader
+$ NAMA_BRANCH=Chetabahana
+$ URL_PROJECT=https://github.com/MarketLeader/Tutorial-Buka-Toko.git
+$ git clone -b $NAMA_BRANCH --single-branch $URL_PROJECT
+```
+
+Hal ini penting agar master dari fork Anda tetap sinkron dengan sumbernya sehingga begitu ada perubahan maka mudah untuk di update (merge). 
+
+Jika ada perubahan yang ingin Anda usulkan maka dorong perubahannya langsung ke upstream atau sumber originalnya nya (bukan ke master Anda). 
+
+[[<img src=https://i.stack.imgur.com/LtFGa.png>|https://stackoverflow.com/a/9646323/4058484]]
+
+Jadi bila perubahan disetujui atau tidak maka master Anda tetap selalu bersih. 
+
+Anda akan mudah update master Anda ke upstream ataupun buat cabang lain lagi tanpa konflik apapun karena masih sinkron dengan sumbernya. 
+
+Untuk lebih jelasnya silahkan simak ''[[artikel ini|https://dont-be-afraid-to-commit.readthedocs.io/en/latest/git/commandlinegit.html]]''.
+
+===Normal Update Master===
+Jika Anda ingin update fork dengan upstream ikuti contoh ''[[Keeping a fork up to date|https://gist.github.com/CristinaSolana/1885435]]
+
+```bash
+Chetabahana@Desktop MINGW32 /d/GitHub/MarketLeader
+git clone git@github.com:MarketLeader/Tutorial-Buka-Toko.git && cd Tutorial-Buka-Toko
+git remote add upstream git://github.com/mirumee/saleor.git
+git fetch upstream
+git checkout master
+```
+
+===Force Update Master===
+Jika Anda mengalami konflik git dengan master dari sumbernya maka Anda dapat reset sbb:
+```bash
+Chetabahana@Desktop MINGW32 /d/GitHub/MarketLeader
+$ git clone git@github.com:MarketLeader/Tutorial-Buka-Toko.git && cd Tutorial-Buka-Toko
+$ git remote add upstream git://github.com/mirumee/saleor.git
+$ git checkout master
+$ git reset --hard upstream/master  
+$ git push origin master --force 
+```
+Cek master Anda akan tertulis: 
+```txt
+This branch is even with mirumee:master
+```
+

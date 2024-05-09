@@ -1,0 +1,24 @@
+__TOC__
+
+==Fitur==
+* [[Cloud Run documentation|https://cloud.google.com/run/docs/]]
+
+[[Cloud Run|https://cloud.google.com/run/]] adalah produk Serverless yang dikelola sepenuhnya yang diluncurkan oleh Google Cloud untuk ketersediaan saat ini adalah [[beta publik|https://console.cloud.google.com/run]] yang menawarkan untuk menjalankan gambar docker di lingkungan Serverless. 
+<br><br>
+Dengan diperkenalkannya Cloud Run memungkinkan untuk menjalankan docker terlepas dari lingkungan waktu berjalan, batasan Fungsi Cloud untuk lingkungan dan versi terbatas dimitigasi oleh Cloud Run yang dapat dijalankan secara langsung dalam beberapa menit. 
+<br><br>
+Cloud Run dapat juga digunakan pada [[GKE dengan Istio dan Knative|https://cloud.google.com/run/docs/quickstarts/prebuilt-deploy-gke]].
+
+===Harga===
+[[Harga Cloud Run|https://cloud.google.com/run/pricing]] ditagih hanya untuk sumber daya yang Anda gunakan, dibulatkan hingga 100 milidetik terdekat. Perhatikan bahwa setiap sumber daya ini memiliki kuota gratis. Total tagihan Cloud Run Anda akan menjadi jumlah sumber daya dalam tabel harga.
+
+[[<img src=https://chetabahana.github.io/images/google/harga-cloud-run.png>|https://translate.google.co.id/translate?hl=id&sl=auto&tl=id&u=https%3A%2F%2Fcloud.google.com%2Frun%2Fpricing]]
+
+Saat mengatur konkurensi lebih tinggi dari satu permintaan pada satu waktu, beberapa permintaan dapat membagikan CPU dan memori yang dialokasikan.
+
+Berkenaan dengan menyebarkan gambar kontainer dari Container Registry, sebagaimana didokumentasikan dalam harga jaringan Cloud Storage. 
+
+Anda tidak akan dikenakan biaya jika Anda menggunakan ke wilayah Cloud Run yang terletak di benua yang sama dengan gambar kontainer Anda. Misalnya, penyebaran ke us-central1 dari us.gcr.io atau gcr.io tidak dikenai biaya.
+
+===Deploy===
+* [[Continuous Deployment to Cloud Run|https://medium.com/google-cloud/simplifying-continuous-deployment-to-cloud-run-with-cloud-build-including-custom-domain-setup-ssl-22d23bed5cd6]]

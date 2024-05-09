@@ -1,0 +1,129 @@
+__TOC__
+==Arsitektur==
+* [[How to Trigger|https://stackoverflow.com/questions/51915171/how-to-run-a-google-cloud-build-trigger-via-cli-rest-api-cloud-functions]]
+
+
+===GCloud===
+
+===Rest API===
+* [[Cloud Build API|https://cloud.google.com/cloud-build/docs/api/reference/rest/]]
+
+```
+PROJECT_ID={projectId}
+TRIGGER_ID={triggerId}
+URL=https://cloudbuild.googleapis.com
+PATH=v1/projects/$PROJECT_ID/triggers/$TRIGGER_ID:run
+curl -X POST $URL/$PATH
+
+```
+
+===Trigger API===
+* [[Cloud Build API|https://cloud.google.com/cloud-build/docs/api]]
+* [[Project Trigger API|https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers/run]]
+
+```
+{
+  "name": "operations/build/chetabahana/NDdlNTEwZTYtZDg0OS00OGU4LTk5ZDUtMGQyNGYxMTkxYzA2",
+  "metadata": {
+    "@type": "type.googleapis.com/google.devtools.cloudbuild.v1.BuildOperationMetadata",
+    "build": {
+      "id": "47e510e6-d849-48e8-99d5-0d24f1191c06",
+      "status": "QUEUED",
+      "source": {
+        "repoSource": {
+          "projectId": "chetabahana",
+          "repoName": "github_chetabahana_compose",
+          "branchName": "master"
+        }
+      },
+      "createTime": "2019-06-06T14:06:09.018589769Z",
+      "steps": [
+        {
+          "name": "python",
+          "args": [
+            "bash",
+            "./scripts/google/ssh.sh"
+          ]
+        },
+        {
+          "name": "gcr.io/cloud-builders/gcloud",
+          "args": [
+            "compute",
+            "ssh",
+            "--zone",
+            "us-central1-c",
+            "chetabahana@backend",
+            "--command",
+            "cd /home/chetabahana/.docker && ./init.sh"
+          ]
+        }
+      ],
+      "timeout": "1800s",
+      "projectId": "chetabahana",
+      "logsBucket": "gs://792657441134.cloudbuild-logs.googleusercontent.com",
+      "sourceProvenance": {
+        "resolvedRepoSource": {
+          "projectId": "chetabahana",
+          "repoName": "github_chetabahana_compose",
+          "commitSha": "4a223dac62fc34ed17f2a6aa533bc4a8acf21bf7"
+        }
+      },
+      "buildTriggerId": "f0892faa-8bd0-413f-9ade-6511485f71b7",
+      "options": {
+        "substitutionOption": "ALLOW_LOOSE",
+        "logging": "LEGACY"
+      },
+      "logUrl": "https://console.cloud.google.com/gcr/builds/47e510e6-d849-48e8-99d5-0d24f1191c06?project=792657441134",
+      "substitutions": {
+        "_LOCAL_PATH": "/workspace/.docker",
+        "_REPOSITORY": "https://github.com/mirumee/saleor.git",
+        "_ZONE": "us-central1-c",
+        "_INSTANCE_NAME": "chetabahana@backend",
+        "_INSTANCE_PATH": "/home/chetabahana"
+      },
+      "tags": [
+        "event-567d7137-a8ee-42c6-a40c-f0164f6dc5bc",
+        "trigger-f0892faa-8bd0-413f-9ade-6511485f71b7"
+      ]
+    }
+  }
+}
+
+```
+
+===HTTP Trigger===
+* [[Calling HTTP|https://cloud.google.com/functions/docs/calling/http]]
+
+request.json:
+```
+{
+  "trigger_template": {
+    "repoName": "$YOUR_REPO_NAME",
+    "branchName": "$SOME_BRANCH"
+  },
+  "filename": "$PATH_TO_CONFIG_FILE"
+}
+```
+
+Aktifkan via request:
+```
+curl -XPOST -T request.json -H"Authorization: Bearer $(gcloud config config-helper --format='value(credential.access_token)')" https://cloudbuild.googleapis.com/v1/projects/$YOUR_PROJECT_ID/triggers
+```
+
+
+===Cloud Pub/Sub===
+
+* [[Project Trigger|https://cloud.google.com/cloud-build/docs/api/reference/rest/v1/projects.triggers/run]]
+* [[Start Build Manually|https://cloud.google.com/cloud-build/docs/running-builds/start-build-manually#running_builds]]
+
+===Cloud Functions===
+```
+gcloud functions call NAME --data 'THING'
+```
+
+==''Referensi''==
+* [[Google - Cloud Scheduler|https://cloud.google.com/scheduler/]]
+
+* [[Jenkins - Scheduling Jobs|https://www.baeldung.com/jenkins-job-schedule]]
+
+* [[GitLab - Repository Mirroring|https://docs.gitlab.com/ee/workflow/repository_mirroring.html]]

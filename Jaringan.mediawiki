@@ -1,0 +1,3 @@
+https://cloud.google.com/appengine/docs/standard/python3/connecting-vpc?hl=in
+
+https://cloud.google.com/compute/pricing?hl=in#network

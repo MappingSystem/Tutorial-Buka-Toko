@@ -1,0 +1,122 @@
+__TOC__
+==Umum==
+===Bahasa===
+Prinsipnya GAE adalah layanan untuk membangun dan menggunakan aplikasi sehingga dapat fokus hanya pada penulisan kode tanpa khawatir mengelola infrastruktur yang mendasarinya.
+
+App Engine secara otomatis berskala tergantung pada lalu lintas aplikasi Anda dan hanya gunakan sumber daya saat kode Anda berjalan.
+
+GAE sedia bahasa populer seperti Java, PHP, Node.js, Python, C #, .Net, Ruby dan Go. Di GAE ini kita akan pilih dengan bahasa Python, untuk kenal lebih jauh Anda bisa simak ''[[GAE Python - Tutorial|https://codelabs.developers.google.com/codelabs/cloud-app-engine-python/]]''.
+===Fungsi===
+* Sebagai Fungsi Web: App Engine menyediakan lingkungan standar, yang memungkinkan Anda menjalankan aplikasi di lingkungan yang aman dan  mendistribusikan permintaan di beberapa server, dan mengukur server untuk memenuhi permintaan lalu lintas. 
+
+[[<img src=https://cloud.google.com/images/appengine/modern-web-applications.svg>|https://cloud.google.com/solutions/web-serving-overview#app-engine]]
+
+* Sebagai Backend Aplikasi Mobile: Aplikasi Anda berjalan di lingkungannya sendiri yang aman dan andal yang tidak tergantung pada perangkat keras, sistem operasi, atau lokasi fisik server. 
+[[<img src=https://cloud.google.com/images/appengine/modern-web-applications.svg>|https://cloud.google.com/appengine/]]
+[[<https://cloud.google.com/images/appengine/scalable-mobile-backends.svg>|https://cloud.google.com/solutions/mobile/mobile-app-backend-services/]]
+
+==Jenis==
+GAE memberikan dua jenis layanan yaitu ''[[Standard|https://cloud.google.com/appengine/docs/standard/]]'' dan ''[[Flexible|https://cloud.google.com/appengine/docs/flexible/]]''. Kedua lingkungan menyediakan Anda dengan infrastruktur penerapan, penyajian, dan penskalaan App Engine. 
+
+[[<img src=https://user-images.githubusercontent.com/36441664/65003211-b24c3e00-d921-11e9-9c91-d379db7b8181.png>|https://cloud.google.com/appengine/docs/python/]]
+
+''[[Perbedaan utama|https://cloud.google.com/appengine/docs/the-appengine-environments#comparing_high-level_features]]'' adalah cara lingkungan menjalankan aplikasi Anda, bagaimana aplikasi Anda mengakses layanan eksternal, bagaimana Anda menjalankan aplikasi Anda secara lokal, dan bagaimana skala aplikasi Anda. 
+
+Anda juga dapat merujuk memilih lingkungan untuk ringkasan tingkat tinggi dari perbedaan-perbedaan ini.
+
+===Standard===
+
+Di jenis standard kita bisa jalankan Aplikasi secara ''[[kuota harian gratis|https://cloud.google.com/appengine/quotas#Instances]]''. Jenis standard terdiri dari ''[[dua generasi|https://cloud.google.com/appengine/docs/standard/runtimes]]'' dimana generasi kedua banyak dilakukan peningkatan layanan.
+
+Selain ''[[Python library|https://docs.python.org/3/library/]]'' secara umum kita bisa pasang ''[[Apa Itu Saleor|Aplikasi Saleor]]'' dengan pustaka lebih untuk ''[[jalankan|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/requirements.txt]]'' maupun ''[[kembangkan|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/requirements_dev.txt]]''. Namun lingkungan standar ''[[tidak support|https://cloud.google.com/appengine/docs/standard/python3/runtime#dependencies]]'' untuk bisa ''[[kelola spesifikasnya|https://stackoverflow.com/a/49867443/4058484]]'' dengan file ''[[Pipfile|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/Pipfile]]'' dan ''[[Pipfile.lock|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/Pipfile.lock]]''.
+
+===Flexibel===
+Untuk memberi Anda lebih banyak opsi, App Engine menawarkan lingkungan yang fleksibel. Saat Anda menggunakan lingkungan yang fleksibel, aplikasi Anda berjalan pada mesin Compute Engine yang dapat dikonfigurasi, tetapi App Engine mengelola lingkungan hosting untuk Anda. 
+
+Ini berarti bahwa Anda dapat menggunakan runtimes tambahan, termasuk runtimes khusus, untuk pilihan bahasa pemrograman lainnya. Anda juga dapat memanfaatkan beberapa fleksibilitas yang ditawarkan Compute Engine, seperti memilih dari berbagai [[Opsi CPU dan memori|https://cloud.google.com/compute/docs/instances/creating-instance-with-custom-machine-type]].
+
+Lingkungan yang fleksibel dimaksudkan untuk ''[[melengkapi lingkungan standar|https://stackoverflow.com/a/47324010/4058484]]''. Jika Anda memiliki aplikasi yang sudah berjalan di lingkungan standar, biasanya tidak perlu untuk memigrasi seluruh aplikasi ke lingkungan yang fleksibel.
+
+Alih-alih, identifikasi bagian-bagian aplikasi Anda yang membutuhkan lebih banyak CPU, lebih banyak RAM, perpustakaan atau program pihak ketiga khusus, atau yang perlu melakukan tindakan yang tidak mungkin dilakukan dalam lingkungan standar. 
+
+Setelah Anda mengidentifikasi bagian-bagian ini dari aplikasi Anda, buat layanan App Engine kecil yang menggunakan lingkungan fleksibel untuk menangani hanya bagian-bagian itu. Layanan Anda yang ada yang berjalan di lingkungan standar dapat memanggil layanan lain menggunakan HTTP, Cloud Tasks (beta), atau Cloud Pub / Sub.
+Untuk detilnya bisa Anda disimak ''[[disini|https://cloud.google.com/appengine/docs/flexible/python/flexible-for-standard-users]]''.
+
+==Items==
+Sebelum memasang aplikasi sebaiknya Anda pelajari terlebih dahulu tentang biaya penagihan (billing). Billing bisa diestimasi via ''[[Google Cloud Pricing Calculator|https://cloud.google.com/products/calculator/]]'' sbb: 
+
+===Instance===
+* Standard
+** Tagihan mengikuti tabel ''[[GAE Standar|https://cloud.google.com/appengine/pricing#standard_instance_pricing]]'' 
+** Batas biaya tagihan harian bisa disetel via ''[[Spending Limit|https://cloud.google.com/appengine/docs/standard/python/console/#setting_a_spending_limit]]''
+** Free Daily Quota: ''[[28 jam type F1 plus 9 jam type B1 (RAM 128MB)|https://cloud.google.com/appengine/quotas#Instances]]''
+** Total Estimasi Tagihan ''[[Type F2/B2 (RAM 256MB)|https://cloud.google.com/appengine/docs/standard/#instance_classes]]'' per bulan: ''[[USD 30.44|https://cloud.google.com/products/calculator/#id=29cba647-c313-4a8e-9944-d9d27048ecf0]]''
+** Bisa setel [[Automatic/Manual/Basic|https://cloud.google.com/appengine/docs/standard/python3/how-instances-are-managed#instance_scaling]]: Stop via Idle / <code>_ah/stop</code> / <code>idle_timeout</code>.
+
+* Flexible
+** Tagihan mengikuti tabel ''[[GAE Flexible|https://cloud.google.com/appengine/pricing#flexible-environment-instances]]''
+** Batas biaya tagihan harian ''[[tidak bisa disetel|https://cloud.google.com/appengine/docs/flexible/java/upgrading#pricing_changes]]''
+** Mesin default ''[[2 vCPUs 3.75 GiB VMs n1-standard-1|https://medium.com/google-cloud/three-simple-steps-to-save-costs-when-prototyping-with-app-engine-flexible-environment-104fc6736495]]''
+** Konfigurasi core/CPUs ''[[tidak bisa di pecah via app.yaml|https://stackoverflow.com/a/44569110/4058484]]''
+** Total ''[[Estimasi Tagihan|https://cloud.google.com/appengine/pricing#flexible-environment-instances]]'' minimum per bulan: ''[[USD 83.42|https://cloud.google.com/products/calculator/?hl=in#id=7d3318d6-9920-4a1c-bfbc-5bed6d58eabf]]''
+** Tidak bisa setel stop otomatis. ''[[Minimum 1 Instance Running|https://cloud.google.com/appengine/docs/the-appengine-environments#comparing_high-level_features]]''
+
+===Database===
+* GCE
+** Tagihan mengikuti tabel ''[[Instance Pricing|https://cloud.google.com/compute/pricing#Predefined vCPUs and memory#standard_machine_types]]''
+** Mesin default ''[[1 vCPUs 3.75 GiB n1-standard-1|https://cloud.google.com/compute/pricing#predefined]]''
+** Total ''[[Estimasi Tagihan|https://cloud.google.com/appengine/pricing#flexible-environment-instances]]'' minimum per bulan: ''[[USD 24.27|https://cloud.google.com/products/calculator/#id=8d216ac0-855c-4510-8b92-8a54a221bd0f]]''
+** Tersedia ''[[Always Free|https://cloud.google.com/compute/pricing#freeusage]]'' type ''[[f1-micro|https://cloud.google.com/compute/pricing#sharedcore]]'' dan ''[[30 GB Standard|https://cloud.google.com/compute/docs/disks/#performance]]''
+** Cara pasang ikuti Tutorial Remote Access ''[[MySQL|https://cloud.google.com/solutions/mysql-remote-access]]'' dan ''[[Postgres|https://cloud.google.com/community/tutorials/setting-up-postgres]]''
+
+* Cloud SQL
+** Tagihan mengikuti tabel ''[[Instance Pricing|https://cloud.google.com/sql/pricing#2nd-gen-instance-pricing]]''
+** Mesin default ''[[1 vCPUs 3.75 GiB db-n1-standard-1|https://cloud.google.com/sql/docs/postgres/create-instance#machine-types]]''
+** Total ''[[Estimasi Tagihan|https://cloud.google.com/appengine/pricing#flexible-environment-instances]]'' minimum per bulan: ''[[USD 51.01|https://cloud.google.com/products/calculator/#id=3d442a05-5a24-42a7-888f-b7eab2c2c552]]''
+** Type shared (db-f1-micro and db-g1-small) ''[[tidak tersedia|https://cloud.google.com/sql/pricing#2nd-gen-instance-pricing]]''
+** Cara pasang dan koneksi ikuti Dokumentasi ''[[MySQL|https://cloud.google.com/sql/docs/mysql/configure-private-ip]]'' dan ''[[Postgres|https://cloud.google.com/sql/docs/postgres/configure-private-ip]]''
+
+===Penyimpanan===
+Untuk Aplikasi Saleor opsi penyimpanan dilakukan di ''[[Amazon S3|https://saleor.readthedocs.io/en/latest/deployment/s3.html]]''. Karena kita pilih pasang di Google Cloud maka dalam proyek ini [[Google-Cloud-Storage|Google Cloud Storage]] akan digunakan via ''[[Django File Api|https://django-storages.readthedocs.io/en/latest/backends/gcloud.html]]''.
+
+[[Harga Cloud Storage|https://cloud.google.com/storage/pricing]] didasarkan pada komponen-komponen berikut:
+
+* [[Penyimpanan data|https://cloud.google.com/storage/pricing#price-tables]]: menyimpan data dalam buckets.
+* [[Penggunaan jaringan|https://cloud.google.com/storage/pricing#network-pricing]]: mengakses dan memindahkan data dalam buckets.
+* [[Penggunaan operasi|https://cloud.google.com/storage/pricing#operations-pricing]]: melakukan tindakan dalam Penyimpanan Cloud.
+* [[Biaya pengambilan dan penghapusan awal|https://cloud.google.com/storage/pricing#archival-pricing]]: hanya berlaku untuk data yang disimpan di kelas Penyimpanan Nearline atau Coldline Storage.
+
+==Billing==
+Karena semua opsi bisa dilakukan maka Anda bisa mulai bekerja dengan budget minim sekalipun. Namun tentu saja akan ada konsekuensi terhadap kerentanan layanan. 
+===Status===
+Actual total biaya harian bisa Anda cek di ''Status Penagihan'' via ''[[Dasbor Aplikasi|https://console.cloud.google.com/appengine]]''. Namun dikarenakan oleh cara penghitungan perkiraannya, jumlah biaya resource individual mungkin tidak sama persis dengan jumlah total yang ditampilkan.
+
+===Support===
+Jika ada hal yang Anda ingin tanyakan tentang hal layanan anada bisa kontak ke [[Support|https://support.google.com/cloud/contact/cloud_platform_billing?hl=en]]:
+
+[[<img src=https://user-images.githubusercontent.com/36441664/65305277-f2732100-dbac-11e9-88a8-ec75265bc086.png>|https://support.google.com/cloud/contact/cloud_platform_billing?hl=en]]
+
+Kasus yang Anda tanyakan akan diberi konfirmasi tentang rekam kasus dan berapa lama waktu yang diperlukan:
+
+[[<img src=https://user-images.githubusercontent.com/36441664/65305573-bee4c680-dbad-11e9-85b3-4d504a47080f.png>|https://support.google.com/cloud/contact/cloud_platform_billing?hl=en]]
+
+==Planning==
+===Free Trial===
+Berikutnya akan kita ulas cara memasang ''[[Aplikasi Saleor|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Apa-Itu-Saleor]]'' dengan opsi seperti berikut:
+
+* Opsi 1: Pasang Aplikasi di GAE Flexible dengan Opsi Database diterapkan di GCE.
+* Opsi 2: Pasang Aplikasi di GAE Standard dengan Opsi Database diterapkan di GCE. 
+* Opsi 3: Pasang Aplikasi di GAE Flexible dengan Opsi Database diterapkan di Cloud SQL.
+* Opsi 4: Pasang Aplikasi di GAE Standard dengan Opsi Database diterapkan di Cloud SQL. 
+
+Untuk mengenal sistem secara keseluruhan maka dalam masa ''[[Free Trial|https://cloud.google.com/free/docs/gcp-free-tier#free-trial]]'' Anda bisa lakukan tes running GAE baik type standard maupun flexible berikut semua opsi database. Sebelum kredit atau masanya habis sebaiknya semua mesin disesuaikan dengan budget Anda. 
+
+===Extend===
+<br>Dilain pihak jika bisnis Anda berkembang besar maka opsi di atas juga akan mengalami kerentanan sehingga perlu ditingkatkan guna melayani beban layanan tinggi dengan cara:
+
+* Pasang aplikasi kedalam Cluster di GKE 
+* Topang oleh Skala via Memory Redis  
+* Atur beban dengan Load Balancing 
+
+Ada banyak cara lain untuk optimalkan biaya bisa dipertimbangkan, bahkan Anda juga ''[[bisa berkontribusi|https://cloud.google.com/community/tutorials/write]]''. Kita akan ulas secara mendetil di ''[[Optimasi Biaya|https://github.com/MarketLeader/Toko-Chetabahana/wiki/Optimasi-Biaya]]'' pada sesi terakhir. 
+

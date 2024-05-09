@@ -1,0 +1,82 @@
+https://linuxize.com/post/how-to-install-python-3-7-on-ubuntu-18-04/
+
+https://stackoverflow.com/a/54152444/4058484
+
+https://pipenv-es.readthedocs.io/es/stable/
+
+http://matthewbrown.io/2018/05/05/setting-up-my-python-workspace-2018/
+
+https://gist.github.com/kogcyc/07c3e5d1f427c9fa6b99044d81f8ee82
+
+https://www.techiediaries.com/ubuntu-install-python/
+
+https://devopstuto-docker.readthedocs.io/en/latest/docker_library/pipenv/pipenv.html
+
+```sh
+#!/bin/bash
+
+#Package
+APP="gevent gunicorn"
+DEV="gittle"
+
+# Set git branch
+git checkout -b compose
+git remote set-url origin $ORIGIN
+
+echo -e "\n$hr\nPIPENV\n$hr"
+python -m pip install --upgrade pip
+pip install --upgrade setuptools
+pip install --user pipenv
+
+echo -e "\n$hr\nPIPFILE\n$hr"
+sed -i 's/\.</,</g' Pipfile && sed -i 's/\.>/,>/g' Pipfile
+cat Pipfile
+
+echo -e "\n$hr\nDEFAULT\n$hr"
+source $LIST_FILES; trap 'trap_abort' 0; set -e
+pipenv install --dev --system --deploy
+
+echo -e "\n$hr\nCHECK\n$hr"
+pipenv check
+
+echo -e "\n$hr\nINSTALL\n$hr"
+pipenv install $APP
+pipenv install $DEV --dev
+
+echo -e "\n$hr\nGRAPH\n$hr"
+pipenv graph
+
+echo -e "$hr\nLOCAL BIN\n$hr"
+echo $HOME/.local/bin
+ls -al $HOME/.local/bin
+
+echo -e "\n$hr\nVENV BIN\n$hr"
+VENV=`pipenv --venv`
+ls -al $VENV/bin
+
+echo -e "\n$hr\nTRANSIFEX\n$hr"
+echo "${TRANSIFEXRC}" | tr ',' '\n' > $HOME/.transifexrc
+pipenv run tx pull -l id
+
+echo -e "\n$hr\nPIPLOCK\n$hr"
+pipenv lock -r > requirements.txt
+cat requirements.txt
+
+echo -e "\n$hr\nDEV PIPLOCK\n$hr"
+pipenv lock -r -d > requirements_dev.txt
+cat requirements_dev.txt
+
+echo -e "\n$hr\nCURRENT REPOSITORY\n$hr"
+pwd && ls -al .
+
+if grep -Fqe "error" << EOF
+`pipenv check`
+EOF
+then
+    trap : 0
+else
+    # push the branch
+    git_push
+fi
+```
+Contoh output: [[Python package / build (3.x)|https://github.com/chetabahana/saleor/commit/21a9faee0c97cd48701eec0dd5c04a631331d565/checks?check_suite_id=227483072]]

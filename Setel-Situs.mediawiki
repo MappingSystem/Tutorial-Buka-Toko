@@ -1,0 +1,4 @@
+__TOC__
+==Setelan Global==
+===SITE_SETTINGS_ID===
+Modul pengaturan situs memungkinkan pengguna Anda untuk mengubah pengaturan toko umum dari dashboard seperti namanya atau domain. Objek pengaturan dipilih oleh pk dari variabel [[SITE_SETTINGS_ID|https://docs.getsaleor.com/en/latest/architecture/settings.html]].

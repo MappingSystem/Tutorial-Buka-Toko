@@ -1,0 +1,76 @@
+https://docs.saleor.io/docs/next/advanced/managing-dependencies/#poetry
+
+https://poetry.eustace.io/docs/cli/
+
+```sh
+#!/bin/bash
+
+# Package
+APP="gevent gunicorn"
+DEV="gittle"
+
+# Set git branch
+git checkout -b compose
+git remote set-url origin $ORIGIN
+
+echo -e "\n$hr\nPIP\n$hr"
+python -m pip install --upgrade pip
+pip install --upgrade setuptools
+pip install --user pipenv
+
+# Switch to poetry #3894
+echo -e "\n$hr\nPOETRY\n$hr"
+export PATH=$HOME/.poetry/bin:$PATH
+pip install --pre poetry
+
+echo -e "\n$hr\nCONFIG\n$hr"
+#sed -i 's/\.</,</g' pyproject.toml && sed -i 's/\.>/,>/g' pyproject.toml
+cat pyproject.toml
+
+echo -e "\n$hr\nDEFAULT\n$hr"
+source $LIST_FILES; trap 'trap_abort' 0; set -e
+poetry install
+
+echo -e "\n$hr\nINSTALL: $APP\n$hr"
+poetry add $APP --optional
+
+echo -e "\n$hr\nINSTALL: $DEV\n$hr"
+poetry add $DEV --dev
+
+echo -e "\n$hr\nCHECK\n$hr"
+poetry check
+poetry lock
+
+echo -e "\n$hr\nSHOW\n$hr"
+poetry show -v
+
+echo -e "$hr\nLOCAL BIN\n$hr"
+echo $HOME/.local/bin
+ls -al $HOME/.local/bin
+
+echo -e "\n$hr\nTRANSIFEX\n$hr"
+echo "${TRANSIFEXRC}" | tr ',' '\n' > $HOME/.transifexrc
+poetry run tx pull -l id
+
+echo -e "\n$hr\nREQUIREMENT.TXT\n$hr"
+poetry export -f requirements.txt -o requirements.txt
+cat requirements.txt
+
+echo -e "\n$hr\nREQUIREMENT_DEV.TXT\n$hr"
+poetry export -f requirements.txt -o requirements_dev.txt --dev
+cat requirements_dev.txt
+
+echo -e "\n$hr\nCURRENT REPOSITORY\n$hr"
+pwd && ls -al .
+
+if grep -Fqe "error" << EOF
+`poetry check`
+EOF
+then
+    trap : 0
+else
+    # push the branch
+    git_push
+fi
+```
+Contoh output: [[Python package / build (3.7)|https://github.com/chetabahana/saleor/commit/5668602c66bedb64dfa8043b53c52233577e37e7/checks?check_suite_id=305635637]]

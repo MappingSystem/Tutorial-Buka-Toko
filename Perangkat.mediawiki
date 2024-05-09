@@ -1,0 +1,409 @@
+Pada sesi ini kita akan bahas tentang bagaimana menyiapkan perangkat yang kita perlukan untuk menjalankan bisnis eCommerce.
+__TOC__
+
+==Akun Google==
+===Mendaftar Akun===
+Cara yang paling umum dilakukan di Google adalah dengan mendaptar akun email via GMail. 
+
+Setelah Anda mendapatkan Akun maka dengan Akun tersebut Anda bisa menggunakan semua fasilitas yang tersedia di layanan Google.
+
+===Banyak Akun Google===
+Jika Anda mempunyai akun lebih dari satu maka sebaiknya Anda keluar atau logout dari semua Akun.  Kemudian masuk atau login kembali di salah satu Akun yang akan Anda gunakan dalam proyek yang akan Anda buat di Google. 
+
+Hal ini penting dilakukan karena Google akan memilih untuk menampilkan salah satu akun Anda yang paling pertama masuk. 
+
+Setelah Anda login dengan akun yang Anda pilih maka Anda bisa masuk kembali ke akun Anda lainnya di Google.
+
+==Akses Layanan==
+Dengan [[Perangkat#Mendaftar_Akun|mendaptar akun]] Anda bisa akses layanan di [[Google Cloud Platform (GCP)|https://cloud.google.com/]].
+
+===Jenis Layanan===
+Semua layanan GCP bisa diakses via 
+* Google Cloud [[Console|https://https://console.cloud.google.com]] dan [[Cloud Shell|https://cloud.google.com/shell/]]
+* Google Cloud [[Software Development Kit (SDK)|https://cloud.google.com/sdk/]] 
+
+Jika Anda akses via ''[[Shell|https://en.wikipedia.org/wiki/Shell_script]]'' maka perintahnya dimulai dengan ''[[gcloud|https://cloud.google.com/sdk/gcloud/reference/]]''. 
+
+```txt
+$
+Welcome to the Google Cloud SDK! Run "gcloud -h" to get the list of available co
+mmands.
+
+$ gcloud --help
+NAME
+    gcloud - manage Google Cloud Platform resources and developer workflow
+
+SYNOPSIS
+    gcloud GROUP | COMMAND [--account=ACCOUNT] [--configuration=CONFIGURATION]
+        [--flags-file=YAML_FILE] [--flatten=[KEY,...]] [--format=FORMAT]
+        [--help] [--project=PROJECT_ID] [--quiet, -q]
+        [--verbosity=VERBOSITY; default="warning"] [--version, -v] [-h]
+        [--log-http] [--trace-token=TRACE_TOKEN] [--no-user-output-enabled]
+
+DESCRIPTION
+    The gcloud CLI manages authentication, local configuration, developer
+    workflow, and interactions with the Google Cloud Platform APIs.
+
+GLOBAL FLAGS
+     --account=ACCOUNT
+        Google Cloud Platform user account to use for invocation. Overrides the
+        default core/account property value for this command invocation.
+
+     --configuration=CONFIGURATION
+        The configuration to use for this command invocation. For more
+        information on how to use configurations, run: gcloud topic
+        configurations. You can also use the [CLOUDSDK_ACTIVE_CONFIG_NAME]
+        environment variable to set the equivalent of this flag for a terminal
+        session.
+
+     --flags-file=YAML_FILE
+        A YAML or JSON file that specifies a --flag:value dictionary. Useful
+        for specifying complex flag values with special characters that work
+        with any command interpreter. Additionally, each --flags-file arg is
+        replaced by its constituent flags. See $ gcloud topic flags-file for
+        more information.
+
+     --flatten=[KEY,...]
+        Flatten name[] output resource slices in KEY into separate records for
+        each item in each slice. Multiple keys and slices may be specified.
+        This also flattens keys for --format and --filter. For example,
+        --flatten=abc.def flattens abc.def[].ghi references to abc.def.ghi. A
+        resource record containing abc.def[] with N elements will expand to N
+        records in the flattened output. This flag interacts with other flags
+        that are applied in this order: --flatten, --sort-by, --filter,
+        --limit.
+
+     --format=FORMAT
+        Set the format for printing command output resources. The default is a
+        command-specific human-friendly output format. The supported formats
+        are: config, csv, default, diff, disable, flattened, get, json, list,
+        multi, none, object, table, text, value, yaml. For more details run $
+        gcloud topic formats.
+
+     --help
+        Display detailed help.
+
+     --project=PROJECT_ID
+        The Google Cloud Platform project name to use for this invocation. If
+        omitted, then the current project is assumed; the current project can
+        be listed using gcloud config list --format='text(core.project)' and
+        can be set using gcloud config set project PROJECTID. Overrides the
+        default core/project property value for this command invocation.
+
+     --quiet, -q
+        Disable all interactive prompts when running gcloud commands. If input
+        is required, defaults will be used, or an error will be raised.
+        Overrides the default core/disable_prompts property value for this
+        command invocation. Must be used at the beginning of commands. This is
+        equivalent to setting the environment variable
+        CLOUDSDK_CORE_DISABLE_PROMPTS to 1.
+
+     --verbosity=VERBOSITY; default="warning"
+        Override the default verbosity for this command with any of the
+        supported standard verbosity levels: debug, info, warning, error,
+        critical, none. Overrides the default core/verbosity property value for
+        this command invocation.
+
+     --version, -v
+        Print version information and exit. This flag is only available at the
+        global level.
+
+     -h
+        Print a summary help and exit.
+
+OTHER FLAGS
+     --log-http
+        Log all HTTP server requests and responses to stderr. Overrides the
+        default core/log_http property value for this command invocation.
+
+     --trace-token=TRACE_TOKEN
+        Token used to route traces of service requests for investigation of
+        issues. Overrides the default core/trace_token property value for this
+        command invocation.
+
+     --user-output-enabled
+        Print user intended output to the console. Overrides the default
+        core/user_output_enabled property value for this command invocation.
+        Use --no-user-output-enabled to disable.
+
+GROUPS
+    GROUP is one of the following:
+
+     app
+        Manage your App Engine deployments.
+
+     auth
+        Manage oauth2 credentials for the Google Cloud SDK.
+
+     beta
+        (BETA) Beta versions of gcloud commands.
+
+     bigtable
+        Manage your Cloud Bigtable storage.
+
+     builds
+        Create and manage builds for Google Cloud Build.
+
+     components
+        List, install, update, or remove Google Cloud SDK components.
+
+     composer
+        Create and manage Cloud Composer Environments.
+
+     compute
+        Create and manipulate Google Compute Engine resources.
+
+     config
+        View and edit Cloud SDK properties.
+
+     container
+        Deploy and manage clusters of machines for running containers.
+
+     dataflow
+        Manage Google Cloud Dataflow jobs.
+
+     dataproc
+        Create and manage Google Cloud Dataproc clusters and jobs.
+
+     datastore
+        Manage your Cloud Datastore indexes.
+
+     debug
+        Commands for interacting with the Cloud Debugger.
+
+     deployment-manager
+        Manage deployments of cloud resources.
+
+     dns
+        Manage your Cloud DNS managed-zones and record-sets.
+
+     domains
+        Manage domains for your Google Cloud projects.
+
+     endpoints
+        Create, enable and manage API services.
+
+     filestore
+        Create and manipulate Cloud Filestore resources.
+
+     firebase
+        Work with Google Firebase.
+
+     functions
+        Manage Google Cloud Functions.
+
+     iam
+        Manage IAM service accounts and keys.
+
+     iot
+        Manage Cloud IoT resources.
+
+     kms
+        Manage cryptographic keys in the cloud.
+
+     logging
+        Manage Stackdriver Logging.
+
+     ml
+        Use Google Cloud machine learning capabilities.
+
+     ml-engine
+        Manage Cloud ML Engine jobs and models.
+
+     organizations
+        Create and manage Google Cloud Platform Organizations.
+
+     projects
+        Create and manage project access policies.
+
+     pubsub
+        Manage Cloud Pub/Sub topics, subscriptions, and snapshots.
+
+     redis
+        Manage Cloud Memorystore Redis resources.
+
+     services
+        List, enable and disable APIs and services.
+
+     source
+        Cloud git repository commands.
+
+     spanner
+        Command groups for Cloud Spanner.
+
+     sql
+        Create and manage Google Cloud SQL databases.
+
+     topic
+        gcloud supplementary help.
+
+COMMANDS
+    COMMAND is one of the following:
+
+     docker
+        (DEPRECATED) Enable Docker CLI access to Google Container Registry.
+
+     feedback
+        Provide feedback to the Google Cloud SDK team.
+
+     help
+        Search gcloud help text.
+
+     info
+        Display information about the current gcloud environment.
+
+     init
+        Initialize or reinitialize gcloud.
+
+     version
+        Print version information for Cloud SDK components.
+```
+
+===Opsi Dari Layanan===
+* [[GCloud Cheat Sheets|https://gist.github.com/pydevops/cffbd3c694d599c6ca18342d3625af97]]
+
+Untuk melihat opsi dar layanan lakukan dengan tanda <code>--help</code>. Misal Anda ingin lihat opsi apa saja di perintah <code>gcloud app</code> lakukan sama halnya seperti ketika hanya melihat <code>gcloud --help</code>. Begitupun seterusnya ke anak cabang dari <code>gcloud app</code> tsb.
+```
+C:\Users\Chetabahana\Project\Google\GAE>gcloud app --help
+NAME
+    gcloud app - manage your App Engine deployments
+
+SYNOPSIS
+    gcloud app GROUP | COMMAND [GCLOUD_WIDE_FLAG ...]
+
+DESCRIPTION
+    The gcloud app command group lets you deploy and manage your Google App
+    Engine apps. These commands replace their equivalents in the appcfg tool.
+
+    App Engine is a platform for building scalable web applications and mobile
+    backends. App Engine provides you with built-in services and APIs such as
+    NoSQL datastores, memcache, and a user authentication API, common to most
+    applications.
+
+    More information on App Engine can be found here:
+    https://cloud.google.com/appengine and detailed documentation can be found
+    here: https://cloud.google.com/appengine/docs/
+
+GCLOUD WIDE FLAGS
+    These flags are available to all commands: --account, --configuration,
+    --flags-file, --flatten, --format, --help, --log-http, --project, --quiet,
+    --trace-token, --user-output-enabled, --verbosity. Run $ gcloud help for
+    details.
+
+GROUPS
+    GROUP is one of the following:
+
+     domain-mappings
+        View and manage your App Engine domain mappings.
+
+     firewall-rules
+        View and manage your App Engine firewall rules.
+
+     instances
+        View and manage your App Engine instances.
+
+     logs
+        Manage your App Engine logs.
+
+     operations
+        View and manage your App Engine Operations.
+
+     regions
+        View regional availability of App Engine runtime environments.
+
+    services
+       View and manage your App Engine services.
+
+    ssl-certificates
+       View and manage your App Engine SSL certificates.
+
+    versions
+       View and manage your App Engine versions.
+
+OMMANDS
+   COMMAND is one of the following:
+
+    browse
+       Open the current app in a web browser.
+
+    create
+       Create an App Engine app within the current Google Cloud Project.
+
+    deploy
+       Deploy the local code and/or configuration of your app to App Engine.
+
+    describe
+       Display all data about an existing service.
+
+    open-console
+       Open the App Engine dashboard, or log viewer, in a web browser.
+
+    update
+       Updates an App Engine application.
+
+XAMPLES
+   To run your app locally in the development application server to simulate
+   your application running in production App Engine with sandbox restrictions
+   and services provided by App Engine SDK libraries, use the dev_appserver.py
+   command and your app's app.yaml configuration file to run:
+
+       $ dev_appserver.py ~/my_app/app.yaml
+
+   For an in-depth look into using the local development server, follow this
+   guide :
+   https://cloud.google.com/appengine/docs/standard/python/tools/using-local-se
+
+ver.
+
+   To deploy the code and configuration of your app to the App Engine server,
+   run:
+
+       $ gcloud app deploy ~/my_app/app.yaml
+    To list all versions of all services of your existing deployments, run:
+
+        $ gcloud app versions list
+
+    To generate all relevant config files for ~/my_app (or emit an error
+    message if the directory contents are not recognized), run:
+
+        $ gcloud app gen-config ~/my_app
+
+NOTES
+    This variant is also available:
+
+        $ gcloud beta app
+
+```
+
+Dari daftar perintah dan opsinya di atas tak berlebihan jika bisa dikatakan hampir ''[[semua produk|https://cloud.google.com/products/]]'' akan diperlukan jika aplikasi kita suatu saat bekerja dengan skala besar.  
+
+Namun untuk tahap awal kita akan konsentrasi di Pemasangan [[Pasang-Aplikasi#pemasangan-web|Web]] dan [[Pasang-Aplikasi#pemasangan-cloud-sql|Database]] merupakan komponen utama dari Aplikasi eCommerce dari ''[[Apa Itu Saleor|Saleor]]''.
+
+==Memulai Project==
+===Mendaftarkan Project===
+Untuk mulai project kita bisa setel ''PROJECT_ID'' di ''[[Console|https://console.cloud.google.com/]]'' atau di ''[[Cloud Shell|https://cloud.google.com/blog/products/gcp/introducing-open-in-cloud-shell-a-new-way-to-create-frictionless-tutorials]]'' maupun di PC Via ''[[GCloud SDK|https://cloud.google.com/sdk/docs/quickstart-windows?hl=in]]'' dengan perintah <code>gcloud init</code> sebagai berikut:
+```python
+gcloud init
+gcloud auth login
+gcloud components update
+gcloud config set project [PROJECT_ID]
+```
+Catatan:
+* Di akun kita bisa daftarkan sampai 24 projects, bahkan bisa ''[[request|https://support.google.com/code/contact/project_quota_increase]]'' bila kurang.
+* Khusus Google App Engine (GAE) layanan bersifat regional, hanya untuk ''[[lokasi tertentu|https://cloud.google.com/appengine/docs/locations]]''
+
+===Pemilihan Region/Zone===
+Direncanakan mulai Tahun 2019/2020 pelanggan di Indonesia ''[[bisa setel|https://console.cloud.google.com/compute/settings]]'' region ''[[Jakarta|https://cloud.google.com/compute/docs/regions-zones/#announced]]''.
+
+* Dari semua region, layanan terlengkap ada di ''[[asia-northeast1 (Tokyo)|https://cloud.google.com/about/locations/?region=asia-pacific#region]]''
+* Free Tier untuk GCE hanya di region us, layanan terlengkap di ''[[us-east1 (South Carolina)|https://cloud.google.com/about/locations/?region=americas#region]]''
+Dengan pertimbangan optimasi biaya vs layanan maka untuk projek ini disetel sbb:
+```txt
+gcloud config set compute/region us-east1
+gcloud config set compute/zone us-east1-b
+```
+
+Berikutnya kita akan bahas secara detil tentang perangkat² ini..
+
+==Referensi==
+* [[Google Developers - Codelab|https://codelabs.developers.google.com/]]

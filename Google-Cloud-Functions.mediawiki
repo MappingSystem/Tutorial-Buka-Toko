@@ -1,0 +1,262 @@
+==Benefit==
+[[Fungsi cloud|https://cloud.google.com/functions/]] memungkinkan Anda untuk [[membuat respon online|https://console.cloud.google.com/functions/list]] dengan intruksi program  baik secara langsung ataupun via feedback dari suatu layanan tanpa harus menyediakan server. 
+
+Respon dapat dikirim ke sumber daya lain di [[Home#kenapa-google-cloud|Google Platform]]  maupun tempat lain seperti [[GitHub Actions|https://github.com/chetabahana/chetabahana.github.io/wiki/Akun-GitHub-Actions]] atau [[Apa-Itu-Codefresh|Codefresh]]  untuk [[triggering|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Apa-Itu-Codefresh#triggering]] atau akses database seperti [[vitess|https://github.com/github/vitess-gh]].
+<br><br>
+[[<img src=https://cloud.google.com/images/products/functions/how-it-works.svg>|https://cloud.google.com/images/products/functions/how-it-works.svg]]
+
+===Harga===
+Fungsi Cloud diberi [[harga|https://cloud.google.com/functions/pricing]] sesuai dengan berapa lama fungsi Anda berjalan, berapa kali itu dipanggil dan berapa banyak sumber daya yang Anda berikan untuk fungsi tersebut.
+
+[[<img src=https://user-images.githubusercontent.com/36441664/63488344-dd856e00-c4d8-11e9-9a34-180ede276d5b.png>|https://user-images.githubusercontent.com/36441664/63488344-dd856e00-c4d8-11e9-9a34-180ede276d5b.png]]
+
+===SSL/TLS===
+Fungsi yang digunakan dengan pemicu HTTP diberikan domain yang sepenuhnya memenuhi syarat bersama dengan sertifikat SSL / TLS yang dihasilkan secara dinamis untuk komunikasi yang aman.
+
+Menggunakan Repositori Sumber Cloud Anda dapat menggunakan Fungsi Cloud langsung dari repositori GitHub atau Bitbucket Anda tanpa perlu mengunggah kode atau mengelola versi sendiri.
+
+==Implementasi==
+* [[Requests: HTTP for Humans™|https://requests.readthedocs.io/en/latest/#requests-http-for-humans]]
+
+Cloud Function disediakan dalam [[Node.js, Python, and Go|https://cloud.google.com/functions/docs/writing/]]. Untuk Java 
+sampai tulisan ini dibuat masih status [[Alpha|https://docs.google.com/forms/d/e/1FAIpQLScC98jGi7CfG0n3UYlj7Xad8XScvZC8-BBOg7Pk3uSZx_2cdQ/viewform]]. Namun untuk custom function bisa gunakan [[Java Library|https://developers.google.com/api-client-library/java/apis/cloudfunctions/v1]].
+
+===Listener===
+Salah satu implementasi [[Cloud Function|https://cloud.google.com/functions/docs/calling/http]] di projeck ini adalah untuk merespon [[Docker Webhook|https://docs.docker.com/docker-hub/webhooks/]]. 
+
+Lihat [[HTTP Tutorial|https://cloud.google.com/functions/docs/tutorials/http]] dan [[HTTP Functions|https://cloud.google.com/functions/docs/writing/http]]:
+```
+$ gcloud functions deploy FUNCTION_NAME --runtime nodejs8 --trigger-http
+$ gcloud functions call FUNCTION_NAME --data '{"name":"Keyboard Cat"}'
+```
+====Trigger====
+Cara ackifkan via Http Post:
+```
+curl -X POST "https://YOUR_REGION-YOUR_PROJECT_ID.cloudfunctions.net/FUNCTION_NAME" -H "Content-Type:application/json" --data '{"name":"Keyboard Cat"}'
+```
+Anda dapat melakukan test di [[Console Cloud Function|https://console.cloud.google.com/functions/list]]
+[[<img src=https://user-images.githubusercontent.com/36441664/63634654-b4551100-c683-11e9-8a37-d82c482ef54e.png>|https://github.com/MarketLeader/Toko-Chetabahana/releases]]
+
+====Source====
+[[Contoh dalam python|https://github.com/GoogleCloudPlatform/python-docs-samples/blob/master/functions/helloworld/main.py]]:
+```
+from flask import escape
+
+def hello_http(request):
+    """HTTP Cloud Function.
+    Args:
+        request (flask.Request): The request object.
+        <http://flask.pocoo.org/docs/1.0/api/#flask.Request>
+    Returns:
+        The response text, or any set of values that can be turned into a
+        Response object using `make_response`
+        <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
+    """
+    request_json = request.get_json(silent=True)
+    request_args = request.args
+
+    if request_json and 'name' in request_json:
+        name = request_json['name']
+    elif request_args and 'name' in request_args:
+        name = request_args['name']
+    else:
+        name = 'World'
+    return 'Hello {}!'.format(escape(name))
+```
+
+====Event====
+Contoh [[Docker Webhook|https://docs.docker.com/docker-hub/webhooks/#example-webhook-payload]] Post format:
+```
+{
+  "callback_url": "https://registry.hub.docker.com/u/svendowideit/testhook/hook/2141b5bi5i5b02bec211i4eeih0242eg11000a/",
+  "push_data": {
+    "images": [
+        "27d47432a69bca5f2700e4dff7de0388ed65f9d3fb1ec645e2bc24c223dc1cc3",
+        "51a9c7c1f8bb2fa19bcd09789a34e63f35abb80044bc10196e304f6634cc582c",
+        "..."
+    ],
+    "pushed_at": 1.417566161e+09,
+    "pusher": "trustedbuilder",
+    "tag": "latest"
+  },
+  "repository": {
+    "comment_count": 0,
+    "date_created": 1.417494799e+09,
+    "description": "",
+    "dockerfile": "#\n# BUILD\u0009\u0009docker build -t svendowideit/apt-cacher .\n# RUN\u0009\u0009docker run -d -p 3142:3142 -name apt-cacher-run apt-cacher\n#\n# and then you can run containers with:\n# \u0009\u0009docker run -t -i -rm -e http_proxy http://192.168.1.2:3142/ debian bash\n#\nFROM\u0009\u0009ubuntu\n\n\nVOLUME\u0009\u0009[/var/cache/apt-cacher-ng]\nRUN\u0009\u0009apt-get update ; apt-get install -yq apt-cacher-ng\n\nEXPOSE \u0009\u00093142\nCMD\u0009\u0009chmod 777 /var/cache/apt-cacher-ng ; /etc/init.d/apt-cacher-ng start ; tail -f /var/log/apt-cacher-ng/*\n",
+    "full_description": "Docker Hub based automated build from a GitHub repo",
+    "is_official": false,
+    "is_private": true,
+    "is_trusted": true,
+    "name": "testhook",
+    "namespace": "svendowideit",
+    "owner": "svendowideit",
+    "repo_name": "svendowideit/testhook",
+    "repo_url": "https://registry.hub.docker.com/u/svendowideit/testhook/",
+    "star_count": 0,
+    "status": "Active"
+  }
+}
+```
+Jika kita kirim request ini maka responnya:
+```
+Hello World!
+```
+Kita ubah <code>'name'</code> di [[Google-Cloud-Functions#source|Source]] dengan </code>'callback_url'</code> maka respon dari request ini:
+```
+Hello https://registry.hub.docker.com/u/svendowideit/testhook/hook/2141b5bi5i5b02bec211i4eeih0242eg11000a/!
+```
+Ubah lagi </code>['callback_url']</code> dengan </code>['repository']['name']</code> maka respon dari request ini:
+```
+Hello testhook!
+```
+
+===Callback===
+* [[Execute curl command within a Python script|https://stackoverflow.com/a/31764155/4058484]]
+====Validate====
+Untuk [[memvalidasi panggilan balik|https://docs.docker.com/docker-hub/webhooks/#validating-a-webhook-callback]] dalam Docker webhook, Anda harus melakukan hal berikut:
+
+* Ambil nilai callback_url di payload JSON permintaan.
+* Kirim permintaan POST ke URL ini yang berisi badan JSON yang valid.
+```
+{
+  "state": "success",
+  "description": "387 tests PASSED",
+  "context": "Continuous integration by Acme CI",
+  "target_url": "http://ci.acme.com/results/afd339c1c3d27"
+}
+```
+====Respon====
+Dengan menggunakan [[python: requests|https://stackoverflow.com/a/31764155/4058484]] ubah [[Google-Cloud-Functions#source|Source]] untuk respon seperti [[Google-Cloud-Functions#Trigger|trigger curl]] sbb:
+```
+from flask import escape
+import requests
+
+def hello_http(request):
+    """HTTP Cloud Function.
+    Args:
+        request (flask.Request): The request object.
+        <http://flask.pocoo.org/docs/1.0/api/#flask.Request>
+    Returns:
+        The response text, or any set of values that can be turned into a
+        Response object using `make_response`
+        <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
+    """
+    headers = {}
+    payload = {
+      "state": "success",
+      "description": "387 tests PASSED",
+      "context": "Continuous integration by Acme CI",
+      "target_url": "http://ci.acme.com/results/afd339c1c3d27"
+    }
+    request_args = request.args
+    request_json = request.get_json(silent=True)
+
+    if request_json and 'callback_url' in request_json:
+        callback_url = request_json['callback_url']
+    elif request_args and 'callback_url' in request_args:
+        callback_url = request_args['callback_url']
+    else:
+        callback_url = 'World'
+    res = requests.post(url=callback_url, data=payload, headers=headers)
+    return 'Send the payload data to: {}!'.format(escape(callback_url))
+```
+====Deploy====
+Untuk jalankan dengan [[Requests|https://2.python-requests.org/en/master/]] dapat diakukan salah satu dari cara berikut:
+
+* clone [[sumber|https://github.com/psf/requests]] dan masukkan [[Google-Cloud-Functions#Respon|respon]] dengan nama file <code>main.yml</code> disitu atau 
+* cukup masukkan [[versinya|https://pypi.org/project/requests/]] saja di file lain dengan nama <code>requirements.txt</code> atau
+* masukkan [[Google-Cloud-Functions#Respon|respon]] ke file <code>main.yml</code> di [[console|https://console.cloud.google.com/functions/list]] dan edit file <code>requirements.txt</code> sbb:
+```
+# Function dependencies, for example:
+# package>=version
+-i https://pypi.python.org/simple
+requests>=2.22.0
+```
+[[<img src=https://user-images.githubusercontent.com/36441664/63639256-40cef600-c6bb-11e9-9ef6-91e1da1db8d5.png>|https://github.com/MarketLeader/Toko-Chetabahana/releases]]
+
+===Integrasi===
+Selanjutnya kita akan integrasikan dengan [[Apa-Itu-Codefresh#triggering|triggering]] ke pipeline di Codefresh.
+
+====API/CLI====
+```
+curl 'https://g.codefresh.io/api/builds/5b1a78d1bdbf074c8a9b3458' \
+--compressed -H 'content-type:application/json; charset=utf-8' \
+-H 'Authorization: <your_key_here>' \
+--data-binary '{"serviceId":"5b1a78d1bdbf074c8a9b3458",\
+"type":"build","repoOwner":"kostis-codefresh",\
+"branch":"master","repoName":"nestjs-example",\
+"variables":{"sample-var1":"sample1","SAMPLE_VAR2":"SAMPLE2"}}'
+```
+====Function====
+```
+from flask import escape
+import requests
+import json
+import os
+
+    
+def http_callback(event):
+    """HTTP Cloud Function.
+    Args:
+        request (flask.Request): The request object.
+        <http://flask.pocoo.org/docs/1.0/api/#flask.Request>
+    Returns:
+        The response text, or any set of values that can be turned into a
+        Response object using `make_response`
+        <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
+    """
+    headers = {}
+    payload = {
+      "state": "success",
+      "description": "image PASSED",
+      "context": "Continuous integration by Codefresh",
+      "target_url": "https://g.codefresh.io/api/builds/5b1a78d1bdbf074c8a9b3458"
+    }
+
+    event_json = event.get_json(silent=True)
+    if event_json and 'callback_url' in event_json:
+        callback_url = event_json['callback_url']
+        r = requests.post(url=callback_url, data=payload, headers=headers)
+        return http_trigger(event_json)
+
+
+def http_trigger(event_json):
+    """HTTP Cloud Function.
+    Args:
+        Requests is an elegant and simple HTTP library for Python, built for human beings..
+        <https://requests.readthedocs.io/en/latest/#requests-http-for-humans>
+    Returns:
+        Example - Triggering pipelines
+        You can also pass extra environment variables using an array
+        <https://codefresh.io/docs/docs/integrations/codefresh-api/#example---triggering-pipelines>.
+    """
+    headers = {
+      "content-type": "application/json; charset=utf-8",
+      "Authorization": "{}".format(escape(os.environ.get("CF_API_KEY")))
+    }
+    payload = {
+      "serviceId": os.environ.get("CF_SERVICE_ID"),
+      "variables": {"JSON_DATA": json.dumps(event_json)}
+    }
+    url = "https://g.codefresh.io/api/builds/" + os.environ.get("CF_SERVICE_ID")
+    r = requests.post(url, data=json.dumps(payload), headers=headers)
+    return str(r.status_code)
+```
+
+====Webhook====
+
+[[<img src=https://docs.docker.com/docker-hub/images/webhooks-submenu.png>|https://docs.docker.com/docker-hub/webhooks/#example-webhook-payload]]
+
+
+==Pengembangan==
+===Aplikasi===
+Contoh di atas bisa dilakukan untuk banyak kepentingan lain. Pustaka program bantu seperti ''[[Google-Cloud-Functions#respon|Request]]'' secara default sudah termasuk dalam file ''[[Pipfile|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/Pipfile#L51]]'' sehingga akan selalu tersedia dalam pengoperasian secara keseluruhan via [[requirements.txt|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/requirements.txt]] dan [[requirements_dev.txt|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/requirements_dev.txt]].
+
+===Clustering===
+Untuk skala yang lebih tinggi dimana diperlukan lingkungan yang menunjang kluster tanpa perlu menyediakan server maka Anda bisa pakai [[Cloud Run|https://cloud.google.com/run/]]. Memungkinkan Anda untuk menjalankan kontainer stateless di lingkungan yang dikelola sepenuhnya atau di cluster GKE Anda sendiri.
+
+==''Referensi''==
+* [[Cloud Functions for Firebase|https://firebase.google.com/docs/functions]]
+* [[How to write cloud functions in java|https://stackoverflow.com/a/55822614/4058484]]
+* [[Google Cloud - API Client Libraries Java|https://developers.google.com/api-client-library/java/google-api-java-client/dev-guide]]

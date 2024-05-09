@@ -1,0 +1,305 @@
+__TOC__
+==Arsitektur==
+
+Secara garis besar otomatisasi dilakukan untuk merespon setiap perubahan baik di sumber code (upstream) maupun custom design/chart di cabang yang kita buat dari master fork repository.
+
+[[<img src=https://cloud.google.com/kubernetes-engine/images/gitops-tutorial-pipeline-flow.svg>|https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build]]
+
+Seperti yang digambarkan di atas maka secara garis besar otomatisasi deploy akan meliputi 4 (empat) bagian yang terintegrasi dimana trigger untuk masuk ke proses berikutnya diatur sedemikian rupa secara berjenjang. 
+
+===Masterisasi===
+* [[Easily keep your GitHub forks synced with upstream using only the GitHub API|https://github.com/upriver/upriver.github.io]]
+
+Adalah mekanisme yang dilakukan untuk memperoleh update secara berkesinambungan antara master project dengan upstream dari repository. 
+
+===Pip-Environment===
+Adalah mekanisme yang dilakukan untuk update cabang dari master yang akan dipakai untuk membuat image docker. Docker Hub akan otomatis di trigger begitu cabang di update. 
+
+===Docker-Compose===
+Setelah image docker selesai dibuat maka penempatannya dilanjutkan dengan membuat docker-compose. Yaitu integrasi Saleor dengan Postgres, Redis, dan Celery. 
+
+===Backend-Compose===
+Step ini adalah step yang memindahkan compose di container docker ke sistem secara permanen (mode produksi). 
+
+==Konfigurasi==
+[[<img src=https://cdn-images-1.medium.com/max/800/0*y58OD5kq1wbF8Vhc.png>|https://medium.com/containers-101/spinnaker-vs-codefresh-a843087008c3]]
+===Internal===
+* [[CI/CD on Google Cloud|https://cloud.google.com/docs/ci-cd/]]
+* [[Cygwin Venv - Release: 'Run Saleor with CI/CD'|https://github.com/MarketLeader/Toko-Chetabahana/releases/tag/v1.4]]
+
+Proses internal dilakukan bedasarkan konsep ''[[Continuous Delivery]]''
+[[<img src=https://cloud.google.com/kubernetes-engine/images/gitops-tutorial-pipeline-architecture.svg>|https://cloud.google.com/kubernetes-engine/images/gitops-tutorial-pipeline-architecture.svg]]
+
+====Gcloud====
+Gcloud dapat digunakan untuk koneksi via ''[[SSH Key]]'', namun untuk gcloud dalam script nya kita harus pakai yang ada dalam instance. Walaupun gcloud sudah tersedia namun tidak dapat digunakan.
+```
+$ gcloud.components.update
+ERROR: (gcloud.components.update) 
+You cannot perform this action because the Cloud SDK component manager 
+is disabled for this installation. You can run the following command 
+to achieve the same result for this installation: 
+
+$ sudo apt-get update && sudo apt-get --only-upgrade install \
+kubectl google-cloud-sdk google-cloud-sdk-app-engine-grpc \
+google-cloud-sdk-pubsub-emulator google-cloud-sdk-app-engine-go \
+google-cloud-sdk-cloud-build-local google-cloud-sdk-datastore-emulator \
+google-cloud-sdk-app-engine-python google-cloud-sdk-cbt \
+google-cloud-sdk-bigtable-emulator google-cloud-sdk-app-engine-python-extras \
+google-cloud-sdk-datalab google-cloud-sdk-app-engine-java
+```
+
+Karena itu kita harus melakukan instalasi terpisah agar dapat dijalankan didalam script oleh Cloud Builder. Lihat caranya di ''[[Instalasi-di-GCE#Separasi|Separasi]]''
+
+====Cloud Build====
+* [[Git commit with git container in Google Cloud Build|https://stackoverflow.com/questions/51997933/git-commit-with-git-container-in-google-cloud-build/56646128#56646128]]
+* [[How to run a Google Cloud Build trigger via CLI / API|https://stackoverflow.com/questions/51915171/how-to-run-a-google-cloud-build-trigger-via-cli-rest-api-cloud-functions]]
+```
+steps:
+
+- name: 'gcr.io/cloud-builders/git'
+  args: ['clone', '${_REPOSITORY}']
+
+- name: 'python'
+  args: ['bash', './scripts/github/init.sh']
+
+- name: 'gcr.io/cloud-builders/gcloud' 
+  args: ['compute', 'scp', '--zone', '${_ZONE}', 
+         '--recurse', '--force-key-file-overwrite', 
+         '${_LOCAL_PATH}', '${_INSTANCE_NAME}:${_INSTANCE_PATH}']
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: ['compute', 'ssh', '--zone', '${_ZONE}', '${_INSTANCE_NAME}', 
+         '--command', 'cd ${_INSTANCE_PATH}/.docker && ./init.sh']
+
+substitutions:
+  _ZONE: us-central1-c
+  _LOCAL_PATH: /workspace/.docker
+  _INSTANCE_PATH: /home/chetabahana
+  _INSTANCE_NAME: chetabahana@backend
+  _REPOSITORY: https://github.com/mirumee/saleor.git
+
+timeout: "1800s"
+```
+
+====Setup Aplikasi====
+
+```
+#Environtment
+export APP="gunicorn gevent"
+export PATH=$HOME/.local/bin:$PATH
+export BRANCH=/workspace/.docker/branch
+export DEBIAN_FRONTEND=noninteractive 
+export LC_ALL=C.UTF-8 && export LANG=C.UTF-8
+
+#Get Utilities
+cd /workspace/saleor
+pip3 install --user pipenv > /dev/null && pipenv sync > /dev/null
+pipenv install $APP > /dev/null && cat Pipfile
+
+#Run test
+#pipenv install --dev > /dev/null
+#pipenv run pytest > /dev/null
+#pipenv run tox > /dev/null
+pipenv check
+
+#Lock
+pipenv lock -r -d > requirements_dev.txt && cat requirements_dev.txt
+pipenv lock -r > requirements.txt && cat requirements.txt
+mv -fv Pipfile Pipfile.lock requirements.txt requirements_dev.txt -t $BRANCH
+```
+
+===Eksternal===
+Proses eksternal dapat dirangkum sbb:
+* Step-1: Pantau perubahan di ''[[sumber saleor|https://github.com/mirumee/saleor]]'' sebagai upstream dari [[master|https://github.com/MarketLeader/Tutorial-Buka-Toko]] dan [[cabang|https://github.com/MarketLeader/Tutorial-Buka-Toko/tree/Chetabahana]].
+* Step-2: Perubahan mendasar di upstream terutama ''[[publikasi release terbaru|https://help.github.com/en/articles/watching-and-unwatching-releases-for-a-repository]]'' akan dijadikan triger supaya ''[[Penyetelan-Aplikasi#force-update-master|update master]]'' dan penyesuaian di cabang berdasarkan ''[[id dari commitnya|https://github.com/mirumee/saleor/releases]]''.
+* Step-3: Update dari master disetel sebagai trigger ''[[Apa-itu-Docker#registry|Docker Hub]]'' untuk [[membuat image|https://docs.docker.com/docker-hub/builds/]].
+* Step-4: ''[[Docker Hub|https://docs.docker.com/docker-hub/webhooks/]]'' disetel untuk ''[[kirim trigger|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/dockerhub-triggers/]]'' ke ''[[Codefresh|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/]]'' begitu image berhasil dibuat.
+* Step-5: Trigger ke ''Codefresh'' disetel untuk ''[[ambil (pull image) dari Docker Hub|https://codefresh.io/docs/docs/docker-registries/codefresh-registry/]]'' via ''[[pipeline|https://codefresh.io/docs/docs/codefresh-yaml/steps/]]'' dan ''[[membuat image cabang|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/running-pipelines-locally/]]'' berdasarkan ''[[Setel-Charts|custom design/charts]]'' yang hasilnya ''[[dikirim (push) ke GCR|https://codefresh.io/docs/docs/docker-registries/external-docker-registries/google-container-registry/]]''.
+* Step-6: Proses kirim ke ''[[GCR|https://cloud.google.com/container-registry/]]'' disetel juga untuk update git via ''[[Codefresh API|https://g.codefresh.io/api/]]'' atau ''[[Command Line (Cli)|https://github.com/codefresh-io/cli]]'' ke repository tersendiri yang menampung dan mengetes file hasil compile dari image.
+* Step-7: Update git disetel untuk aktifkan ''[[Google-Cloud-Builders|Cloud Build]]'' ke instance secara ''[[Setel-Otomatisasi-Deploy#Internal|Internal]]''.
+
+Berikutnya kita uraikan step di atas secara detail. 
+
+====Step-1: Crontab====
+* [[Memahami Crontab|https://www.codepolitan.com/memahami-perintah-perintah-crontab-paling-lengkap-59f69445130a0]]
+
+Proses update di atur setiap terjadi perubahan kode di upstream ke master dan cabang sbb:<br><br>
+# Master 
+# Cabang
+# Remote
+# Current
+# Next
+
+Crontab disetel perjam:
+```
+$ crontab -e
+# Edit this file to introduce tasks to be run by cron.
+# 
+# Each task to run has to be defined through a single line
+# indicating with different fields when the task will be run
+# and what command to run for the task
+# 
+# To define the time you can provide concrete values for
+# minute (m), hour (h), day of month (dom), month (mon),
+# and day of week (dow) or use '*' in these fields (for 'any').# 
+# Notice that tasks will be started based on the cron's system
+# daemon's notion of time and timezones.
+# 
+# Output of the crontab jobs (including errors) is sent through
+# email to the user the crontab file belongs to (unless redirected).
+# 
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
+
+0 * * * * sh ~/.docker/cron.sh
+```
+
+====Step-2: Upstream====
+* [[How do I update a GitHub forked repository?|https://stackoverflow.com/questions/7244321/how-do-i-update-a-github-forked-repository/56504442#56504442]]
+* [[How to automatically update your docker containers, if base-images are updated|https://stackoverflow.com/a/56505030/4058484]]
+
+Proses update dari masing² repository diatur via <code>Pipfile.lock</code> sbb:<br><br>
+
+* Update master mengikuti [[perubahan kode di upstream|https://stackoverflow.com/questions/7244321/how-do-i-update-a-github-forked-repository/56504442#56504442]].
+* Update cabang mengikuti [[perubahan image di Docker Hub|https://stackoverflow.com/questions/26423515/how-to-automatically-update-your-docker-containers-if-base-images-are-updated/56505030#56505030]].
+
+```
+#!/bin/sh
+if grep -Fqe "Image is up to date" << EOF
+`docker pull chetabahana/saleor`
+EOF
+then
+    cd ~/.docker/compose && rm -rf Tutorial-Buka-Toko
+    eval `ssh-agent` && expect ~/.ssh/agent && ssh-add -l
+    git clone git@github.com:MarketLeader/Tutorial-Buka-Toko.git
+    cd Tutorial-Buka-Toko && git checkout master
+    git remote add upstream git://github.com/mirumee/saleor.git
+    git fetch --prune upstream > /dev/null
+    if [ `git rev-list HEAD...upstream/master --count` -eq 0 ]
+    then
+        echo "all the same, do nothing"
+    else
+        echo "update exist, do delivery!"
+        git reset --hard upstream/master && git push origin master --force
+    fi
+    cd .. && rm -rf Tutorial-Buka-Toko
+    eval `ssh-agent -k`
+else
+    echo "latest exist, do compose!"
+fi
+```
+
+====Step-3: Docker Hub====
+```
+#Environtment
+CURRENT=gunicorn
+NEXT=taxonomy
+
+echo "\nREMOTE\n"
+git checkout Chetabahana
+git fetch --prune origin && git reset --hard origin/master
+cp -frpvT ~/.docker/branch ~/.docker/backend/Tutorial-Buka-Toko
+cp -frpT ~/.docker/branch ~/.docker/backend/.docker/branch
+git status && git add . && git commit -m "Add support for ${CURRENT}"
+git push origin Chetabahana --force
+cd .. && rm -rf Tutorial-Buka-Toko
+
+echo "\nMASTER\n"
+[ -d saleor ] && rm -rf saleor || echo "cloning.."
+git clone git@github.com:chetabahana/saleor.git saleor && cd saleor
+git remote add upstream git://github.com/MarketLeader/Tutorial-Buka-Toko.git
+git fetch --prune upstream Chetabahana && git reset --hard upstream/Chetabahana
+git push origin master --force
+
+echo "\nCURRENT\n"
+git checkout "${CURRENT}"
+git fetch --prune origin master && git reset --hard origin/master
+git push origin "${CURRENT}" --force
+
+echo "\nNEXT\n"
+git checkout "${NEXT}"
+git fetch --prune origin master && git reset --hard origin/master
+tx pull --all > /dev/null
+git push origin "${NEXT}" --force
+cd .. && rm -rf saleor
+```
+
+====Step-4: CodeFresh====
+
+Pada step ini kita setel Codefresh untuk mulai alur ''[[pipeline|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/]]'' berdasarkan webhook.
+
+[[Webhooks|https://en.wikipedia.org/wiki/Webhook]] adalah permintaan POST yang dikirim ke URL yang Anda tentukan. Anda dapat gunakan webhooks untuk mentrigger tindakan di layanan lain sebagai respons terhadap suatu peristiwa. 
+
+[[GitHub|https://github.com/chetabahana/chetabahana.github.io/wiki/Optimasi-GitHub]] dan [[Docker Hub|https://docs.docker.com/docker-hub/webhooks/]] memberikan fasilitas [[Webhooks|https://cloud.docker.com/repository/docker/chetabahana/saleor/webhooks]] ketika sebuah gambar didorong ke repo, Anda dapat mengirim secara otomatis ke alur kerja Anda pada layanan lain spt Codefresh berdasarkan webhook tersebut. 
+
+Pada projeck ini alur Webhooks dipilih berdasarkan pertimbangan sesuai tabel berikut.
+
+<table>
+  <thead><tr><th>Fitur</th><th>Google</th><th>GitHub</th><th>Docker</th><th>Codefresh</th><th>CircleCI</th><th>Spinnaker</th><th>Jenkins</th></tr></thead>
+  <tbody>  
+    <tr><td>Build Image</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Build API</td><td>Yes</td><td>Yes</td><td>-</td><td>-</td><td>Yes</td><td>-</td><td>-</td></tr>
+    <tr><td>Compose</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Deploy</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>CI/CD</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Logs</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Registry</td><td>Yes</td><td>Yes</td><td>Yes</td><td>-</td><td>Yes</td><td>-</td><td>-</td></tr>
+    <tr><td>Pull External</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Push External</td><td>Yes</td><td>Yes</td><td>-</td><td>-</td><td>-</td><td>Yes</td><td>-</td><td>-</td></tr>
+    <tr><td>Notify</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Trigger</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>Webhooks</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    <tr><td>HELM Chart</td><td>Yes</td><td>-</td><td>-</td><td>-</td><td>Yes</td><td>-</td><td>-</td></tr>
+    <tr><td>Repository</td><td>Yes</td><td>Yes</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+    <tr><td>Biaya</td><td>Yes</td><td>-</td><td>-</td><td>-</td><td>-</td><td>[[$121/bln|https://console.cloud.google.com/marketplace/details/click-to-deploy-images/spinnaker?q=spinnaker]]</td><td>-</td></tr>
+    <tr><td>Free Tier</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td><td>-</td><td>-</td></tr>
+  </tbody>
+</table>
+
+Dengan analisa seperti tabulasi di atas dan juga dengan mempertimbangkan analisa perbandingan seperti di ''[[arikel ini|https://blog.codepipes.com/hosted-ci-comparison/hosted-ci-comparison.html]]'' maka Codefresh bisa dipakai sebagai acuan untuk otomatisasi via webhooks.
+
+====Step-5: Compose====
+Lihat:
+* https://docs.getsaleor.com/en/latest/customization/docker.html
+* https://docs.getsaleor.com/en/latest/customization/tests.html
+* https://docs.getsaleor.com/en/latest/customization/i18n.html							   
+```
+docker-compose config --version
+docker-compose run web python --version
+docker-compose run --rm web python -m pip install -r requirements_dev.txt
+
+docker-compose run --rm web python manage.py migrate
+docker-compose run --rm web python manage.py collectstatic --noinput
+docker-compose run --rm web python manage.py populatedb --createsuperuser
+docker-compose run --rm web python manage.py create_thumbnails
+
+docker-compose run --rm web tx pull --all
+docker-compose run --rm web python manage.py compilemessages
+docker-compose run --rm web python manage.py makemessages -l en --extension=email,html,mjml,py,txt --ignore="templates/templated_email/compiled/*"
+docker-compose run --rm web python manage.py makemessages -l en -d djangojs --ignore="_build/*" --ignore="node_modules/*" --ignore="saleor/static/assets/*"
+
+docker-compose run web py.test
+docker-compose run web tox
+docker-compose up -d
+```
+
+====Step-6: Backend====
+Dengan menyetel variable lingkungan di file ''[[app.yaml|https://cloud.google.com/appengine/docs/standard/python3/config/appref]]'' maka file yang ditampung dapat di ''[[Instalasi-di-GAE#via-build-image|deploy di App Engine]]''. Oleh karena itu repository ini sebaiknya ''[[dibuat private|https://github.blog/2019-01-07-new-year-new-github/]]'' sehingga dapat menyimpan file atau kunci rahasia seperti [[SECRET_KEY|https://docs.djangoproject.com/en/2.1/ref/settings/#s-secret-key]] untuk jalankan ''[[Apa-Itu-Saleor#Django|Django]]'' dalam aplikasi ''Saleor''.
+
+====Step-7: Internal====
+Setelah semua perangkat yang diperlukan tersedia didalam sistem maka CloudBuilder dapat ditrigger untuk melakukan proses update secara internal.
+
+==''Referensi''==
+* https://github.com/MarketLeader/docker
+* https://docs.gitlab.com/ee/workflow/repository_mirroring.html
+* https://stackoverflow.com/a/48030992/4058484
+* https://cloud.google.com/sdk/gcloud/reference/compute/ssh
+* https://cloud.google.com/cloud-build/docs/access-private-github-repos
+* https://cloud.google.com/cloud-build/docs/securing-builds/set-service-account-permissions
+* http://howtoinstallthisapp.blogspot.com/2018/01/django-not-able-to-run-collectstatic-on.html
+* https://github.com/suecharo/SAPPORO#what-does-useful-for-continuous-testing-of-workflows-mean

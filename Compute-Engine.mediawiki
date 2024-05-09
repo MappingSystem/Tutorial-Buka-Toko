@@ -1,0 +1,395 @@
+__TOC__
+==Layanan==
+Google Cloud Platform meluncurkan promo [[Free Tier|https://cloud.google.com/free/docs/gcp-free-tier]] untuk menarik banyak pelanggan mencoba layanan cloud secara cuma-cuma. Program ini memiliki dua bagian:
+
+* [[Uji coba gratis 12 bulan|https://cloud.google.com/free/docs/gcp-free-tier#free-trial]] dengan kredit $ 300 untuk digunakan dengan layanan GCP apa pun.
+* [[Always Free|https://cloud.google.com/free/#always-free]], yang menyediakan akses terbatas ke banyak sumber daya GCP umum, gratis.
+
+‘Always Free’ tersedia tanpa ada trial dengan waktu yang terbatas. Pelanggan dapat [[mengakses layanan cloud|https://cloud.google.com/free/#always-free]] dari Google secara cuma-cuma tanpa batas waktu, tetapi Google membatasinya pada sumber dayanya
+
+===Free===
+‘Always Free’ untuk [[Compute Engine|https://cloud.google.com/compute/docs]] tersedia sebagai berikut:
+* 1 instance VM ''[[f1-mikro|https://cloud.google.com/compute/pricing#sharedcore]]'' '''non-[[preemptible|https://translate.google.com/translate?sl=en&tl=id&u=https%3A%2F%2Fcloud.google.com%2Fcompute%2Fdocs%2Finstances%2Fpreemptible]]''' per bulan di salah satu wilayah AS berikut:
+** Oregon: us-west1
+** Iowa: us-central1
+** Carolina Selatan: us-east1
+* 30 GB penyimpanan ''[[disk persisten standar|https://cloud.google.com/compute/docs/disks/?hl=in#performance]]'' per bulan.
+* 5 GB penyimpanan ''[[snapshot|https://codelabs.developers.google.com/codelabs/cpo200-snapshots/#0]]'' per bulan.
+* Batas Lalu Lintas Jaringan:
+** Anda harus menggunakan ''[[Tingkat Premium|https://cloud.google.com/network-tiers/pricing?hl=in]]''. Anda tidak dapat menggunakan Tier Standar.
+** Lalu lintas harus dikirim dari wilayah GCP di Amerika Utara.
+** Anda dapat mengirim hingga 1GB lalu lintas keluar, secara agregat, ke wilayah kecuali untuk yang di Oceania dan Cina
+===Billing===
+Anda dapat menemukan informasi harga dengan opsi berikut:
+
+* Lihat perkiraan biaya mesin virtual Anda  di ''[[Google Cloud Platform Console|https://console.cloud.google.com/?hl=in]]'' dan Perkirakan total biaya proyek Anda dengan ''[[Google Cloud Pricing Calculator|https://cloud.google.com/products/calculator/?hl=in]]''.
+* Contoh kalkulasi 1 (satu) Instance ''[[f1-micro + 30GB Disk Standar|https://cloud.google.com/products/calculator/#id=dde5844f-f3c1-4d31-99d0-32f0fcb42f4a]]'' tagihannya [[USD 3.88/bulan|https://cloud.google.com/products/calculator/#id=2284d7a5-f52c-4f1f-a4ef-779326a6dfaf]]. Edit dan centang kotak ''Always Free'' akan menjadi [[US$ 0.00/bulan|https://cloud.google.com/products/calculator/#id=c4588e8b-05b8-4918-abc4-af141217aa2f]].
+* Optimasi tentang billing GCE bersama komponen² lainnya akan kita ulas secara detil pada ''[[sesi akhir|https://github.com/MarketLeader/Toko-Chetabahana/wiki/Optimasi-Biaya]]'' dari dokumentasi ini.
+
+===Ketentuan===
+Batas instance f1-mikro Selalu Gratis Anda adalah berdasarkan waktu, bukan oleh instance. 
+
+Penggunaan yang layak dari semua instans f1-mikro Anda setiap bulan adalah gratis hingga Anda telah menggunakan '''[[jumlah jam yang sama dengan total jam pada bulan ini|https://cloud.google.com/free/docs/gcp-free-tier]]'''. Perhitungan penggunaan '''digabungkan''' di seluruh wilayah yang didukung.
+
+Compute Engine menawarkan diskon untuk penggunaan mesin virtual yang berkelanjutan. Penggunaan [[Always Free|https://cloud.google.com/free/#always-free]] tidak menjadi faktor dalam penggunaan berkelanjutan.
+
+GPU (''[[Graphics Processing Unit|https://en.wikipedia.org/wiki/Graphics_processing_unit]]'') dan TPU ''[[(Tensor Processing Unit|https://en.wikipedia.org/wiki/Tensor_processing_unit]]'') tidak termasuk dalam penawaran Selalu Gratis. Anda akan dikenai biaya untuk GPU dan TPU yang Anda tambahkan ke instance.
+
+==Instance==
+[[<img src=https://cloud.google.com/vpc/images/private-services-access-sql.svg?hl=in>|https://cloud.google.com/vpc/docs/private-access-options]]
+
+===Pilihan===
+Ada banyak macam server di GCE, kita akan pilih seperti ini
+* Buka situs https://stackoverflow.com/tags
+* Masukkan semua brand server yang ditawarkan
+
+Saat dokumentasi ini dibuat, hasilnya adalah sbb:
+
+```txt
+ubuntu ×44156
+centos ×10208
+debian ×7686
+redhat ×2821
+fedora ×2139
+windows-server ×739
+coreos ×574
+suse ×430
+mint ×426
+```
+
+Rating paling tinggi adalah brand <code>Ubuntu</code>. 
+* Jenis Ubuntu yang ditawarkan juga ada beberapa macam. 
+* Kita masukkan lagi ke kotak <code>search tag</code> nya,
+Saat dokumentasi ini dibuat, hasilnya adalah sbb:
+
+```txt
+ubuntu-14.04 ×4826
+ubuntu-16.04 ×4453
+ubuntu-18.04 ×1002
+```
+
+Rating tertinggi adalah ''[[Ubuntu 14.04|http://releases.ubuntu.com/14.04/]]''. Namun menurut [[dokumentasi saleor linux|https://docs.getsaleor.com/en/latest/gettingstarted/installation-linux.html#debian-ubuntu]] minimal Ubuntu 16.04. Jadi jenis terbaru yang akan kita pilih.
+
+===Console===
+* Reserving a ''[[Static External IP Address|https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address]]''
+* ''[[Creating and Configuring|https://cloud.google.com/container-optimized-os/docs/how-to/create-configure-instance#using_cloud-init]]'', cara ''[[Access|https://cloud.google.com/compute/docs/instances/managing-instance-access]]'' dan ''[[General Tips|https://cloud.google.com/compute/docs/troubleshooting/general-tips#ssherrors]]''
+
+# Jika belum pesan buat terlebih dahulu [[Alamat IP Eksternal|https://console.cloud.google.com/networking/addresses/list]].
+# Di Cloud Platform Console, buka halaman VM Instances.
+# Klik tombol Buat instance.
+# Beri Nama untuk instance yang sedang dibuat.
+# Di bagian Boot disk, klik Ubah untuk mulai mengonfigurasi disk boot Anda.
+# Di tab gambar prakonfigurasi, pilih Ubuntu 14.04 LTS.
+# Di bagian Tipe disk boot, pilih Disk persisten standar.
+# Isi MetaData <code>enable-oslogin</code> nilai <code>TRUE</code>
+# Di bagian Firewall, pilih Izinkan lalu lintas HTTP dan Izinkan lalu lintas HTTPS.
+# Klik tombol Buat untuk membuat instance.
+
+=== Via Gcloud===
+* Buat ''[[Akun Layanan|https://cloud.google.com/compute/docs/access/service-accounts]]'' untuk ''[[Akses GCE|https://cloud.google.com/compute/docs/access/granting-access-to-resources]]''. Roles: [[project-owner|https://console.cloud.google.com/iam-admin/iam]]
+* Setel ''[[Cakupan|https://cloud.google.com/compute/docs/access/create-enable-service-accounts-for-instances#changeserviceaccountandscopes]]'' Akun Layanan ke Izinkan akses penuh ke semua API Cloud
+
+```txt
+
+$ gcloud init
+$ gcloud iam service-accounts create <nama akun layanan> --display-name "<judul akun>"
+$ gcloud projects add-iam-policy-binding <project-id> --role roles/project.owner \
+--member serviceAccount:<email akun layanan>
+$ gcloud iam service-accounts keys create key.json \
+--iam-account <email akun layanan>
+
+$ INSTANCE=<pilih nama>
+$ gcloud compute disks list
+$ gcloud compute disks delete $INSTANCE
+$ gcloud compute instances delete compute $INSTANCE
+$ cloud compute addresses create ip4-$INSTANCE --ip-version=IPV4
+$ gcloud compute --project=<project-id> instances create $INSTANCE \
+--subnet=default --network-tier=PREMIUM --machine-type=f1-micro \
+--maintenance-policy=TERMINATE --metadata enable-oslogin=false \
+--scopes=https://www.googleapis.com/auth/cloud-platform \
+--image=ubuntu-1804-bionic-v20190307 --image-project=ubuntu-os-cloud \
+--tags=http-server,https-server,postgres-server,mysql-server,redis-server \
+--boot-disk-device-name=$INSTANCE --no-boot-disk-auto-delete \
+--boot-disk-type=pd-standard --boot-disk-size=30GB \
+--address=<abaikan bila belum pesan IP Address> \
+--service-account=<email akun layanan>
+
+WARNING: You have selected a disk size of under [200GB]. This may result in poor I/O 
+For more information, see: https://developers.google.com/compute/docs/disks#performance.
+WARNING: Some generated warnings: Disk size: '30 GB' is larger than image size: '10 GB'. 
+Resize root repartition manually if the operating system not support automatic resizing.
+See https://cloud.google.com/compute/docs/disks/persistent-disks#repartitionrootpd
+
+NAME     ZONE        MACHINE_TYPE  PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP   STATUS
+[nama]   us-east1-b  f1-micro                   [IP ADDRESS] [IP ADDRESS]  RUNNING
+```
+
+Bisa [[lepas dan pasang disk|https://cloud.google.com/compute/docs/disks/detach-reattach-boot-disk]] sbb:
+```
+$ gcloud compute instances stop $INSTANCE
+$ gcloud compute instances detach-disk $INSTANCE --disk=$INSTANCE
+$ gcloud compute instances attach-disk $INSTANCE --disk=$INSTANCE --boot
+```
+
+==Koneksi==
+* [[Connecting to instances|https://cloud.google.com/compute/docs/instances/connecting-to-instance]]
+* Initial [[Server Setup|https://www.digitalocean.com/community/tutorials/initial-server-setup-with-ubuntu-18-04]] with Ubuntu 18.04
+
+===Timeout 255===
+```bash
+ssh: connect to host 35.222.19.23 port 22: Connection timed out
+ERROR: (gcloud.compute.ssh) [/usr/bin/ssh] exited with return code [255].
+```
+
+Lihat cara ''[[cek Instant|https://stackoverflow.com/a/49012827/4058484]]''
+```bash
+$ gcloud compute instances describe backend --zone us-east1-c --project chetabahana
+$ gcloud compute instances get-serial-port-output backend --zone us-east1-c --project chetabahana
+$ gcloud compute firewall-rules list --project chetabahana
+$ gcloud compute firewall-rules list --project chetabahana \
+NAME NETWORK DIRECTION PRIORITY ALLOW default-allow-ssh default INGRESS 65534 tcp:22
+$ gcloud compute firewall-rules update --priority 1000 default-allow-ssh
+ERROR: (gcloud.compute.firewall-rules.update) Could not fetch resource:
+ - The resource 'projects/chetabahana/global/firewalls/default-allow-ssh' was not found
+```
+
+===Setel Firewall===
+Lihat ''[[Using Firewall Rules|https://cloud.google.com/vpc/docs/using-firewalls]]'' dan ''[[troubleshooting-ssh|https://cloud.google.com/compute/docs/troubleshooting/troubleshooting-ssh]]''
+```bash
+~$ gcloud compute firewall-rules create default-allow-ssh --allow tcp:22
+Creating firewall...⠧Created [https://www.googleapis.com/compute/v1/projects/chetabahana/global/firewalls/default-allow-ssh].
+Creating firewall...done.
+NAME               NETWORK  DIRECTION  PRIORITY  ALLOW   DENY  DISABLED
+default-allow-ssh  default  INGRESS    1000      tcp:22        False
+
+# gcloud compute instances add-tags [INSTANCE-NAME] --zone [ZONE] --tags [TAGS]
+$ gcloud compute instances add-tags backend --tags postgres-server
+
+
+```
+
+===Firewall List===
+```bash
+$ gcloud compute firewall-rules list
+NAME                    NETWORK  DIRECTION  PRIORITY  ALLOW                         DENY  DISABLED
+default-allow-http      default  INGRESS    1000      tcp:80                              False
+default-allow-https     default  INGRESS    1000      tcp:443                             False
+default-allow-icmp      default  INGRESS    65534     icmp                                False
+default-allow-internal  default  INGRESS    65534     tcp:0-65535,udp:0-65535,icmp        False
+default-allow-rdp       default  INGRESS    65534     tcp:3389                            False
+default-allow-ssh       default  INGRESS    1000      tcp:22                              False
+mysql-remote-access     default  INGRESS    1000      tcp:3306                            False
+postgres-remote-access  default  INGRESS    1000      tcp:5432                            False
+redis-ingress           default  INGRESS    1000      tcp:6379                            False
+
+~$ gcloud compute firewall-rules describe default-allow-https --format="value(targetTags)"
+https-server
+```
+
+===Scan Ports===
+Lihat ''[[Scan Tutorial|https://nmap.org/book/port-scanning-tutorial.html]]'' dan ''[[How to open PORT: 443|https://www.digitalocean.com/community/questions/how-to-open-port-443]]''
+
+
+```
+~$ sudo apt install nmap
+~$ nmap scanme.nmap.org
+Starting Nmap 7.60 ( https://nmap.org ) at 2019-03-08 07:23 UTC
+Nmap scan report for scanme.nmap.org (45.33.32.156)
+Host is up (0.042s latency).
+Not shown: 995 closed ports
+PORT      STATE    SERVICE
+22/tcp    open     ssh
+25/tcp    filtered smtp
+80/tcp    open     http
+9929/tcp  open     nping-echo
+31337/tcp open     Elite
+
+Nmap done: 1 IP address (1 host up) scanned in 1.91 seconds
+PORT     STATE  SERVICE
+22/tcp   open   ssh
+443/tcp  closed https
+
+```
+
+===Login Ssh===
+Jika sudah bisa login via ssh, akan tertulis Welcome seperti berikut ini:
+```bash
+Connected, host fingerprint: ssh-rsa 0 XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX
+Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 4.15.0-1028-gcp x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+  System information as of Wed Mar 20 01:22:51 UTC 2019
+
+  System load:  0.0               Processes:           90
+  Usage of /:   5.1% of 28.90GB   Users logged in:     0
+  Memory usage: 39%               IP address for ens4: 10.142.0.10
+  Swap usage:   0%
+
+ * Ubuntu's Kubernetes 1.14 distributions can bypass Docker and use containerd
+   directly, see https://bit.ly/ubuntu-containerd or try it now with
+
+     snap install microk8s --channel=1.14/beta --classic
+
+  Get cloud support with Ubuntu Advantage Cloud Guest:
+    http://www.ubuntu.com/business/services/cloud
+
+ * Canonical Livepatch is available for installation.
+   - Reduce system reboots and improve kernel security. Activate at:
+     https://ubuntu.com/livepatch
+
+22 packages can be updated.
+3 updates are security updates.
+
+
+Last login: Tue Mar 19 22:31:20 2019 from 35.186.150.205
+chetabahana@backend:~$ id
+uid=1001(chetabahana) gid=1002(chetabahana) groups=1002(chetabahana),4(adm),
+20(dialout),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),
+108(lxd),114(netdev),1000(ubuntu),1001(google-sudoers)
+```
+Dengan koneksi ssh seperti ini maka Anda dapat lakukan banyak hal antara lain:
+
+* instalasi, update, atau ubah setelan component
+* ubah atau tambah ukuran booting dan external ''[[Google-Compute-Engine#Disk|disk]]''
+
+===OS Login===
+Lihat ''[[Enable OS Login|https://cloud.google.com/compute/docs/instances/managing-instance-access#enable_oslogin]]''
+```bash
+$ gcloud compute instances add-metadata backend --metadata enable-oslogin=TRUE
+Updated [https://www.googleapis.com/compute/v1/projects/chetabahana/zones/us-east1-b/instances/backend].
+$ gcloud compute --project "chetabahana" ssh --zone "us-central1-c" "instance-sql"
+WARNING: Using OS Login user [chetabahana_gmail_com] instead of default user [chetabahana]
+groups: cannot find name for group ID 1107890316
+chetabahana_gmail_com@backend:~$ sudo cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+...
+...
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/
+```
+
+Lihat Tanpa OS Login - [[Set Up SSH Keys|https://www.digitalocean.com/community/tutorials/how-to-set-up-ssh-keys-on-ubuntu-1804]]
+```
+$ gcloud compute instances add-metadata backend --metadata enable-oslogin=FALSE
+Updated [https://www.googleapis.com/compute/v1/projects/chetabahana/zones/us-east1-b/instances/backend].
+$ ssh-keygen
+Enter file in which to save the key (/home/chetabahana/.ssh/id_rsa):
+/home/chetabahana/.ssh/id_rsa already exists.
+Overwrite (y/n)? y
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/chetabahana/.ssh/id_rsa.
+Your public key has been saved in /home/chetabahana/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+The key's randomart image is:
++---[RSA 2048]----+
+|  .B@+. .E.      |
+...
+...
+|      oB*.oo.    |
++----[SHA256]-----+
+$ gcloud compute --project "chetabahana" ssh --zone "us-east1-b" "backend"
+Updating project ssh metadata...⠹Updated [https://www.googleapis.com/compute/v1/projects/chetabahana].
+Updating project ssh metadata...done.
+Waiting for SSH key to propagate.
+Enter passphrase for key '/home/chetabahana/.ssh/google_compute_engine':
+Welcome to Ubuntu 18.04.2 LTS (GNU/Linux 4.15.0-1028-gcp x86_64)
+chetabahana@backend:~$ sudo cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+...
+...
+ubuntu:x:1000:1000:Ubuntu:/home/ubuntu:/bin/bash
+chetabahana:x:1001:1002::/home/chetabahana:/bin/bash
+```
+Cek di 
+
+
+===Home===
+Lihat cara ''[[ganti nama user|https://cloud.google.com/compute/docs/ssh-in-browser#changing_the_default_username]]''
+```bash
+~$ sudo cp -r /home/user_gmail_com/. /home/user
+~$ sudo chown -R user:user /home/user
+```
+==Setelan==
+Jika Anda pakai jenis f1-micro dengan US region maka Anda bisa manfaatkan fasilitas [[Google-Compute-Engine#Free|Free Tier]] yaitu 30GB Persistent Disk dan 5GB Snapshot.
+
+===Snapshot===
+Lihat [[Creating persistent disk snapshots|https://cloud.google.com/compute/docs/disks/create-snapshots?hl=in]]
+```
+$ gcloud compute snapshots list
+$ gcloud beta compute disks snapshot backend --project=chetabahana \
+--snapshot-names=snapshot --zone=us-east1-b --storage-location=us
+
+$ gcloud beta compute resource-policies list
+$ gcloud beta compute resource-policies create-snapshot-schedule snapshot-schedule \
+--project=chetabahana --region=us-east1 --max-retention-days=7 \
+--on-source-disk-delete=apply-retention-policy \
+--daily-schedule --start-time=00:00 \
+--guest-flush
+
+$ gcloud beta compute disks add-resource-policies backend \
+    --resource-policies snapshot-schedule \
+    --zone us-east1-b
+
+```
+[[<img src=https://cloud.google.com/compute/images/creating-snapshot.png>|https://cloud.google.com/compute/docs/disks/create-snapshots?hl=in]]
+===Cek Disk===
+Pastikan Anda sudah bisa ''[[Google-Compute-Engine#Login_Ssh|koneksi ssh]]'' ke instance jika Anda ingin merubah ''[[disk|https://console.cloud.google.com/compute/disks]]'' Anda. 
+Lihat partisi sbb:
+
+```
+$ df -h
+Filesystem      Size  Used Avail Use% Mounted on
+udev            277M  4.0K  277M   1% /dev
+tmpfs            59M  256K   59M   1% /run
+/dev/sda1        30G  1.3G   27G   5% /
+none            4.0K     0  4.0K   0% /sys/fs/cgroup
+none            5.0M     0  5.0M   0% /run/lock
+none            295M     0  295M   0% /run/shm
+none            100M     0  100M   0% /run/user
+
+$ sudo lsblk
+NAME   MAJ:MIN RM SIZE RO TYPE MOUNTPOINT
+sda      8:0    0  30G  0 disk 
+└─sda1   8:1    0  30G  0 part /
+```
+
+===Resizing===
+Beberapa sistem akan otomatis resizing saat booting. 
+
+JIka belum pernah booting lakukan langkah berikut
+* Tambahkan [[Google-Compute-Engine#Snapshot|Snapshot (Cuplikan)]] sebelum restart
+*  Restart Server
+```
+$ gcloud compute disks snapshot compute
+$ gcloud compute instances stop compute
+$ gcloud compute instances start compute
+```
+Cek welcome
+```
+System load: 0.24              Memory usage: 9%   Processes:       61
+Usage of /:  4.1% of 29.50GB   Swap usage:   0%   Users logged in: 0
+```
+
+===Opsi Lain===
+Selain ''[[tambah atau resize lokal HDD|https://cloud.google.com/compute/docs/disks/add-persistent-disk]]''.ada [[beberapa opsi|https://cloud.google.com/compute/docs/disks/]] yang bisa dilakukan sbb:
+
+* Lokal SSD
+* Zonal HDD atau SSD
+* Regional HDD atau SSD
+* Koneksi dengan [[Cloud Storage|https://cloud.google.com/compute/docs/disks/gcs-buckets]]
+
+Catatan untuk Koneksi dengan Cloud Storage (GCR):
+<br><br>
+
+* Google Cloud Storage adalah opsi penyimpanan yang fleksibel. Bucket dapat diskalakan dan digunakan sebagai penyimpanan objek secara umum termasuk dengan [[App-Engine|Google App Engine]].
+
+* Jika ingin agar bucket yang dipasang berperilaku mirip dengan disk yang persisten, Anda dapat menggunakan ''[[FUSE|https://cloud.google.com/storage/docs/gcs-fuse]]''. Tersedia gratis, tetapi penyimpanan, I/O, dll mengikuti [[App-Engine#Penyimpanan|Harga Storage]].
+
+* Selain komunikasi antara layanan di cloud, kita juga bisa gunakan buket untuk pasang ''[[Kontainer Openshif|https://docs.openshift.com/container-platform/3.11/install_config/configuring_gce.html#configuring-gce-storage_configuring-for-GCE]]'' dari ''[[Ansible|https://www.ansible.com/]]'' yang juga tersedia secara ''[[open source|https://github.com/ansible/ansible]]''.
+
+==''Referensi''==
+* [[GCP: assign/remove ephemeral IP to an existing instance|https://stackoverflow.com/a/47537412/4058484]]

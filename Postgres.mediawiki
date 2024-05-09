@@ -1,0 +1,213 @@
+__TOC__
+==Expose==
+* [[Postgres - Docker Official Images|https://hub.docker.com/_/postgres/]]
+===Services===
+* [[Checking running services|https://unix.stackexchange.com/questions/82378/what-is-the-recommended-way-of-checking-running-services]]
+```
+$ ls -1 /etc/rc$(runlevel| cut -d" " -f2).d/S* | \
+awk -F'[0-9][0-9]' '{print "Startup :-> " $2}'
+Startup :-> acpid
+Startup :-> apport
+Startup :-> atd
+Startup :-> cgroupfs-mount
+Startup :-> chrony
+Startup :-> console-setup.sh
+Startup :-> cron
+Startup :-> dbus
+Startup :-> docker
+Startup :-> grub-common
+Startup :-> lvm2-lvmetad
+Startup :-> lvm2-lvmpolld
+Startup :-> lxcfs
+Startup :-> lxd
+Startup :-> mdadm
+Startup :-> open-vm-tools
+Startup :-> plymouth
+Startup :-> rsync
+Startup :-> rsyslog
+Startup :-> ssh
+Startup :-> sshguard
+Startup :-> unattended-upgrades
+Startup :-> uuidd
+```
+
+
+===Container===
+* [[Launch phppgadmin Container|http://tleyden.github.io/blog/2017/06/14/running-postgresql-in-docker/]]
+
+```
+$ docker run -e POSTGRES_USER=saleor -e POSTGRES_PASSWORD=saleor -p 5432:5432 postgres
+The files belonging to this database system will be owned by user "postgres".
+This user must also own the server process.
+
+The database cluster will be initialized with locale "en_US.utf8".
+The default database encoding has accordingly been set to "UTF8".
+The default text search configuration will be set to "english".
+
+Data page checksums are disabled.
+
+fixing permissions on existing directory /var/lib/postgresql/data ... ok
+creating subdirectories ... ok
+selecting default max_connections ... 100
+selecting default shared_buffers ... 128MB
+selecting dynamic shared memory implementation ... posix
+creating configuration files ... ok
+running bootstrap script ... ok
+performing post-bootstrap initialization ... ok
+syncing data to disk ... ok
+
+WARNING: enabling "trust" authentication for local connections
+You can change this by editing pg_hba.conf or using the option -A, or
+--auth-local and --auth-host, the next time you run initdb.
+
+Success. You can now start the database server using:
+
+    pg_ctl -D /var/lib/postgresql/data -l logfile start
+
+waiting for server to start....2019-04-17 17:00:31.218 UTC [40] 
+LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2019-04-17 17:00:31.352 UTC [41] LOG:  database was shut down at 2019-04-17 17:00:29 UTC
+2019-04-17 17:00:31.382 UTC [40] LOG:  database is ready to accept connections
+ done
+server started
+CREATE DATABASE
+
+
+/usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
+
+2019-04-17 17:00:33.697 UTC [40] LOG:  received fast shutdown request
+           waiting for server to shut down....2019-04-17 17:00:33.700 UTC [40] 
+           LOG:  aborting any active transactions
+2019-04-17 17:00:33.706 UTC [40] LOG:  background worker "logical replication launcher" 
+           (PID 47) exited with exit code 1
+2019-04-17 17:00:33.707 UTC [42] LOG:  shutting down
+2019-04-17 17:00:33.729 UTC [40] LOG:  database system is shut down
+ done
+server stopped
+
+PostgreSQL init process complete; ready for start up.
+
+2019-04-17 17:00:33.845 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2019-04-17 17:00:33.845 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2019-04-17 17:00:33.858 UTC [1] LOG:  listening on "/var/run/postgresql/.s.PGSQL.5432"
+2019-04-17 17:00:33.878 UTC [58] LOG:  database was shut down at 2019-04-17 17:00:33 UTC
+2019-04-17 17:00:33.885 UTC [1] LOG:  database system is ready to accept connections
+2019-04-17 17:00:34.772 UTC [65] FATAL:  password authentication failed for 
+        user "postgres"
+2019-04-17 17:00:34.772 UTC [65] DETAIL:  Role "postgres" does not exist.
+        Connection matched pg_hba.conf line 95: "host all all all md5"
+2019-04-17 17:00:35.436 UTC [66] FATAL:  password authentication failed for 
+        user "postgres"
+2019-04-17 17:00:35.436 UTC [66] DETAIL:  Role "postgres" does not exist.
+        Connection matched pg_hba.conf line 95: "host all all all md5"
+2019-04-17 17:00:37.036 UTC [67] FATAL:  password authentication failed for 
+        user "postgres"
+2019-04-17 17:00:37.036 UTC [67] DETAIL:  Role "postgres" does not exist.
+        Connection matched pg_hba.conf line 95: "host all all all md5"
+...
+...
+```
+==Scanning==
+* [[Static IP Addresses and App Engine apps|https://cloud.google.com/appengine/kb/#static-ip]]
+[[<img src=https://cloud.google.com/images/products/virtual-network/global.svg>|https://cloud.google.com/vpc/]]
+
+
+===TCP Traffic===
+* [[Monitor TCP Traffic on specific port|https://superuser.com/questions/604998/monitor-tcp-traffic-on-specific-port]]
+
+```
+$ sudo tcpdump port 5432 and '(tcp-syn|tcp-ack)!=0'
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on ens4, link-type EN10MB (Ethernet), capture size 262144 bytes
+
+16:19:26.472838 IP 50-224-110-50-static.hfc.comcastbusiness.net.39903 > 
+backend.us-central1-c.c.chetabahana.internal.postgresql: 
+Flags [S], seq 1779566115, win 29200, 
+options [mss 1380,sackOK,TS val 451453976 ecr 0,nop,wscale 7], length 0
+
+16:19:26.473135 IP backend.us-central1-c.c.chetabahana.internal.postgresql > 
+50-224-110-50-static.hfc.comcastbusiness.net.39903: 
+Flags [S.], seq 4028889669, ack 1779566116, win 28960, 
+options [mss 1460,sackOK,TS val 2412144 ecr 451453976,
+nop,wscale 7], length 0
+
+16:19:26.525816 IP 50-224-110-50-static.hfc.comcastbusiness.net.39903 > 
+backend.us-central1-c.c.chetabahana.internal.postgresql: 
+Flags [.], ack 1, win 229, options [nop,nop,TS val 451453989 ecr 2412144], length 0
+...
+...
+
+```
+===Firewall Rules===
+* [[Cloud compute firewall-rules|https://cloud.google.com/sdk/gcloud/reference/compute/firewall-rules/]]
+* [[Implementing iptables in linux|https://wiki.debian.org/iptables]]
+
+```
+SYNOPSIS
+gcloud compute firewall-rules create NAME (--action=ACTION     |
+ --allow=PROTOCOL[:PORT[-PORT]],[…]) [--description=DESCRIPTION] 
+[--destination-ranges=CIDR_RANGE,[CIDR_RANGE,…]] [--direction=DIRECTION] 
+[--disabled] [--enable-logging] [--network=NETWORK; default="default"] 
+[--priority=PRIORITY] [--rules=PROTOCOL[:PORT[-PORT]],[…]] 
+[--source-ranges=CIDR_RANGE,[CIDR_RANGE,…]] [--source-service-accounts=EMAIL,[EMAIL,…]] 
+[--source-tags=TAG,[TAG,…]] [--target-service-accounts=EMAIL,[EMAIL,…]] 
+[--target-tags=TAG,[TAG,…]] [GCLOUD_WIDE_FLAG …]
+
+$ gcloud compute firewall-rules create default-allow-sql --priority=1000 \
+--action=ALLOW --direction=INGRESS --allow tcp:3306,5432,6379 \
+--target-service-accounts=EMAIL --source-service-accounts=EMAIL
+
+$ gcloud compute firewall-rules list
+NAME                    NETWORK  DIRECTION  PRIORITY  ALLOW                         
+default-allow-http      default  INGRESS    1000      tcp:80,tcp:8000,tcp:8080      
+default-allow-https     default  INGRESS    1000      tcp:443                       
+default-allow-icmp      default  INGRESS    65534     icmp                          
+default-allow-internal  default  INGRESS    65534     tcp:0-65535,udp:0-65535,icmp  
+default-allow-rdp       default  INGRESS    65534     tcp:3389                      
+default-allow-sql       default  INGRESS    1000      tcp:3306,tcp:5432,tcp:6379    
+default-allow-ssh       default  INGRESS    1000      tcp:22
+
+$ docker run -e POSTGRES_USER=saleor -e POSTGRES_PASSWORD=saleor -p 5432:5432 postgres
+...
+...
+PostgreSQL init process complete; ready for start up.
+
+2019-04-17 19:05:06.041 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2019-04-17 19:05:06.042 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2019-04-17 19:05:06.071 UTC [1] LOG:  listening on "/var/run/postgresql/.s.PGSQL.5432"
+2019-04-17 19:05:06.122 UTC [58] LOG:  database was shut down at 2019-04-17 19:05:05 UTC
+2019-04-17 19:05:06.136 UTC [1] LOG:  database system is ready to accept connections
+
+```
+
+===Cloud Identity===
+* [[Cloud Identity-Aware Proxy (Cloud IAP)|https://cloud.google.com/iap/]]
+* Enabling Cloud IAP for [[GAE|https://cloud.google.com/iap/docs/app-engine-quickstart]], [[GCE|https://cloud.google.com/iap/docs/enabling-compute-howto]] and [[GKE|https://cloud.google.com/iap/docs/enabling-kubernetes-howto]]
+
+[[<img src=https://cloud.google.com/images/products/iap/cloud-iap.png>|https://cloud.google.com/iap/docs/enabling-compute-howto]]
+
+Dalam kasus yang kita bahas maka dapat dilakukan [[prosedur untuk GCE|https://cloud.google.com/iap/docs/enabling-compute-howto]] berikut ini:
+# Lakukan [[persetujuan layar OAuth|https://console.cloud.google.com/apis/credentials/consent]] jika Anda belum mengonfigurasi proyek Anda.
+# Buka [[Console Cloud IAP|https://console.cloud.google.com/security/iap]] buat [[ID Auth|https://console.cloud.google.com/iam-admin/iam]], dan [[akses domain|https://cloud.google.com/iap/docs/enabling-compute-howto#oauth-credentials]].
+# Aktifkan Cloud IAP 
+```
+$ gcloud auth login
+$ gcloud config set project project_id
+$ gcloud compute backend-services update backend_service_name --global \
+  --iap=enabled,oauth2-client-id=client_id,oauth2-client-secret=client_secret
+```
+===Security Scanner===
+* [[Using Cloud Security Scanner|https://cloud.google.com/security-scanner/docs/scanning]]
+* [[Special Configurations for VM Instances|https://cloud.google.com/vpc/docs/special-configurations]]
+
+[[Cloud Security Scanner|https://cloud.google.com/security-scanner/]] adalah pemindai keamanan web GAE, GCE, dan GKE yang dapat secara otomatis memindai dan mendeteksi empat kerentanan umum, yaitu cross-site-scripting (XSS), injeksi Flash, konten campuran (HTTP dalam HTTPS), dan pustaka yang usang / tidak aman. 
+<br><br>
+Ini memungkinkan identifikasi awal dan memberikan tingkat positif palsu yang sangat rendah. Anda dapat dengan mudah mengatur, menjalankan, menjadwalkan, dan mengelola pemindaian keamanan dan gratis untuk pengguna Google Cloud Platform.
+<br><br>
+# Lalu lintas dan siklus komputasi akan diperhitungkan dalam penagihan dan kuota standar.
+# Anda dapat menggunakan Cloud Security Scanner hanya untuk memindai GCP.
+# Masih akan dirilis: suport untuk [[Postgres#Cloud_Identity|Cloud Identity-Aware Proxy]].
+# Masih akan dirilis: Client Library.
+
+==''Referensi''==
+* [[FATAL: password authentication failed for user “postgres”|https://stackoverflow.com/questions/21137726/fatal-password-authentication-failed-for-user-postgres/55735152?noredirect=1#comment98381221_55735152]]

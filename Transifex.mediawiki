@@ -1,0 +1,1 @@
+https://docs.transifex.com/client/client-configuration#-transifexrc

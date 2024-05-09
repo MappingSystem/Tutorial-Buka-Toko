@@ -1,0 +1,61 @@
+__TOC__
+==Penskalaan==
+===Basic===
+Layanan dengan penskalaan basic menggunakan instance dinamis. Setiap instance dibuat ketika aplikasi menerima permintaan. Mesin virtual akan ditolak ketika aplikasi menjadi diam. Penskalaan basic ideal untuk pekerjaan yang berselang atau didorong oleh aktivitas pengguna.
+
+===Manual===
+Sebuah layanan dengan penskalaan manual menggunakan instance resident yang terus menerus menjalankan jumlah instance yang ditentukan terlepas dari level beban. Ini memungkinkan tugas-tugas seperti inisialisasi kompleks dan aplikasi yang bergantung pada status memori seiring waktu.
+
+===Otomatis===
+Layanan penskalaan otomatis menggunakan instance dinamis yang dibuat berdasarkan tingkat permintaan, latensi respons, dan metrik aplikasi lainnya. Namun, jika Anda menentukan jumlah instance idle minimum, jumlah instance tertentu dijalankan sebagai instance resident sementara instances tambahan apa pun adalah dinamis.
+[[<img src=https://i.imgur.com/BuJIZka.png?1>|https://cloud.google.com/appengine/docs/standard/python/how-instances-are-managed]]
+
+
+==Penyelelan==
+* [[Settings in the app.yaml - Python3|https://cloud.google.com/appengine/docs/standard/python3/config/appref]]
+
+===Memory===
+[[<img src=https://user-images.githubusercontent.com/36441664/65078966-63a5af00-d9c8-11e9-831d-746ad6d85253.png>|https://cloud.google.com/appengine/docs/standard/]]
+
+===Instance===
+* [[App Engine instance not starting with basic scaling|https://stackoverflow.com/questions/38005333/app-engine-instance-not-starting-with-basic-scaling-but-works-with-auto-scaling]]
+
+[[<img src=https://user-images.githubusercontent.com/36441664/65078210-c9913700-d9c6-11e9-9041-e6ef9e355484.png>|https://user-images.githubusercontent.com/36441664/65078210-c9913700-d9c6-11e9-9041-e6ef9e355484.png]]
+
+====Saleor====
+* [[Console - Saleor Instance Tabel Size|https://console.cloud.google.com/appengine/instances?project=chetabahana&serviceId=saleor&versionId=production&instancesTablesize=20&duration=P30D&graph=AE_MEMORY_USAGE]]
+
+```
+env: standard
+service: saleor
+runtime: python37
+instance_class: F2
+entrypoint: uwsgi --ini saleor/wsgi/uwsgi.ini 
+
+automatic_scaling:
+  max_instances: 1
+
+handlers:
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
+```
+====Celery====
+* [[Console - Celery Instance Tabel Size|https://console.cloud.google.com/appengine/instances?project=chetabahana&serviceId=celery&versionId=dev-v2&instancesTablesize=20&duration=P30D&graph=AE_MEMORY_USAGE]]
+
+```
+env: standard
+service: celery
+runtime: python37
+instance_class: B2
+entrypoint: celery -A saleor worker --app saleor.celeryconf:app --loglevel info
+
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 10m
+
+handlers:
+- url: /.*
+  script: auto
+```

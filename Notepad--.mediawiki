@@ -1,0 +1,11 @@
+__TOC__
+
+===Tab===
+[[<img src=https://user-images.githubusercontent.com/36441664/63717993-baa9df80-c873-11e9-8504-0f9820dfe27c.png>|https://github.com/notepad-plus-plus/notepad-plus-plus/issues/2791]]
+
+===Unix===
+* [[Mapping Windows accounts to POSIX|https://stackoverflow.com/a/32973565/4058484]]
+```
+'\r': command not found
+```
+[[<img src=https://i.stack.imgur.com/6r9g6.jpg>|https://stackoverflow.com/a/54878123/4058484]]

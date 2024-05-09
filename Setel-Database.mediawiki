@@ -1,0 +1,246 @@
+
+__TOC__
+==Uji Koneksi==
+Lihat panduan ''[[set environment variables|https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html]]''.<br>
+
+Untuk tes koneksi SQL di saleor amannya kita tidak setel '''DATABASE_URL''' spt dijelaskan di sbb:
+```
+Note (5. Create a PostgreSQL user)
+You need to create the user to use within your project. 
+Username and password are extracted from the DATABASE_URL environmental variable. 
+If absent they both default to saleor.
+
+Note (6. Create a PostgreSQL database)
+Database name is extracted from the DATABASE_URL environment variable. 
+If absent it defaults to saleor.
+```
+===Console===
+Buat user ''saleor'' dengan password ''saleor'' di ''[[PENGGUNA|https://console.cloud.google.com/sql/instances/cloud-sql-postgres-instance/users]]'' dan database ''saleor'' di ''[[BASIS DATA|https://console.cloud.google.com/sql/instances/cloud-sql-postgres-instance/databases]]''
+
+===CloudShell===
+https://console.cloud.google.com/cloudshell/environment/view<br>
+Matikan dahulu SSL dengan cara ''Izinkan koneksi yang tidak aman'' di ''[[KONEKSI|https://console.cloud.google.com/sql/instances/cloud-sql-postgres-instance/connections]]''
+```bash
+gcloud sql connect cloud-sql-postgres-instance --user=saleor
+```
+Output
+```bash
+Whitelisting your IP for incoming connection for 5 minutes...done.
+Connecting to database with SQL user [saleor].Password for user saleor:
+```
+Masukan password ''saleor'' tekan ''Enter''. Outputnya spt berikut:
+```bash
+psql (9.6.10)
+SSL connection (protocol: TLSv1.2, cipher: ECDHE-RSA-AES128-GCM-SHA256, bits: 128, compression: off)
+Type "help" for help.
+saleor=>
+```
+Tekan ''Ctrl+C'' untuk keluar..<br>
+
+==Setel IP==
+===Public===
+===Private===
+Lihat ''[[Cloud SQL - Private Connections|https://gweb-cloudblog-publish.appspot.com/products/databases/cloud-sql-now-supports-private-connections-and-app-engine-second-generation-runtimes/amp/]]''
+
+==Setel Proxy==
+Aktifkan SSL dengan cara ''Hanya izinkan koneksi yang aman'' di ''[[KONEKSI|https://console.cloud.google.com/sql/instances/cloud-sql-postgres-instance/connections]]''
+
+===Tes Proxy===
+[[<img src="https://chetabahana.files.wordpress.com/2019/02/using-the-cloudsql-proxy-to-talk-to-mysql-from-your-gke-rails-application.jpeg">|https://codelabs.developers.google.com/codelabs/cloud-postgresql-gke-memegen/#5]]
+https://codelabs.developers.google.com/codelabs/cloud-postgresql-gke-memegen/#5
+
+```bash
+gcloud iam service-accounts create proxy-user --display-name "proxy-user"
+gcloud iam service-accounts list
+
+gcloud projects add-iam-policy-binding marketstore \ 
+--member serviceAccount:proxy-user@marketstore.iam.gserviceaccount.com \
+--role roles/cloudsql.client
+
+gcloud iam service-accounts keys create key.json \ 
+--iam-account proxy-user@marketstore.iam.gserviceaccount.com
+
+```
+Directory
+```bash
+~$ ls
+cloud_sql_proxy  key.json  Pipfile  Pipfile.lock  Tutorial-Buka-Toko
+```
+
+Run Proxy
+```bash
+export CONNECTION_NAME=marketstore:asia-southeast1:cloud-sql-postgres-instance
+export INSTANCE_CONNECTION_NAME="$CONNECTION_NAME=tcp:5432"
+./cloud_sql_proxy -instances=$INSTANCE_CONNECTION_NAME -credential_file=key.json &
+```
+Output
+```bash
+2019/02/09 09:59:47 Rlimits for file descriptors set to {&{8500 1048576}}
+2019/02/09 09:59:47 using credential file for authentication; email=proxy-user@marketstore.iam.gserviceaccount.com
+2019/02/09 09:59:47 Listening on 127.0.0.1:5432 for marketstore:asia-southeast1:cloud-sql-postgres-instance
+2019/02/09 09:59:47 Ready for new connections
+```
+Open Proxy
+Buka ''CloudShell'' baru..<br>
+Proxy dibuka menggunakan '''tcp:5432'''<br>
+Jadi untuk tes kita gunakan ''[[TCP Socket|https://cloud.google.com/sql/docs/postgres/connect-admin-proxy]]'' (bukan Unix Socket) sbb:
+```bash
+psql "host=127.0.0.1 sslmode=disable dbname=saleor user=saleor"
+```
+masukkan password: ''saleor'' <br>. Outputnya spt berikut:
+```bash
+psql (9.6.10)
+Type "help" for help.
+
+saleor=>
+```
+Masukkan ''/q'' dan tekan ''Enter'' untuk keluar..
+
+Di ''CloudShell'' sebelumnya akan didapat output sbb:
+```bash
+2019/02/09 10:08:20 New connection for "marketstore:asia-southeast1:cloud-sql-postgres-instance"
+2019/02/09 10:08:21 Client closed local connection on 127.0.0.1:5432
+2019/02/09 09:59:47 Ready for new connections
+```
+Stop Proxy
+```bash
+killall cloud_sql_proxy
+```
+
+===Deploy Proxy===
+
+Follow a guide to setup "generic" ''[[Kubernetes cluster|https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app#step_4_create_a_container_cluster]]'' and remember to '''''[[set environment variables|https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html]]''''' when creating your ''[[workload|https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/]]'' based on the uploaded image.
+```bash
+kubectl create secret generic cloudsql-instance-credentials \
+--from-file=credentials.json=key.json
+
+kubectl create secret generic cloudsql-db-credentials \
+    --from-literal=secretKey=[SECRET_KEY] \
+    --from-literal=allowedHosts=shop.chetabahana.com \
+    --from-literal=currency=Rp
+```
+File Deployment yaml
+Nama: saleor_deployment.yaml<br>
+Sumber: [[gmemegen_deployment.yaml|https://github.com/GoogleCloudPlatform/gmemegen/blob/master/gmemegen_deployment.yaml]]<br>
+Ikuti [[Pedoman Kubernetes|https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/#creating-the-backend-using-a-deployment]]. Hasil modifikasi:
+```bash
+# Copyright 2018 Google LLC
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     https://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: saleor
+  labels:
+    app: saleor
+spec:
+  selector:
+    matchLabels:
+      app: saleor
+      tier: backend
+      track: stable
+  template:
+    metadata:
+      labels:
+        app: saleor
+        tier: backend
+        track: stable
+    spec:
+      # This section describes the containers that make up the deployment
+      containers:
+        - name: saleor
+          image: gcr.io/marketstore/saleor
+          ports:
+            - name: http
+              containerPort: 8000
+          # Set env variables used for Postgres Connection
+          env:
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: secretKey
+            - name: ALLOWED_HOSTS
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: allowedHosts
+            - name: DEFAULT_CURRENCY
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: currency
+        # Change <INSTANCE_CONNECTION_NAME> here to include your GCP
+        # project, the region of your Cloud SQL instance and the name
+        # of your Cloud SQL instance. The format is $PROJECT:$REGION:$INSTANCE
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances=marketstore:asia-southeast1:cloud-sql-postgres-instance=tcp:5432",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          volumeMounts:
+            - name: my-secrets-volume
+              mountPath: /secrets/cloudsql
+              readOnly: true
+      volumes:
+        - name: my-secrets-volume
+          secret:
+            secretName: cloudsql-instance-credentials
+```
+Backend yaml
+Nama: saleor_backend_tier.yaml<br>
+Ikuti [[Pedoman Backend Kubernetes|https://kubernetes.io/docs/tasks/access-application-cluster/connecting-frontend-backend/#creating-the-backend-service-object]]. Hasil modifikasi:
+```bash
+kind: Service
+apiVersion: v1
+metadata:
+  name: web-map-backend-tier-saleor
+spec:
+  selector:
+    app: saleor
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 8000
+    targetPort: http
+```
+
+Deploy
+```bash
+kubectl delete deployment saleor
+kubectl get deployments --all-namespaces
+
+kubectl delete service saleor
+kubectl get service
+
+kubectl create -f saleor_deployment.yaml
+kubectl create -f saleor_backend_tier.yaml
+kubectl get pods
+kubectl expose deployment saleor --type=LoadBalancer --port 80 --target-port 8000
+```
+
+==Pembiayaan==
+Untuk melihat harga masing layanan kita bisa lihat di ''[[Price List|https://cloud.google.com/pricing/list]]''. Pada ujung sesi dari dokumentasi ini kita akan ulas [[secara keseluruhan|https://github.com/MarketLeader/Toko-Chetabahana/wiki/Optimasi-Biaya]].
+
+Berikut ini kita bahas masing² komponen biaya yang terkait dengan Database.
+
+===GCE===
+===Cloud SQL===
+===Kubernetes===
+
+==Referensi==
+* [[PostgreSQL server configuration|https://www.postgresql.org/docs/9.6/static/runtime-config.html]]
+* https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html
+* https://codelabs.developers.google.com/codelabs/cloud-postgresql-gke-memegen/#7  
+* https://codeburst.io/beginners-guide-to-deploying-a-django-postgresql-project-on-google-cloud-s-flexible-app-engine-e3357b601b91

@@ -1,0 +1,7 @@
+[[Helm Charts|https://kubernetes.io/blog/2016/10/helm-charts-making-it-simple-to-package-and-deploy-apps-on-kubernetes/]] adalah salah satu perangkat yang juga tersedia di ''[[Apa-Itu-Codefresh|Codefresh]]'' untuk memudahkan dalam mengemas  aplikasi umum dengan ''[[Apa-Itu-Docker|Docker]]'' dan menggunakannya di ''[[Apa-Itu-Kubernetes|Kubernetes]]''.
+
+__TOC__
+==Referensi==
+* [[HELM Charts - Dokumentasi|https://github.com/helm/helm/blob/master/docs/charts.md]]
+* [[HELM Charts - Best-Practices (pdf)|https://codefresh.io/wp-content/uploads/2019/05/Codefresh-Helm-Best-Practices-2019.pdf]]
+* [[HELM Charts - Quickstart for Saleor|https://github.com/stephenmoloney/saleor-helm/tree/master/deployment/helm#quickstart]]

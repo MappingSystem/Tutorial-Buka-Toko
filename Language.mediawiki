@@ -1,0 +1,70 @@
+__TOC__
+==Translasi==
+* [[translation|https://docs.getsaleor.com/en/latest/customization/i18n.html]]
+* [[initial|https://docs.transifex.com/client/init]]
+===Config===
+File setup terletak di [[.tx/Config|https://github.com/mirumee/saleor/tree/master/.tx]]
+```
+[main]
+host = https://www.transifex.com
+
+[saleor-1.dashboardpo]
+file_filter = saleor/dashboard/locale/<lang>/LC_MESSAGES/django.po
+source_file = saleor/dashboard/locale/en/LC_MESSAGES/django.po
+source_lang = en
+minimum_perc = 1
+trans.zh-Hans = saleor/dashboard/locale/zh_Hans/LC_MESSAGES/django.po
+trans.zh-Hant = saleor/dashboard/locale/zh_Hant/LC_MESSAGES/django.po
+
+[saleor-1.javascriptpo]
+file_filter = locale/<lang>/LC_MESSAGES/djangojs.po
+source_file = locale/en/LC_MESSAGES/djangojs.po
+source_lang = en
+minimum_perc = 1
+trans.zh-Hans = locale/zh_Hans/LC_MESSAGES/djangojs.po
+trans.zh-Hant = locale/zh_Hant/LC_MESSAGES/djangojs.po
+
+[saleor-1.storefrontpo]
+file_filter = locale/<lang>/LC_MESSAGES/django.po
+source_file = locale/en/LC_MESSAGES/django.po
+source_lang = en
+minimum_perc = 1
+trans.zh-Hans = locale/zh_Hans/LC_MESSAGES/django.po
+trans.zh-Hant = locale/zh_Hant/LC_MESSAGES/django.po
+
+```
+===Token===
+Ambil token di [[User Settings|https://www.transifex.com/user/settings/api/]]
+
+```
+$ cd /path/ke/saleor
+$ tx init --token=<token> --skipsetup --no-interactive
+```
+Token akan otomatis masuk ke <code>~/.transifexrc</code>
+```
+$ cat ~/.transifexrc
+[https://www.transifex.com]
+api_hostname = https://api.transifex.com
+hostname = https://www.transifex.com
+password = <token>
+username = api
+
+```
+Selanjutnya jalankan untuk update [[translasi id|https://github.com/mirumee/saleor/tree/master/locale/id/LC_MESSAGES/django.po]]
+```
+$ tx pull --all
+tx INFO: Skipping 'tr' translation (file: locale/id/LC_MESSAGES/django.po).
+..
+..
+tx INFO: Skipping 'sr' translation (file: locale/sr/LC_MESSAGES/django.po).
+tx INFO: Skipping 'tr' translation (file: locale/tr/LC_MESSAGES/django.po).
+tx INFO: Skipping 'th' translation (file: locale/th/LC_MESSAGES/django.po).
+tx INFO: Done.
+```
+
+===Ajukan===
+Jika Anda ingin ajukan terjemaha bisa dilakukan [[dalam 3 bagian|https://www.transifex.com/mirumee/saleor-1/translate/#id]]
+* [[etalase|https://www.transifex.com/mirumee/saleor-1/translate/#id/storefrontpo]]
+* [[dasbor|https://www.transifex.com/mirumee/saleor-1/translate/#id/dashboardpo]]
+* [[javascript.po|https://www.transifex.com/mirumee/saleor-1/translate/#id/javascriptpo]]
+

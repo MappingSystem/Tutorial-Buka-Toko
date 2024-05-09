@@ -1,0 +1,3 @@
+__TOC__
+==Referensi==
+* [[Creating, deleting, and deprecating custom images|https://cloud.google.com/compute/docs/images/create-delete-deprecate-private-images#creating_a_custom_image]]

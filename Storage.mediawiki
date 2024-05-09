@@ -1,0 +1,830 @@
+Pada sesi ini kita akan bahas tentang setelan untuk Google Storage
+==Tools==
+===GsUtil===
+* [[Top-Level Command-Line Options|https://cloud.google.com/storage/docs/gsutil/addlhelp/TopLevelCommandLineOptions]]
+* [[Copy file to local google storage via command line|https://stackoverflow.com/a/41466685/4058484]]
+
+====Size==== 
+* [[du - Display object size usage|https://cloud.google.com/storage/docs/gsutil/commands/du]]
+* [[How Much Total Space Am I Using?|https://stackoverflow.com/questions/33082788/google-cloud-storage-how-much-total-space-am-i-using]]
+```
+$ export BOTO_CONFIG=/dev/null
+$ gsutil -o GSUtil:default_project_id=chetabahana du -shc
+24.18 MiB    gs://appspot.chetabahana.com
+687.46 MiB   gs://artifacts.chetabahana.appspot.com
+947 B        gs://chetabahana_cloudbuild
+252.55 MiB   gs://staging.chetabahana.appspot.com
+9.36 GiB     gs://us.artifacts.chetabahana.appspot.com
+10.3 GiB     total
+```
+====Cleaning====
+
+===Delivery===
+[[<img src=https://cloud.google.com/cdn/images/cdn-response-flow.png>|https://cloud.google.com/cdn/docs/caching]]
+
+====Caching====
+[[Cloud CDN and HTTP(S) load balancing|https://cloud.google.com/cdn/docs/overview]]
+
+====Balancing====
+[[Adding a Cloud Storage bucket to content-based load balancing|https://cloud.google.com/load-balancing/docs/https/adding-a-backend-bucket-to-content-based-load-balancing]]
+===GcsFuse===
+
+[[<img src=https://docs.docker.com/storage/images/volumes-shared-storage.svg>|https://docs.docker.com/storage/volumes/#share-data-among-machines]]
+
+GcsFuse atau [[Cloud Storage FUSE|https://cloud.google.com/storage/docs/gcs-fuse]] adalah adaptor [[FUSE|http://fuse.sourceforge.net/]] open source yang memungkinkan Anda untuk memasang bucket Cloud Storage sebagai sistem file di Linux atau sistem macOS. 
+
+Sistem ini juga menyediakan cara bagi aplikasi untuk mengunggah dan mengunduh objek Penyimpanan Cloud menggunakan semantik sistem file standar atau via [[modul|https://pypi.org/project/fusepy/]] dan dapat dijalankan di mana saja baik dengan konektivitas ke Cloud Storage maupun via [[plug-in|https://github.com/lorenzleutgeb/docker-volume-gcs]].
+
+Cloud Storage FUSE adalah alat sumber terbuka di GitHub yang ditulis dalam Go oleh komunitas dan [[berbagai pengembang|https://github.com/search?q=gcsfuse]]. 
+
+====Instal====
+* Ubuntu and Debian ([[latest releases|https://github.com/GoogleCloudPlatform/gcsfuse/blob/master/docs/installing.md#ubuntu-and-debian-latest-releases]])
+```
+export GCSFUSE_REPO=gcsfuse-`lsb_release -c -s`
+echo "deb http://packages.cloud.google.com/apt $GCSFUSE_REPO main" | sudo tee /etc/apt/sources.list.d/gcsfuse.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+sudo apt-get update
+sudo apt-get install gcsfuse
+
+sudo usermod -a -G fuse $USER
+exit
+```
+Login dan Cek grup
+
+====Jalankan====
+```
+gcsfuse --help
+NAME:
+   gcsfuse - Mount a GCS bucket locally
+
+USAGE:
+   gcsfuse [global options] bucket mountpoint
+   
+VERSION:
+   0.23.0 (Go version go1.9)
+   
+GLOBAL OPTIONS:
+   --foreground                 Stay in the foreground after mounting.
+   -o value                     Additional system-specific mount options. Be careful!
+   --dir-mode value             Permissions for directories, in octal. (default: 755)
+   --file-mode value            Permission bits for files, in octal. (default: 644)
+   --uid value                  UID owner of all inodes. (default: -1)
+   --gid value                  GID owner of all inodes. (default: -1)
+   --implicit-dirs              Implicitly define directories based on content. 
+                                See docs/semantics.md
+   --only-dir value             Mount only the given directory, relative to the 
+                                bucket root.
+   --key-file value             Absolute path to JSON key file for use with GCS.  
+                                (default: none, Google application default  
+                                credentials used)
+   --limit-bytes-per-sec value  Bandwidth limit for reading data, measured over a  
+                                30-second window. (use -1 for no limit) (default: -1)
+   --limit-ops-per-sec value    Operations per second limit, measured over a  
+                                30-second window (use -1 for no limit) (default: 5)
+   --stat-cache-ttl value       How long to cache StatObject results and inode  
+                                attributes. (default: 1m0s)
+   --type-cache-ttl value       How long to cache name -> file/dir mappings in  
+                                directory inodes. (default: 1m0s)
+   --temp-dir value             Absolute path to temporary directory for local GCS  
+                                object copies. (default: system default, likely /tmp)
+   --debug_fuse                 Enable fuse-related debugging output.
+   --debug_gcs                  Print GCS request and timing information.
+   --debug_http                 Dump HTTP requests and responses to/from GCS.
+   --debug_invariants           Panic when internal invariants are violated.
+   --help, -h                   show help
+   --version, -v                print the version
+
+$ id
+uid=1001(chetabahana) gid=999(docker) groups=999(docker)
+```
+Aktifkan 'user_allow_other' di /etc/fuse.conf
+```
+$ sudo sed 's/#user_allow_other/user_allow_other/' /etc/fuse.conf
+$ gcsfuse -o allow_other --uid 1001 --gid 999 chetabahana.appspot.com ~/.docker/media
+Using mount point: /home/chetabahana/.docker/media
+Opening GCS connection...
+Opening bucket...
+Mounting file system...
+File system has been successfully mounted.
+```
+
+====Startup Script====
+* [[Running Startup Scripts|https://cloud.google.com/compute/docs/startupscript#startupscriptrunninginstances]]
+```
+$ gcloud compute instances add-metadata backend --metadata startup-script='#! /bin/bash
+gcsfuse -o allow_other --uid 1001 --gid 999 chetabahana.appspot.com /home/chetabahana/.docker/media'
+```
+
+
+===Volume===
+
+====User====
+*[[Running a Docker container as a non-root user|https://medium.com/redbubble/running-a-docker-container-as-a-non-root-user-7d2e00f8ee15]]
+```
+docker-compose run --rm --user $(id -u):$(id -g) web python3 manage.py migrate
+docker-compose run --rm --user $(id -u):$(id -g) web python3 manage.py collectstatic --noinput
+docker-compose run --rm --user $(id -u):$(id -g) web python3 manage.py populatedb --createsuperuser
+docker-compose run --rm --user $(id -u):$(id -g) web python3 manage.py create_thumbnails
+CURRENT_UID=$(id -u):$(id -g) docker-compose up -d
+```
+====Privileged====
+Agar dapat di koneksi dengn Docker maka kontainer harus disetel dengan ''[[privileged|https://hub.docker.com/r/levkuznetsov/gcsfuse-docker/]]''
+```
+services:
+  web:
+    privileged: true
+```
+
+====Propagation====
+* [[Configure bind propagation|https://docs.docker.com/v17.09/engine/admin/volumes/bind-mounts/#configure-bind-propagation]]
+Bind propagation secara Default disetel dengan <code>rprivate</code> Default yang berarti bahwa tidak ada titik pemasangan di mana pun di dalam titik pemasangan asli atau replika yang merambat di kedua arah. 
+```
+$ docker inspect backend_saleor_1
+...
+...
+       "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/home/chetabahana/.docker/media",
+                "Destination": "/app/media",
+                "Mode": "rw",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+...
+...
+```
+* [[add bind-propagation to docker-compose|https://github.com/moby/moby/issues/34936#issuecomment-336638274]]
+Setel dengan <code>shared</code> supaya perubahan dapat diexpose dalam dua arah (vise versa).
+```
+    volumes:
+      - type: bind
+        target: /app/media
+        source: /home/chetabahana/.docker/media
+        bind:
+          propagation: shared
+```
+====Output Compose====
+```
+(97%)
+[#################################################-] 293/300 (98%)
+[#################################################-] 294/300 (98%)
+[#################################################-] 295/300 (98%)
+[#################################################-] 296/300 (99%)
+[##################################################] 297/300 (99%)
+[##################################################] 298/300 (99%)
+[##################################################] 299/300 (100%)
+[##################################################] 300/300 (100%)
+
+Starting backend_redis_1 ... done
+
+Starting backend_db_1 ... done
+backend_db_1 is up-to-date
+backend_redis_1 is up-to-date
+Creating backend_web_1 ... 
+PUSH
+DONE
+
+Creating backend_web_1 ... done
+```
+
+====Output Storage====
+```
+Detail bucket
+  __sized__/	—	Folder	—	—	
+Per objek	—	–	-	
+  category-backgrounds/	—	Folder	—	—	
+Per objek	—	–	-	
+  collection-backgrounds/	—	Folder	—	—	
+Per objek	—	–	-	
+  products/	—	Folder	—	—	
+Per objek	—	–	-	
+```
+==Expose==
+[[<img src=https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/images/sample.png>|https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/app-engine-cloud-storage-sample]]
+
+===Via API===
+* [[Viewing and Editing Object Metadata|https://cloud.google.com/storage/docs/viewing-editing-metadata#set-object-metadata-json]]
+====Python API====
+* [[Images Python API Overview|https://cloud.google.com/appengine/docs/standard/python/images/]]
+* [[Python get_serving_url() Examples|https://www.programcreek.com/python/example/100886/google.appengine.api.images.get_serving_url]]
+```
+def get_image(name, size=None, crop=False, secure_url=None):
+        key = blobstore.create_gs_key("your GS dir/"+name)
+        img = images.get_serving_url(key, size, crop, secure_url)
+        return img 
+```
+====JSON API====
+* [[JSON API Overview|https://cloud.google.com/storage/docs/json_api/]]
+* [[APIs Explorer|https://developers.google.com/apis-explorer/?hl=in#p/storage/v1/]] dan [[Console|https://console.cloud.google.com/apis/api/storage-api.googleapis.com/overview]]
+```
+curl -X GET \
+    -H "Authorization: Bearer [OAUTH2_TOKEN]" \
+    "https://www.googleapis.com/storage/v1/b/[BUCKET_NAME]/o/[OBJECT_NAME]"
+```
+====XML API====
+* [[XML API Overview|https://cloud.google.com/storage/docs/xml-api/overview]]
+* [[Request Methods|https://cloud.google.com/storage/docs/xml-api/reference-methods]] dan [[HTTP Headers |https://cloud.google.com/storage/docs/xml-api/reference-headers]]
+```
+curl -I HEAD \
+    -H "Authorization: Bearer [OAUTH2_TOKEN]" \
+    "https://storage.googleapis.com/[BUCKET_NAME]/[OBJECT_NAME]"
+```
+
+===Via curl===
+
+```
+curl -X GET \
+    -H "Authorization: Bearer [OAUTH2_TOKEN]" \
+    "https://www.googleapis.com/storage/v1/b/[BUCKET_NAME]/o/[OBJECT_NAME]"
+```
+===Via gsutil===
+* [[Install gsutil|https://cloud.google.com/storage/docs/gsutil_install]]
+* [[Using the gsutil Tool|https://cloud.google.com/storage/docs/quickstart-gsutil]]
+
+Dengan gsutil memungkinkan Anda mengakses Cloud Storage dari baris perintah.
+
+```
+$ gsutil mb -l us-east1 gs://my-awesome-bucket/
+Creating gs://my-awesome-bucket/...
+
+$ gsutil cp Desktop/kitten.png gs://my-awesome-bucket
+Copying file://Desktop/kitten.png [Content-Type=image/png]...
+Uploading   gs://my-awesome-bucket/kitten.png:       0 B/164.3 KiB
+Uploading   gs://my-awesome-bucket/kitten.png:       164.3 KiB/164.3 KiB
+
+$ gsutil cp gs://my-awesome-bucket/kitten.png Desktop/kitten2.png
+Copying gs://my-awesome-bucket/kitten.png...
+Downloading file://Desktop/kitten2.png:               0 B/164.3 KiB
+Downloading file://Desktop/kitten2.png:               164.3 KiB/164.3 KiB
+```
+
+===Via Handler===
+* app.yaml Reference: [[Handlers element|https://cloud.google.com/appengine/docs/standard/go/config/appref#handlers_element]]
+```
+handlers:
+- url: /images
+  static_dir: static/images
+  http_headers:
+    Access-Control-Allow-Origin: http://mygame.appspot.com
+  # ...
+```
+====Cross Origin====
+* [[Cross Origin Resource Sharing (CORS)|https://www.w3.org/TR/cors/]]
+* [[Panduan|https://cloud.google.com/storage/docs/cross-origin]], cara [[konfigurasi|https://cloud.google.com/storage/docs/configuring-cors]] dan setel [[bucket|https://cloud.google.com/storage/docs/xml-api/put-bucket-cors]]
+
+Salah satu penggunaan penting dari fitur ini adalah untuk mendukung <code>cross-origin resource sharing (CORS)</code>, seperti mengakses file yang di-host oleh aplikasi App Engine lainnya.
+
+Misalnya, Anda dapat memiliki aplikasi game <code>mygame.appspot.com</code> yang mengakses aset yang dihosting oleh <code>myassets.appspot.com</code>. 
+
+Namun, jika <code>mygame</code> mencoba membuat JavaScript <code>XMLHttpRequest</code> ke <code>myassets</code>, itu tidak akan berhasil kecuali <code>handler</code> untuk <code>myassets</code> mengembalikan <code>Access-Control-Allow-Origi</code>n: header respons yang berisi nilai <code>http://mygame.appspot.com</code>.
+
+Ini adalah bagaimana Anda akan membuat file handler statis Anda mengembalikan nilai header respons yang diperlukan:
+
+[[<img src=https://cloud.google.com/storage/images/cors_config.png>|https://cloud.google.com/storage/docs/xml-api/put-bucket-cors]]
+
+====Setel Bucket====
+* [[Panduan Request Methods|https://cloud.google.com/storage/docs/xml-api/reference-methods]]
+* [[HTTP Headers and Query String for cors|https://cloud.google.com/storage/docs/xml-api/reference-headers#cors]]
+
+Sample setelan untuk [[HTTP Method|https://cloud.google.com/storage/docs/xml-api/put-bucket#request-headers]]
+```
+PUT /?cors HTTP/1.1
+Host: acme-pets.storage.googleapis.com
+Date: Thu, 12 Mar 2012 03:38:42 GMT
+Content-Length: 1320
+Authorization: Bearer ya29.AHES6ZRVmB7fkLtd1XTmq6mo0S1wqZZi3-Lh_s-6Uw7p8vtgSwg
+
+<?xml version="1.0" encoding="UTF-8"?>
+<CorsConfig>
+  <Cors>
+    <Origins>
+      <Origin>http://origin1.example.com</Origin>
+      <Origin>http://origin2.example.com</Origin>
+    </Origins>
+    <Methods>
+      <Method>GET</Method>
+      <Method>HEAD</Method>
+      <Method>PUT</Method>
+      <Method>POST</Method>
+      <Method>DELETE</Method>
+    </Methods>
+    <ResponseHeaders>
+      <ResponseHeader>x-goog-meta-foo1</ResponseHeader>
+      <ResponseHeader>x-goog-meta-foo2</ResponseHeader>
+    </ResponseHeaders>
+    <MaxAgeSec>1800</MaxAgeSec>
+  </Cors>
+</CorsConfig>
+```
+
+===Via Mapping===
+* [[Google Cloud Storage on Appengine Dev Server|https://stackoverflow.com/a/47823681/4058484]]
+* [[Copy file to local google storage via command line|https://stackoverflow.com/a/41466685/4058484]]
+
+```
+ localhost:port/_ah/gcs/bucket_name/file_suffi
+```
+Di mana port secara default 8080, dan file ditulis ke: <code>/bucket_name/file_suffix</code>
+```
+def create_file(self, filename):
+    """Create a file."""
+
+       self.response.write('Creating file {}\n'.format(filename))
+
+       # The retry_params specified in the open call will override the default
+       # retry params for this particular file handle.
+       write_retry_params = cloudstorage.RetryParams(backoff_factor=1.1)
+       with cloudstorage.open(
+           filename, 'w', content_type='text/plain', options={
+               'x-goog-meta-foo': 'foo', 'x-goog-meta-bar': 'bar'},
+               retry_params=write_retry_params) as cloudstorage_file:
+                   cloudstorage_file.write('abcde\n')
+                   cloudstorage_file.write('f'*1024*4 + '\n')
+       self.tmp_filenames_to_clean_up.append(filename) 
+
+       with cloudstorage.open(
+           filename, 'w', content_type='text/plain', options={
+               'x-goog-meta-foo': 'foo', 'x-goog-meta-bar': 'bar'},
+               retry_params=write_retry_params) as cloudstorage_file:
+                   cloudstorage_file.write('abcde\n')
+                   cloudstorage_file.write('f'*1024*4 + '\n')
+```
+Di mana nama file adalah <code>/bucket_name/file_suffix</code>
+
+===Via Static Files===
+* [[Serving Static Files|https://cloud.google.com/appengine/docs/standard/go111/serving-static-files]]
+```
+https://storage.googleapis.com/<your-bucket-name>/static/...
+https://storage.cloud.google.com/<your-bucket-name>/file
+```
+
+===Via Subdomain===
+* [[working with a bucket configured as a website|https://cloud.google.com/storage/docs/static-website#tip-subdomain]]
+```
+NAME    TYPE     DATA
+test    CNAME    c.storage.googleapis.com.
+```
+Setel
+```
+gsutil web set [-m main_page_suffix] [-e error_page] bucket_url...
+gsutil web get bucket_url
+```
+
+===Via Image Data===
+```
+apidata.googleusercontent.com/download/storage/v1/b
+```
+===Via Constructors===
+* [[Image constructors|https://docs.microsoft.com/en-us/windows/desktop/gdiplus/-gdiplus-class-image-constructors]]
+```
+img = images.Image(filename='/gs/bucket/object')
+```
+
+===Via XMLHttpRequest===
+* [[XMLHttpRequest|https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest]]
+
+==Setelan==
+* GCE: [[Storage#GcsFuse|via GcsFuse]]
+* GAE: [[Storage#Via_Handler|via Handler]]
+
+===Rute===
+* [[python37 Second generation|https://cloud.google.com/appengine/docs/the-appengine-environments#comparing_high-level_features]]
+* [[Runtimes|https://cloud.google.com/appengine/docs/standard/runtimes]]
+```
+Writing to local disk
+
+Standard environment	
+Java 8, Node.js, Python 3.7, PHP 7.2, Go 1.11, and Go 1.12 (beta) have read and 
+write access to the /tmp directory.
+Python 2.7, Go 1.9, and PHP 5.5 don't have write access to the disk.
+```
+====Setting====
+<source lang="Ruby">
+$ gsutil acl ch -u AllUsers:R gs://BUCKET_NAME/STATIC_BUCKET_DIR
+
+$ gsutil rsync -r bucket_static gs://BUCKET_NAME/static
+</source>
+
+====Delivery====
+* [[Deploying Cloud Storage bucket|https://cloud.google.com/python/django/kubernetes-engine#deploying_the_app_to_]]
+
+Di AWS Storage bisa dilakukan [[deploy|https://github.com/mirumee/saleor/blob/master/scripts/deploy_master.sh]] dan [[push|https://github.com/mirumee/saleor/blob/master/scripts/push_static.sh]] seperti ini
+
+```
+#!/bin/bash
+
+# Push static to AWS S3
+
+docker run --rm \
+    -e SECRET_KEY=dummy \
+    -e AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
+    -e AWS_LOCATION=${AWS_LOCATION} \
+    -e AWS_MEDIA_BUCKET_NAME=${AWS_MEDIA_BUCKET_NAME} \
+    -e AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+    -e AWS_STORAGE_BUCKET_NAME=${AWS_STORAGE_BUCKET_NAME} \
+    -e STATIC_URL=${STATIC_URL} \
+    ${IMAGE_NAME} \
+    python3 manage.py collectstatic --no-input
+
+# Deploy master to AWS S3
+
+VERSION=$CIRCLE_SHA1
+ZIP=$VERSION.zip
+
+cd deployment/elasticbeanstalk
+zip -r /tmp/$ZIP .
+
+aws s3 cp /tmp/$ZIP s3://$VERSIONS_BUCKET/$ZIP
+
+aws elasticbeanstalk create-application-version --application-name saleor-demo \
+   --version-label $VERSION --source-bundle S3Bucket=$VERSIONS_BUCKET,S3Key=$ZIP
+
+# Update the environment to use the new application version
+aws elasticbeanstalk update-environment --environment-name $MASTER_ENV_NAME \
+     --version-label $VERSION
+
+```
+====Runtime====
+* [[Filesystem|https://cloud.google.com/appengine/docs/standard/python3/runtime#filesystem]]
+* [[Location|https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Location]]
+Runtime termasuk sistem file lengkap. Sistem file bersifat read-only kecuali untuk location / tmp, yang merupakan disk virtual yang menyimpan data dalam RAM instance App Engine Anda.
+```
+handlers:
+- url: /media
+  static_dir: /tmp/media
+  http_headers:
+    Location: https://storage.googleapis.com/<your-bucket-name>/static/...
+  # ...
+```
+
+===Setup===
+* [[Python37|https://cloud.google.com/storage/docs/reference/libraries#client-libraries-install-python]] - [[Using Storage|https://cloud.google.com/appengine/docs/standard/python3/using-cloud-storage]] via [[Client Library|https://pypi.org/project/google-cloud-storage/]] berikut [[sampel|https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/app-engine-cloud-storage-sample]]
+* Django Storage - [[Official|https://django-storages.readthedocs.io/en/latest/index.html]]. Via [[GCS JSON API|https://pypi.org/project/django-gapc-storage/]], atau [[File backend |https://pypi.org/project/django-google-cloud-storage//]]
+
+```
+if os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine'):
+    STATIC_URL = 'https://storage.googleapis.com/<your-bucket>/static/'
+else:
+    STATIC_URL = '/static/'
+```
+Catatan:
+* Sejauh ini ''[[support|https://github.com/chetabahana/saleor/tree/gcloud-storage]]'' untuk [[Google Cloud Storage|https://django-storages.readthedocs.io/en/latest/backends/gcloud.html]] belum dilakukan oleh pengembang
+* Salah satu yang [[pernah diajukan|https://github.com/sergioisidoro/saleor/tree/f977c0b76490a74b6b50fd18a0f60d125f902740]] adalah [[PR #2626|https://github.com/mirumee/saleor/pull/2626/files]] namun [[hasil test|https://github.com/mirumee/saleor/pull/2626]] belum sempurna
+```
+$ git checkout -b gcloud-storage
+$ git fetch --prune sergioisidoro gcloud-storage
+$ git reset --hard sergioisidoro/gcloud-storage
+$ git push origin gcloud-storage --force
+```
+
+====Pip Install====
+* [[Python 'Virtual-Env' Add support for Google Cloud Storage|https://github.com/MarketLeader/Toko-Chetabahana/releases/tag/v1.1]]
+Jika Anda hanya hanya akan gunakan [[Google Storage|https://django-storages.readthedocs.io/en/latest/backends/gcloud.html]] maka instal
+```
+(virtual-env)$ pip install django-storages[google]
+Running setup.py install for googleapis-common-protos ... done
+Successfully installed 
+cachetools-3.1.0 google-api-core-1.9.0 google-auth-1.6.3 google-cloud-core-0.29.1 
+google-cloud-storage-1.15.0 google-resumable-media-0.3.2 googleapis-common-protos-1.5.9 
+protobuf-3.7.1 pyasn1-0.4.5 pyasn1-modules-0.2.5 rsa-4.0
+```
+Jalankan kembali pip untuk membekukan semua paket dalam file menggunakan [[flag -r|https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/#using-requirements-files]]
+```
+(virtual-env)$ pip freeze > requirements.txt
+(virtual-env)$ pip install -r requirements.txt
+```
+Dengan demikian baris berikut ditambahkan di [[requirements.txt|https://github.com/MarketLeader/Toko-Chetabahana/blob/ed7f61a523f0ba6152cb71571cbf363b094b8e0c/virtual-env/requirements.txt]] spt hanya di [[PR#2626|https://github.com/mirumee/saleor/pull/2626/files]] 
+```
+cachetools==3.1.0
+google-api-core==1.9.0
+google-auth==1.6.3
+google-cloud-core==0.29.1
+google-cloud-storage==1.15.0
+google-resumable-media==0.3.2
+googleapis-common-protos==1.5.9
+protobuf==3.7.1
+pyasn1==0.4.5
+pyasn1-modules==0.2.5
+rsa==4.0
+```
+====PipEnv Install====
+* [[Pipenv: A Guide|https://realpython.com/pipenv-guide/]]
+```
+$ pipenv install --help
+Usage: pipenv install [OPTIONS] [PACKAGES]...
+
+  Installs provided packages and adds them to Pipfile, or (if no packages
+  are given), installs all packages from Pipfile.
+
+Options:
+  --system                 System pip management.  [env var: PIPENV_SYSTEM]
+  -c, --code TEXT          Import from codebase.
+  --deploy                 Abort if the Pipfile.lock is out-of-date, or Python
+                           version is wrong.
+  --skip-lock              Skip locking mechanisms and use the Pipfile instead
+                           during operation.  [env var: PIPENV_SKIP_LOCK]
+  -e, --editable TEXT      An editable python package URL or path, often to a
+                           VCS repo.
+  --ignore-pipfile         Ignore Pipfile when installing, using the
+                           Pipfile.lock.  [env var: PIPENV_IGNORE_PIPFILE]
+  --selective-upgrade      Update specified packages.
+  --pre                    Allow pre-releases.
+  -r, --requirements TEXT  Import a requirements.txt file.
+  --extra-index-url TEXT   URLs to the extra PyPI compatible indexes to query
+                           for package lookups.
+  -i, --index TEXT         Target PyPI-compatible package index url.
+  --sequential             Install dependencies one-at-a-time, instead of
+                           concurrently.  [env var: PIPENV_SEQUENTIAL]
+  --keep-outdated          Keep out-dated dependencies from being updated in
+                           Pipfile.lock.  [env var: PIPENV_KEEP_OUTDATED]
+  --pre                    Allow pre-releases.
+  -d, --dev                Install both develop and default packages.  [env
+                           var: PIPENV_DEV]
+  --python TEXT            Specify which version of Python virtualenv should
+                           use.
+  --three / --two          Use Python 3/2 when creating virtualenv.
+  --clear                  Clears caches (pipenv, pip, and pip-tools).  [env
+                           var: PIPENV_CLEAR]
+  -v, --verbose            Verbose mode.
+  --pypi-mirror TEXT       Specify a PyPI mirror.
+  -h, --help               Show this message and exit.
+(virtual-env)
+
+```
+
+====File settings.py====
+
+* [[Deploying django-pipeline|https://stackoverflow.com/questions/24700604/django-manage-py-collectstatic-not-uploading-to-google-cloud-storage]]
+* [[Configure Django and Google Cloud Storage?|https://stackoverflow.com/questions/34247702/configure-django-and-google-cloud-storage]]
+
+Ubah [[Django#settingspy|settings.py]]  ke:
+```
+# Amazon S3 configuration
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')U
+AWS_LOCATION = os.environ.get('AWS_LOCATION', '')
+AWS_MEDIA_BUCKET_NAME = os.environ.get('AWS_MEDIA_BUCKET_NAME')
+AWS_MEDIA_CUSTOM_DOMAIN = os.environ.get('AWS_MEDIA_CUSTOM_DOMAIN')
+AWS_QUERYSTRING_AUTH = get_bool_from_env('AWS_QUERYSTRING_AUTH', False)
+AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_STATIC_CUSTOM_DOMAIN')
+AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', None)
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_DEFAULT_ACL = os.environ.get('AWS_DEFAULT_ACL', None)
+
+if AWS_STORAGE_BUCKET_NAME:
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+if AWS_MEDIA_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'saleor.core.storages.S3MediaStorage'
+    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+
+# Google cloud storage
+GS_STORAGE_BUCKET_NAME = os.environ.get('GS_STORAGE_BUCKET_NAME')
+GS_MEDIA_BUCKET_NAME = os.environ.get('GS_MEDIA_BUCKET_NAME')
+GS_MEDIA_CUSTOM_DOMAIN = os.environ.get('GS_MEDIA_CUSTOM_DOMAIN')
+GS_PROJECT_ID = os.environ.get('GS_PROJECT_ID')
+GS_AUTO_CREATE_BUCKET = get_bool_from_env('GS_AUTO_CREATE_BUCKET', False)
+GS_AUTO_CREATE_ACL = os.environ.get('GS_AUTO_CREATE_ACL', 'projectPrivate')
+GS_DEFAULT_ACL = os.environ.get('GS_DEFAULT_ACL', 'publicRead')
+GS_FILE_CHARSET = os.environ.get('GS_FILE_CHARSET')
+GS_FILE_OVERWRITE = get_bool_from_env('GS_FILE_OVERWRITE', True)
+GS_MAX_MEMORY_SIZE = os.environ.get('GS_MAX_MEMORY_SIZE', 0)
+GS_CACHE_CONTROL = os.environ.get('GS_CACHE_CONTROL', None)
+GS_LOCATION = os.environ.get('GS_LOCATION', None)
+GS_EXPIRATION = os.environ.get('GS_EXPIRATION', timedelta(seconds=86400))
+
+if 'GOOGLE_APPLICATION_CREDENTIALS' not in os.environ:
+    GS_CREDENTIALS = os.environ.get('GS_CREDENTIALS')
+
+if GS_STORAGE_BUCKET_NAME:
+    STATICFILES_STORAGE = 'saleor.core.storages.GSStaticStorage'
+
+if GS_MEDIA_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'saleor.core.storages.GCSMediaStorage'
+    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+
+```
+====File storages.py====
+* [[<code>storages.backends.s3boto3.S3Boto3Storage</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/storages/backends/s3boto3.py#L171]]<br>
+* [[<code>storages.backends.gcloud.GoogleCloudStorage</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/storages/backends/gcloud.py#L85]]
+```
+from django.conf import settings
+from storages.backends.s3boto3 import S3Boto3Storage
+from storages.backends.gcloud import GoogleCloudStorage
+from storages.utils import setting
+from urllib.parse import urljoin
+
+class S3MediaStorage(S3Boto3Storage):
+    def __init__(self, *args, **kwargs):
+        self.bucket_name = settings.AWS_MEDIA_BUCKET_NAME
+        self.custom_domain = settings.AWS_MEDIA_CUSTOM_DOMAIN
+        super().__init__(*args, **kwargs)
+
+class GSMediaStorage(GoogleCloudStorage):
+    """GoogleCloudStorage suitable for Django's Media files."""
+
+    def __init__(self, *args, **kwargs):
+        if not settings.MEDIA_URL:
+            raise Exception('MEDIA_URL has not been configured')
+        kwargs['bucket_name'] = setting('GS_MEDIA_BUCKET_NAME', strict=True)
+        super(GSMediaStorage, self).__init__(*args, **kwargs)
+
+    def url(self, name):
+        """.url that doesn't call Google."""
+        return urljoin(settings.MEDIA_URL, name)
+
+
+class GSStaticStorage(GoogleCloudStorage):
+    """GoogleCloudStorage suitable for Django's Static files"""
+
+    def __init__(self, *args, **kwargs):
+        if not settings.STATIC_URL:
+            raise Exception('STATIC_URL has not been configured')
+        kwargs['bucket_name'] = setting('GS_STATIC_BUCKET_NAME', strict=True)
+        super(GSStaticStorage, self).__init__(*args, **kwargs)
+
+    def url(self, name):
+        """.url that doesn't call Google."""
+        return urljoin(settings.STATIC_URL, name)
+```
+
+===Debug===
+* [[App Identity Python API Overview|https://cloud.google.com/appengine/docs/standard/python/appidentity/]]
+
+====Not found====
+```
+logName:  "projects/chetabahana/logs/stderr"  
+ receiveTimestamp:  "2019-05-06T05:48:04.869223836Z"  
+ resource: {…}  
+ textPayload:  "Traceback (most recent call last):
+  File "/env/lib/python3.7/site-packages/django/core/handlers/exception.py", line 34, in inner
+    response = get_response(request)
+  File "/env/lib/python3.7/site-packages/django/core/handlers/base.py", line 100, in _get_response
+    resolver_match = resolver.resolve(request.path_info)
+  File "/env/lib/python3.7/site-packages/django/urls/resolvers.py", line 558, in resolve
+    raise Resolver404({'tried': tried, 'path': new_path})
+django.urls.exceptions.Resolver404: {'tried': [
+[<URLResolver <URLPattern list> (dashboard:dashboard) '^dashboard/'>], 
+[<URLPattern '^graphql/' [name='api']>], 
+[<URLPattern '^sitemap\.xml$' [name='django.contrib.sitemaps.views.sitemap']>], 
+[<URLPattern '^i18n/$' [name='set_language']>], 
+[<URLResolver <module 'social_django.urls' from '/env/lib/python3.7/site-packages/social_django/urls.py'> (social:social) ''>, 
+<URLPattern '^login/(?P<backend>[^/]+)/$' [name='begin']>], 
+[<URLResolver <module 'social_django.urls' from '/env/lib/python3.7/site-packages/social_django/urls.py'> (social:social) ''>, 
+<URLPattern '^complete/(?P<backend>[^/]+)/$' [name='complete']>], 
+[<URLResolver <module 'social_django.urls' from '/env/lib/python3.7/site-packages/social_django/urls.py'> (social:social) ''>, 
+<URLPattern '^disconnect/(?P<backend>[^/]+)/$' [name='disconnect']>], 
+[<URLResolver <module 'social_django.urls' from '/env/lib/python3.7/site-packages/social_django/urls.py'> (social:social) ''>, 
+<URLPattern '^disconnect/(?P<backend>[^/]+)/(?P<association_id>\d+)/$' [name='disconnect_individual']>], 
+[<URLResolver <URLResolver list> (None:None) 'en/'>]], 
+'path': 'media/__sized__/products/saleordemoproduct_fd_juice_06_48RQOmM-thumbnail-540x540.png'}"
+```
+
+====Startswith====
+* [[Setting STATIC_URL|https://stackoverflow.com/a/42552956/4058484]]<br>
+```
+$ python3 manage.py collectstatic --noinput --clear --verbosity 3
+Traceback (most recent call last):
+  File "manage.py", line 10, in <module>
+    execute_from_command_line(sys.argv)
+  File "/usr/local/lib/python3.7/site-packages/django/core/management/__init__.py", line 381, in execute_from_command_line
+    utility.execute()
+  File "/usr/local/lib/python3.7/site-packages/django/core/management/__init__.py", line 375, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/usr/local/lib/python3.7/site-packages/django/core/management/base.py", line 323, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/usr/local/lib/python3.7/site-packages/django/core/management/base.py", line 364, in execute
+    output = self.handle(*args, **options)
+  File "/usr/local/lib/python3.7/site-packages/django/contrib/staticfiles/management/commands/collectstatic.py", line 188, in handle
+    collected = self.collect()
+  File "/usr/local/lib/python3.7/site-packages/django/contrib/staticfiles/management/commands/collectstatic.py", line 96, in collect
+    self.clear_dir('')
+  File "/usr/local/lib/python3.7/site-packages/django/contrib/staticfiles/management/commands/collectstatic.py", line 222, in clear_dir
+    if not self.storage.exists(path):
+  File "/usr/local/lib/python3.7/site-packages/django/utils/functional.py", line 256, in inner
+    self._setup()
+  File "/usr/local/lib/python3.7/site-packages/django/contrib/staticfiles/storage.py", line 498, in _setup
+    self._wrapped = get_storage_class(settings.STATICFILES_STORAGE)()
+  File "/usr/local/lib/python3.7/site-packages/storages/backends/gcloud.py", line 110, in __init__
+    check_location(self)
+  File "/usr/local/lib/python3.7/site-packages/storages/utils.py", line 82, in check_location
+    if storage.location.startswith('/'):
+AttributeError: 'NoneType' object has no attribute 'startswith'
+```
+
+====Non Debug====
+* [[Authentication|https://googleapis.github.io/google-cloud-python/latest/core/auth.html]]<br>
+* [[Static for production|https://github.com/mirumee/saleor/issues/1538#issuecomment-415610213]]<br>
+Dengan <code>DEBUG</code> diaktifkan, Django menyajikan file statis untuk Anda. Jika Anda menonaktifkannya, server Anda harus ambil-alih. 
+<br><br>
+# Pastikan file <code>webpack.config.js</code> Anda terbaru. Tetapi, jika Anda tidak menggunakan cabang master, gunakan versi <code>webpack.config.js</code> karena file lokal tidak akan kompatibel dengan master terbaru (<= 2018.07);
+# Anda perlu mengatur <code>STATIC_URL</code> ke URL bucket Anda (ke direktori aset induk);
+# Jalankan <code>npm run build-assets --production</code>; 
+# Pastikan file aset bucket Anda dikompilasi menggunakan <code>--production</code>, jika tidak, jalankan kembali <code>collectstatics</code> untuk memperbarui bucket;
+# Start ulang Saleor.
+[[<img src=https://what-problem-does-it-solve.com/webpack/images/webpack_configs.png>|https://what-problem-does-it-solve.com/webpack/production.html]]
+
+====Whitenoise====
+Django tidak mendukung penyajian file statis dalam produksi. 
+
+Namun, dengan menggunakan [[WhiteNoise|http://whitenoise.evans.io/en/stable/]] maka file statis tetap dapat diintegrasikan ke dalam aplikasi Django Anda.
+
+<source lang="Ruby">
+$ pipenv install whitenoise
+$ pipenv lock -r > requirements.txt
+$ pipenv lock -r -d > dev-requirements.txt
+</source>
+
+settings.py
+<source lang="Ruby">
+MIDDLEWARE = [
+  # 'django.middleware.security.SecurityMiddleware',
+  'whitenoise.middleware.WhiteNoiseMiddleware',
+  # ...
+]
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+</source>
+
+Cara gunakan:
+<source lang="Ruby">
+from whitenoise import WhiteNoise
+
+from my_project import MyWSGIApp
+
+application = MyWSGIApp()
+application = WhiteNoise(application, root='/path/to/static/files')
+application.add_files('/path/to/more/static/files', prefix='more-files/')
+
+</source>
+
+====Rekam Jejak====
+Ada hal yang ingin penulis sampaikan mungkin ini menarik.
+
+Jika pada ''[[sesi skema kerja|https://github.com/chetabahana/chetabahana.github.io/wiki]]'' hal yang tersulit adalah tentang [[<code>bagan project</code>|https://github.com/chetabahana/chetabahana.github.io/wiki/Bagan-Project]] maka pada ''[[Home|sesi tutorial]]'' yang Anda sedang simak ini hal yang tersulit adalah setelan untuk ''Google Storage'' ini.
+
+Kesulitan yang utama adalah juga sama seperti halnya pada <code>bagan project</code>, ini karena sampai saat tulisan ini dibuat, belum bisa ditemukan bagaimana caranya agar Aplikasi Saleor ''[[menempatkan file static dan media di ''Google Storage''|https://docs.getsaleor.com/en/latest/deployment/gcs.html]]''. 
+
+Bahkan pengembang sendiri yang melakukannya pada <code>Amazon AWS</code> di platform <code>heroku</code> juga ketika ditanyakan pada ''[[Issue#2533|https://github.com/mirumee/saleor/issues/2533]]'', pengembang belum bisa membagikan caranya di ''Google Storage''.
+
+Sekalipun sudah ada user yang berhasil menempatkan di ''Google Storage''. Namun setelah membagi caranya masih gagal karena ketika ditest hasilnya konflik.
+
+Hanya karena tujuan bahwa projek ini butuh pemasangan di ''Google Platform'' maka caranya harus ketemu supaya bisa lanjut. 
+
+Jadi apa boleh buat harus cari solusi sendiri..
+
+Untuk menemukan caranya, usahanya sangat rumit, ribet, ratusan kali gagal, bahkan sampai harus alami ''Windows'' nya rusak gak bisa restart saking keseringan build dan instal, bikin jatuh mental. 
+
+Ahirnya ketemu juga, ternyata caranya itu sangat simple, butuh hanya satu baris perintah saja, namun masalah utama itu karena belum pernah ada yang menuju kesitu. 
+
+```
+$ pipenv install django-storages[google]
+```
+
+Perintah ini akan memasang plug-in django untuk google storages dan menempatkannya pada <code>Pipfile</code> dan <code>Pipfile.lock</code>
+
+Kedua file inilah yang kemudian dipakai agar docker memasang paket django untuk Google Storage via <code>Dockerfile</code>:
+
+```
+# Install Python dependencies
+RUN pip install pipenv
+COPY Pipfile Pipfile.lock /app/
+WORKDIR /app
+RUN pipenv install --system --deploy
+```
+
+Yang jadi masalah adalah jika setelan tidak bersesuaian maka semua fungsi macet.
+
+Contoh simplenya, yang pernah diusulkan di [[PR #2626|https://github.com/mirumee/saleor/pull/2626/files]] adalah <code>Pipfile</code> seperti ini:
+
+```
+google-cloud = "==0.34.* "
+google-cloud-storage = "==1.10.*"
+```
+
+penyetelan <code>Pipfile</code> ini selalu berujung dengan error, padahal seharusnya ikut hasil <code>pipenv install</code> yakni
+
+```
+django-storages = {extras = ["google"],version = "*"}
+```
+
+Saya sudah berusaha untuk ''[[sampe kesini|https://github.com/mirumee/saleor/issues/2533#issuecomment-493491117]]'' dari bulan Februari 2019 baru bisa berhasil menemukan caranya seperti yang saya usulkan via [[PR#4127|https://github.com/mirumee/saleor/pull/4127]] pada bulan Mei 2019. 
+
+Ini bulan puasa, jadi kalau dikilas balik sudah hampir setahun sejak saya mulai menulis projek ini. 
+
+Ketika itu <code>bagan project</code> bisa berhasil tersusun juga di bulan puasa. Benar kata pepatah yang mengatakan bahwa:
+
+'''Sesungguhnya dibalik kesulitan itu ada kemudahan, yang penting adalah jangan menyerah untuk hadapi segala kesulitan, teruslah berusaha cari solusinya..'''
+
+
+==''Referensi''==
+* [[Serve Static files from GCS Bucket|https://www.google.com/search?q=django+collectstatic+google+storage&oq=django_google_storage]]
+* [[Setting Up Google Cloud Storage|https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/setting-up-cloud-storage]]
+* [[Boto client library plugin - Python XML API|https://cloud.google.com/storage/docs/boto-plugin]]
+* [[Reading and Writing to Google Cloud Storage|https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/read-write-to-cloud-storage]]
+* [[Use a Google Cloud Storage Backend with Your Django Project|https://eldarion-gondor.github.io/docs/how-to/configure-gcs-backend/]]
+* [[Django Media Serving Using Google Cloud Storage Signed URLS|https://www.codementor.io/samwelopiyo/how-i-learned-django-static-and-media-serving-through-google-cloud-storage-signed-urls-jl9tjk9uk]]
+

@@ -1,0 +1,56 @@
+==Arsitektur==
+[[<img src=https://cdn-images-1.medium.com/max/800/1*39XEUZgpoUUzahu7giTlAw.png>|https://medium.com/building-the-system/gunicorn-3-means-of-concurrency-efbb547674b7]]
+
+===App Engine===
+====Penskalaan====
+* [[How Instances are Managed|https://cloud.google.com/appengine/docs/standard/python3/how-instances-are-managed]]
+
+[[<img src=https://chetabahana.github.io/images/google/jenis-skala-instance.png>|https://cloud.google.com/appengine/docs/standard/python3/how-instances-are-managed]]
+==Kelola Instance==
+
+===Via app.yaml===
+```
+instance_class: F2
+entrypoint: gunicorn -b :$PORT saleor.wsgi --timeout 120
+
+automatic_scaling:
+  max_instances: 1
+```
+
+====Kasus Memory====
+* [[App Engine Standard - Instance classes|https://cloud.google.com/appengine/docs/standard/#instance_classes]]
+* [[App Engine Pricing - Standard environment instances|https://cloud.google.com/appengine/pricing#standard_instance_pricing]]
+```
+2019-04-10 05:14:39.799 ICT
+While handling this request, the process that handled this request was found to be using 
+too much memory and was terminated. This is likely to cause a new process to be used for 
+the next request to your application. If you see this message frequently, you may have a 
+memory leak in your application or may be using an instance with insufficient memory. 
+Consider setting a larger instance class in app.yaml.
+
+2019-04-10 05:14:39.798 ICT
+Exceeded soft memory limit of 256 MB with 312 MB after servicing 88 requests total. 
+Consider setting a larger instance class in app.yaml.
+```
+
+opsi
+```
+entrypoint: gunicorn -b :$PORT saleor.wsgi --timeout 120 --threads 2 --log-level debug 
+--worker-class gthread --workers $((2 * $(getconf _NPROCESSORS_ONLN) + 1))
+```
+
+====Kasus Performance====
+* [[Django, fast: part 2|https://blog.mirumee.com/django-fast-part-2-d73a4ecd61f3]]
+* [[Add support for Gunicorn|https://github.com/mirumee/saleor/pull/4167]]
+
+[[<img src=https://cdn-images-1.medium.com/max/2400/1*yAL7NXrpC_NhXRQMfpU66g.png>|https://cdn-images-1.medium.com/max/2400/1*yAL7NXrpC_NhXRQMfpU66g.png]]
+
+==''Referensi''==
+
+* https://gunicorn.org/
+* https://pypi.org/project/gunicorn/
+* https://github.com/benoitc/gunicorn
+* http://docs.gunicorn.org/en/stable/run.html
+* https://blog.gevent.org/2010/02/27/why-gevent/
+* http://rahmonov.me/posts/run-a-django-app-with-gunicorn-in-ubuntu-16-04/
+* [[Benchmark uWSGI vs gunicorn for async workers|https://ivan-site.com/2012/09/benchmark-uwsgi-vs-gunicorn-for-async-workers/]]

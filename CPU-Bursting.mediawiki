@@ -1,0 +1,11 @@
+[[CPU Bursting|https://cloud.google.com/compute/docs/machine-types#sharedcore]] adalah kemampuan yang memungkinkan mesin virtual untuk menggunakan CPU fisik tambahan untuk periode waktu yang singkat. Spike terjadi secara otomatis ketika instance Anda membutuhkan lebih banyak CPU fisik daripada yang dialokasikan sebelumnya..
+
+__TOC__
+
+[[<img src=https://user-images.githubusercontent.com/36441664/64082422-f4c62600-cd38-11e9-8838-95d7673cb64e.png>|https://cloud.google.com/compute/docs/machine-types#sharedcore]]
+
+Spike ini perlu diperhatikan statusnya pada konsol compute engine di akun Anda karena juga akan membebani tagihan, seperti yang terlihat berikut [[sebagai contoh|https://user-images.githubusercontent.com/36441664/65305179-b770ed80-dbac-11e9-92b9-e88d58d26cd4.png]] 
+
+==Referensi==
+* [[Shared-core machine types|https://cloud.google.com/compute/docs/machine-types#sharedcore]]
+* [[How to avoid Google Cloud Compute bursting/burstable cpu throttling|https://serverfault.com/questions/776117/how-to-avoid-google-cloud-compute-bursting-burstable-cpu-throttling]]

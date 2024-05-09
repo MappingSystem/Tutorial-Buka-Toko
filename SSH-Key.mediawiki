@@ -1,0 +1,372 @@
+==GitHub==
+===SSH Key===
+* [[Using SSH key for Data transfer|https://stackoverflow.com/a/56204733/4058484]]
+
+====Cek Remote====
+Lihat [[daftar key di GitHub|https://github.com/settings/keys]]
+
+====Cek Local====
+Lihat [[daftar key di local PC|https://help.github.com/en/articles/checking-for-existing-ssh-keys]]
+```
+$ ls -al ~/.ssh
+```
+default adalah
+* id_dsa.pub
+* id_ecdsa.pub
+* id_ed25519.pub
+* id_rsa.pub
+Jika tidak ditemukan coba cek dengan
+```
+$ ssh -vT git@github.com
+```
+====Buat Baru====
+* [[Setup SSH Keys on a Linux / Unix System|https://www.cyberciti.biz/faq/how-to-set-up-ssh-keys-on-linux-unix/]]
+
+Jika tidak ditemukan maka [[buat baru|https://help.github.com/en/articles/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent]]
+```
+$ ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -C "your_email@example.com"
+
+```
+contoh
+```
+$ ssh-keygen -t rsa -b 4096 -C "chetabahana@gmail.com"
+Generating public/private rsa key pair.
+Enter file in which to save the key (/home/chetabahana/.ssh/id_rsa):
+Enter passphrase (empty for no passphrase):
+Enter same passphrase again:
+Your identification has been saved in /home/chetabahana/.ssh/id_rsa.
+Your public key has been saved in /home/chetabahana/.ssh/id_rsa.pub.
+The key fingerprint is:
+SHA256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx chetabahana@gmail.com
+The key's randomart image is:
++---[RSA 4096]----+
+| ..=o.o ..o      |
+'''
+
+$ ls -al ~/.ssh
+total 104
+drwx------ 2 chetabahana docker  4096 Mar 30 15:04 .
+drwxr-xr-x 8 chetabahana docker  4096 Mar 30 05:37 ..
+-rw------- 1 chetabahana docker  3326 Mar 30 15:04 id_rsa
+-rw-r--r-- 1 chetabahana docker   747 Mar 30 15:04 id_rsa.pub
+
+$ clip < ~/.ssh/id_rsa.pub
+```
+
+Jika ingin ubah passphrase
+```
+ ssh-keygen -p
+```
+
+===Tes SSH===
+Copy dan [[masukkan id_rsa.pub ke GitHub|https://github.com/settings/ssh/new]] lalu tes sbb
+
+```
+$ ssh -T git@github.com
+Enter passphrase for key '/home/chetabahana/.ssh/id_rsa': xxxxxxxxx
+Hi chetabahana! You've successfully authenticated, ......
+
+```
+
+====SSH Agent====
+Anda dapat mengamankan kunci SSH dan mengkonfigurasi SSH Agent otentikasi sehingga Anda tidak perlu memasukkan kembali passphrase Anda setiap kali menggunakan kunci SSH.
+
+* Jika Anda pakai [[GitHub Desktop|https://desktop.github.com/]] tidak perlu langkah ini, agent akan start otomatis.
+* Jika pakai terminal lain ikuti cara [[Auto-launching ssh-agent|https://help.github.com/en/articles/working-with-ssh-key-passphrases#auto-launching-ssh-agent-on-git-for-windows]].
+```
+$ eval $(ssh-agent -s)
+Agent pid 5054
+
+$ ssh-add ~/.ssh/id_rsa
+Enter passphrase for /home/chetabahana/.ssh/id_rsa: xxxxxxxxx
+Identity added: /home/chetabahana/.ssh/id_rsa (/home/chetabahana/.ssh/id_rsa)
+
+$ ssh-add -l
+SHA256:xefGz0.../wmtCvyIVLdqNtJOGX..... /home/chetabahana/.ssh/id_rsa (RSA)
+
+$ ssh -T git@github.com
+Hi chetabahana! You've successfully authenticated,
+
+```
+
+====Expect====
+* [[interactive login|https://stackoverflow.com/a/55779022/4058484]]
+* [[ssh-add automatically|https://unix.stackexchange.com/questions/90853/how-can-i-run-ssh-add-automatically-without-a-password-prompt]]
+~/.ssh/agent
+```
+#!/usr/bin/expect -f
+spawn ssh-add /home/chetabahana/.ssh/id_rsa
+expect "Enter passphrase for /home/chetabahana/.ssh/id_rsa:"
+send "[passphrase]\n";
+expect "Identity added: /home/chetabahana/.ssh/id_rsa (/home/chetabahana/.ssh/id_rsa)"
+interact
+```
+
+instal expect
+```
+$ sudo apt-get --assume-yes install expect
+
+$ expect ~/.ssh/agent
+Agent pid 5516
+spawn ssh-add /home/chetabahana/.ssh/id_rsa
+Enter passphrase for /home/chetabahana/.ssh/id_rsa: 
+Identity added: /home/chetabahana/.ssh/id_rsa (/home/chetabahana/.ssh/id_rsa)
+
+```
+====Issue====
+Jika masih belum bisa koneksi coba langkah berikut
+
+* Buka Control Panel dari menu Start
+* Pilih Akun Pengguna
+* Pilih "Kelola kredensial Anda" di menu sebelah kiri
+* Hapus kredensial yang terkait dengan Git atau GitHub
+* Kemudian ulangi dari awal lagi..
+
+==Cloud Builder==
+* Jika Anda pakai [[Build configuration overview|https://cloud.google.com/cloud-build/docs/build-config]].
+===SSH Remote===
+
+cloudbuild.yaml
+```
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["compute", "ssh", "${_USER_NAME}@${_INSTANCE_NAME}", "--zone", "${_ZONE}", 
+  "--command", "pwd"]
+
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: ["cp", "-rPv", "/builder/home/.ssh", "gs://${_BUCKET_NAME}/builder/"]
+
+substitutions:
+  _ZONE: us-central1-c
+  _USER_NAME: chetabahana # default value
+  _BUCKET_NAME: appspot.chetabahana.com 
+  _INSTANCE_NAME: backend # default value 
+  _DOCKER_DIRECTORY: /home/chetabahana/.docker # default value
+```
+
+====Response====
+
+```
+Starting Step #1
+Step #1: Already have image (with digest): gcr.io/cloud-builders/gcloud
+Step #1: WARNING: The public SSH key file for gcloud does not exist.
+Step #1: WARNING: The private SSH key file for gcloud does not exist.
+Step #1: WARNING: You do not have an SSH key for gcloud.
+Step #1: WARNING: SSH keygen will be executed to generate a key.
+Step #1: This tool needs to create the directory [/builder/home/.ssh] before 
+Step #1: being able to generate SSH keys.
+Step #1: 
+Step #1: Do you want to continue (Y/n)?  
+Step #1: Generating public/private rsa key pair.
+Step #1: Your identification has been saved in /builder/home/.ssh/google_compute_engine.
+Step #1: Your public key has been saved in /builder/home/.ssh/google_compute_engine.pub.
+Step #1: The key fingerprint is:
+Step #1: SHA256:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX root@XXXXXXXXXX
+Step #1: The key's randomart image is:
+Step #1: +---[RSA 2048]----+
+Step #1: |          .+X .++|
+Step #1: |          .o.oo=+|
+Step #1: |          o o .=E|
+Step #1: |       . . =  +.+|
+Step #1: |      x S + .o =.|
+Step #1: |     * + . .. + =|
+Step #1: |    o O =    . o.|
+Step #1: |     X B         |
+Step #1: |   .x B .        |
+Step #1: +----[SHA256]-----+
+Step #1: Updating project ssh metadata...
+Step #1: ...............................................................................
+..............Updated [https://www.googleapis.com/compute/v1/projects/chetabahana].
+Step #1: .done.
+Step #1: Waiting for SSH key to propagate.
+Step #1: Warning: Permanently added 'compute.XXXX' (ECDSA) to the list of known hosts.
+Step #1: /home/chetabahana
+Finished Step #1
+Starting Step #2
+Step #2: Already have image (with digest): gcr.io/cloud-builders/gsutil
+Step #2: Copying file:///builder/home/.ssh/google_compute_known_hosts \
+         [Content-Type=application/octet-stream]...
+Step #2: / [0 files][    0.0 B/  222.0 B]                                                
+         / [1 files][  222.0 B/  222.0 B]                                                
+         Created: gs://appspot.chetabahana.com/builder/.ssh/
+         google_compute_known_hosts#1555082519040128
+Step #2: Copying file:///builder/home/.ssh/google_compute_engine \
+         [Content-Type=application/octet-stream]...
+Step #2: / [1 files][  222.0 B/  1.9 KiB]                                                
+         / [2 files][  1.9 KiB/  1.9 KiB]                                                
+         Created: gs://appspot.chetabahana.com/builder/.ssh/
+         google_compute_engine#1555082519405651
+Step #2: Copying file:///builder/.ssh/google_compute_engine.pub 
+         [Content-Type=application/octet-stream]...
+Step #2: - [2 files][  1.9 KiB/  2.2 KiB]                                                
+         - [3 files][  2.2 KiB/  2.2 KiB]                                                
+         Created: gs://appspot.chetabahana.com/builder/.ssh/
+         google_compute_engine.pub#1555082519727233
+Step #2: Operation completed over 3 objects/2.2 KiB.                                      
+Finished Step #2
+PUSH
+DONE
+```
+
+====Result====
+```
+$ gsutil ls gs://appspot.chetabahana.com/builder/.ssh/
+gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine
+gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine.pub
+gs://appspot.chetabahana.com/builder/.ssh/google_compute_known_hosts
+
+$ gsutil ls -alR gs://appspot.chetabahana.com/builder/.ssh/
+gs://appspot.chetabahana.com/builder/.ssh/:
+1675  2019-04-12T15:21:59Z  gs://appspot.chetabahana.com/builder/.ssh/
+google_compute_engine#1555082519405651  metageneration=1
+399  2019-04-12T15:21:59Z  gs://appspot.chetabahana.com/builder/.ssh/
+google_compute_engine.pub#1555082519727233  metageneration=1
+222  2019-04-12T15:21:59Z  gs://appspot.chetabahana.com/builder/.ssh/
+google_compute_known_hosts#1555082519040128  metageneration=1
+TOTAL: 3 objects, 2296 bytes (2.24 KiB)
+```
+
+===SSH Reverse===
+cloudbuild.yaml
+```
+steps:
+- name: "gcr.io/cloud-builders/gsutil"
+  args: ["cp", "-rv", "gs://${_BUCKET_NAME}/builder/.ssh", "/builder/home/"]
+
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["compute", "ssh", "${_USER_NAME}@${_INSTANCE_NAME}", "--zone", "${_ZONE}", 
+  "--command", "pwd"]
+
+substitutions:
+  _ZONE: us-central1-c
+  _USER_NAME: chetabahana # default value
+  _BUCKET_NAME: appspot.chetabahana.com 
+  _INSTANCE_NAME: backend # default value 
+  _DOCKER_DIRECTORY: /home/chetabahana/.docker # default value
+
+timeout: "1800s"  
+```
+
+====Response====
+
+```
+Starting Step #0
+Step #0: Already have image (with digest): gcr.io/cloud-builders/gsutil
+Step #0: Copying gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine...
+Step #0: / [0 files][ 0.0 B/ 1.6 KiB] 
+/ [1 files][ 1.6 KiB/ 1.6 KiB] 
+Created: file:///builder/home/.ssh/google_compute_engine
+Step #0: Copying gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine.pub
+Step #0: / [1 files][ 1.6 KiB/ 2.0 KiB] 
+/ [2 files][ 2.0 KiB/ 2.0 KiB] 
+Created: file:///builder/home/.ssh/google_compute_engine.pub
+Step #0: Copying gs://appspot.chetabahana.com/builder/.ssh/google_compute_known_hosts
+Step #0: / [2 files][ 2.0 KiB/ 2.2 KiB] 
+-
+- [3 files][ 2.2 KiB/ 2.2 KiB] 
+Created: file:///builder/home/.ssh/google_compute_known_hosts
+Step #0: 
+Step #0: Operation completed over 3 objects/2.2 KiB. 
+Finished Step #0
+Starting Step #1
+Step #1: Already have image (with digest): gcr.io/cloud-builders/gcloud
+Step #1: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Step #1: @ WARNING: UNPROTECTED PRIVATE KEY FILE! @
+Step #1: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+Step #1: Permissions 0644 for '/builder/home/.ssh/google_compute_engine' are too open.
+Step #1: It is required that your private key files are NOT accessible by others.
+Step #1: This private key will be ignored.
+Step #1: Load key "/builder/home/.ssh/google_compute_engine": bad permissions
+Step #1: Permission denied (publickey).
+Step #1: ERROR: (gcloud.compute.ssh) [/usr/bin/ssh] exited with return code [255].
+Finished Step #1
+ERROR
+ERROR: build step 1 "gcr.io/cloud-builders/gcloud" failed: exit status 255
+
+```
+
+====Atribut====
+* [[cp - Copy files and objects|https://cloud.google.com/storage/docs/gsutil/commands/cp]]
+
+Jika Anda menemui masalah di atas maka kita harus merubah type isi file ssh namun bukan di gcs tapi di lokasi lain dan di copy dengan bendera -P.
+```
+$ gsutil cp --help
+
+-P                Menyebabkan atribut POSIX yang akan dipertahankan ketika objek berada
+                  disalin. Dengan fitur ini diaktifkan, gsutil cp akan menyalin bidang
+                  disediakan oleh stat. Ini adalah ID pengguna pemilik, grup
+                  ID grup pemilik, mode (izin) file, dan
+                  waktu akses / modifikasi file. Untuk unduhan, ini
+                  atribut hanya akan ditetapkan jika objek sumber diunggah
+                  dengan bendera ini diaktifkan.
+
+                  Pada Windows, flag ini hanya akan mengatur dan mengembalikan waktu 
+                  akses dan modifikasi. Ini karena Windows tidak memiliki
+                  Gagasan POSIX uid / gid / mode.
+
+-R, -r Opsi -R dan -r identik. 
+                  Penyebab direktori, 
+                  bucket, dan subdirektori bucket untuk disalin secara rekursif.
+                  Jika Anda lalai untuk menggunakan opsi ini untuk mengunggah, gsutil 
+                  akan melakukannya salin semua file yang ditemukannya dan lewati 
+                  direktori mana pun. Demikian pula,
+                  lalai menentukan opsi untuk unduhan akan menyebabkan
+                  gsutil untuk menyalin objek apa pun di direktori bucket saat ini
+                  tingkatkan, dan lewati setiap subdirektori.
+```
+* [[unprotected private key file|https://stackoverflow.com/questions/25869207/unprotected-private-key-file]].
+
+```
+$ mkdir dummy
+$ export BOTO_CONFIG=/dev/null
+$ export BUCKET_NAME=appspot.chetabahana.com
+$ gsutil cp -rv gs://${BUCKET_NAME}/builder/.ssh dummy
+$ chmod 400 dummy/.ssh/*
+$ gsutil cp -rPv dummy/.ssh gs://${BUCKET_NAME}/builder
+Copying file://dummy/.ssh/google_compute_known_hosts [Content-Type=application/octet-stream]...
+Created: gs://appspot.chetabahana.com/builder/.ssh/google_compute_known_hosts#1557034548447582
+Copying file://dummy/.ssh/google_compute_engine.ppk [Content-Type=application/octet-stream]...
+Created: gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine.ppk#1557034548618063
+Copying file://dummy/.ssh/google_compute_engine [Content-Type=application/octet-stream]...
+Created: gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine#1557034548912606
+Copying file://dummy/.ssh/google_compute_engine.pub [Content-Type=application/octet-stream]...
+Created: gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine.pub#1557034549362622
+
+Operation completed over 4 objects/3.7 KiB.  
+$ rm -rf dummy
+
+```
+
+====Result====
+
+```
+Starting Step #0
+Step #0: Already have image (with digest): gcr.io/cloud-builders/gsutil
+Step #0: Copying gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine...
+Step #0: / [0 files][ 0.0 B/ 1.6 KiB] 
+         / [1 files][ 1.6 KiB/ 1.6 KiB] 
+         Created: file:///builder/home/.ssh/google_compute_engine
+Step #0: Copying gs://appspot.chetabahana.com/builder/.ssh/google_compute_engine.pub
+Step #0: / [1 files][ 1.6 KiB/ 2.0 KiB] 
+         / [2 files][ 2.0 KiB/ 2.0 KiB] 
+         Created: file:///builder/home/.ssh/google_compute_engine.pub
+Step #0: Copying gs://appspot.chetabahana.com/builder/.ssh/google_compute_known_hosts
+Step #0: / [2 files][ 2.0 KiB/ 2.2 KiB] 
+         / [3 files][ 2.2 KiB/ 2.2 KiB] 
+         Created: file:///builder/home/.ssh/google_compute_known_hosts
+Step #0: Operation completed over 3 objects/2.2 KiB. 
+Finished Step #0
+Starting Step #1
+Step #1: Already have image (with digest): gcr.io/cloud-builders/gcloud
+Step #1: /home/chetabahana
+Finished Step #1
+PUSH
+DONE
+
+```
+
+
+==Referensi==
+* https://console.cloud.google.com/compute/metadata/sshKeys
+* https://cloud.google.com/compute/docs/instances/connecting-to-instance
+* https://cloud.google.com/compute/docs/instances/adding-removing-ssh-keys
+

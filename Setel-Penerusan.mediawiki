@@ -1,0 +1,33 @@
+__TOC__
+==Penerusan==
+===External IP===
+Contoh di bawah ini menunjukkan tiga layanan. Di <code>service1</code> dan <code>service2</code>, file sumber berada pada level yang sama dengan file YAML. Di <code>service3</code>, ada file YAML untuk dua versi.
+
+[[<img src=https://cloud.google.com/appengine/docs/images/services_yaml_files2.svg>|https://cloud.google.com/appengine/docs/standard/go/configuration-files]]
+
+File konfigurasi ini mengontrol fitur opsional yang berlaku untuk semua layanan dalam aplikasi:
+
+* dispatch.yaml
+* queue.yaml
+* index.yaml
+* cron.yaml
+* dos.yaml
+
+Deploy 
+```
+gcloud app deploy [CONFIG_FILE]
+```
+===Internal IP===
+[[<img src=https://cloud.google.com/dns/images/dns-forwarding-1.svg>|https://cloud.google.com/dns/images/dns-forwarding-1.svg]]
+
+==Pembiayaan==
+===Nginx===
+===Load Balancing===
+* Pertimbangkan ''[[biaya load balancing|https://cloud.google.com/compute/pricing#lb/]]'' sebelum menggunakan.
+* Untuk menghemat bisa lakukan ''[[balancing dengan Nginx|https://cloud.google.com/community/tutorials/https-load-balancing-nginx]]''
+
+
+
+==''Referensi''==
+* [[Internal DNS|https://cloud.google.com/compute/docs/internal-dns]]
+* [[Cloud Identity-Aware Proxy|https://cloud.google.com/iap/]]

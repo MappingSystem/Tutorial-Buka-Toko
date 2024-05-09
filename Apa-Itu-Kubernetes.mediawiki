@@ -1,0 +1,1 @@
+[[Kubernetes|https://en.wikipedia.org/wiki/Kubernetes]] adalah sistem orkestrasi wadah sumber terbuka untuk mengotomatiskan penerapan, penskalaan, dan manajemen aplikasi yang bebasis kontainer termasuk ''[[Apa-itu-Docker|Docker]]''.

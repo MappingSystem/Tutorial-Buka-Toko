@@ -1,0 +1,7 @@
+
+
+__TOC__
+==Referensi==
+* [[Detil Quota|https://console.cloud.google.com/appengine/quotadetails]]
+* [[Quota: Implementing Cron and Task|https://www.igorkromin.net/index.php/2018/03/22/the-right-way-of-implementing-cron-and-task-queues-on-google-app-engine/]]
+* [[Google App engine needs periodic restarting|https://stackoverflow.com/a/35290296/4058484]]

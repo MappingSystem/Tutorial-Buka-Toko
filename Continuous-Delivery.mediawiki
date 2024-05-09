@@ -1,0 +1,170 @@
+[[Continuous delivery|https://en.wikipedia.org/wiki/Continuous_delivery]] (CD atau CDE) adalah pendekatan rekayasa perangkat lunak untuk memastikan bahwa perangkat lunak dapat dirilis setiap saat. Proses penyebaran langsung dan berulang sangat penting untuk penerapan secara terus menerus.
+
+__TOC__
+
+==Layanan==
+===Compute===
+====Nirmata====
+[[Nirmata|https://www.nirmata.com/pricing/]] adalah layanan turnkey untuk mengelola kontainer aplikasi produksi di cloud publik dan private. Nirmata ''[[Suport GCE|https://nirmata-documentation.readthedocs.io/en/latest/Introduction.html?highlight=google+compute+engine#cloud-providers]]'' karenanya [[dapat dijalankan di Google Platform|https://nirmata-documentation.readthedocs.io/en/latest/CloudProviders.html?highlight=google+platform#gce-cloud-provider]] seperti berikut:
+
+[[<img src=http://nirmata.com/wp-content/uploads/2015/05/dockerhubintegration-ppt.png>|http://help.nirmata.com/en/latest/Environments.html#cloud-shell]]
+
+====Webhook Relay====
+* [[Setting up simple, self-hosted & fast CI/CD solution with Drone.io|https://webhookrelay.com/blog/2019/02/11/using-drone-for-simple-selfhosted-ci-cd/]]
+Webhook Relay memungkinkan siapa saja untuk menerima webhook dan memaparkan layanan web ke internet tanpa memiliki IP publik atau mengkonfigurasi NAT / firewall.
+
+[[<img src=https://webhookrelay.com/images/high-level.png>|https://webhookrelay.com/]]
+
+
+===Kubernetes===
+
+====CodeFresh====
+Bersasarkan [[Analisa CI/CD|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Setel-Otomatisasi-Deploy#step-4-codefresh]] dari begitu banyak penyedia maka [[Codefresh|https://g.codefresh.io/signup?ref=ByhLQyoQ4]] dapat dipilih sebagai acuan dalam project ini. Selain yang sudah [[Apa-Itu-Codefresh|dirangkum]] maka Anda bisa simak lebih detil di [[dokumentasi|https://codefresh.io/docs/]].
+
+[[<img src=https://cdn.thenewstack.io/media/2019/02/50d282a5-travisc1.png>|https://codefresh.io/docs/]]
+
+Selain yang diulas dalam [[tabel penyedia CI/CD|https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Setel-Otomatisasi-Deploy#step-4-codefresh]] maka untuk GKE hal ini dapat juga dilakukan dengan [[BitBucket|https://confluence.atlassian.com/bitbucket/use-docker-images-as-build-environments-792298897.html]], [[GitLab|https://about.gitlab.com/pricing/]], [[Travis|https://travis-ci.com/]], [[Codeship|http://codeship.com/]], [[VMWare|https://docs.vmware.com/en/VMware-Code-Stream/services/Using-and-Managing-CodeStream/GUID-FAB8901C-1682-4B80-BCF5-C999F0F877EC.html]], [[CloudBees|https://www.cloudbees.com/devops/continuous-delivery/jenkins-docker]], [[Knatife|https://knative.dev/docs/serving/samples/gitwebhook-go/]] dan [[masih banyak lagi|https://blog.codepipes.com/hosted-ci-comparison/hosted-ci-comparison.html]]. 
+
+==Setup Server==
+Selain menggunakan ''[[Continuous-Delivery#layanan|layanan]]'' maka Anda juga dapat memasang server untuk menjalankan CI/CD. Hal ini akan memberikan keleluasaan yang lebih tinggi dalam menentukan arah project yang Anda bangun baik di [[Continuous-Delivery#Compute_Engine|Compute Engine]] maupun [[Continuous-Delivery#Kubernetes_Cluster|Kubernetes Cluster]].
+
+===Compute Engine===
+====Gcloud====
+* [[A quick overview on what is possible with Google Cloud Build|https://ordina-jworks.github.io/cloud/2019/03/28/Building-With-Google-Cloud-Build.html]]
+```
+$ gcloud components install cloud-build-local
+$ cloud-build-local --config=[CONFIG FILE] \
+  --dryrun=false \
+  --push \
+  [SOURCE_CODE]
+```
+====GoCD====
+[[GoCD|https://en.wikipedia.org/wiki/Go_continuous_delivery]] adalah alat open-source yang digunakan dalam pengembangan perangkat lunak untuk membantu tim dan organisasi mengotomatiskan pengiriman perangkat lunak yang berkelanjutan. Ini mendukung otomatisasi seluruh proses build-test-release dari kode check-in hingga penyebaran.
+[[<img src=https://docs.gocd.org/current/images/home-image1.svg>|https://docs.gocd.org/current/]]
+
+====Strider CD====
+[[Strider|https://github.com/Strider-CD/strider]] adalah platform Open Source Continuous Deployment / Continuous Integration. Ditulis dalam Node.JS/JavaScript dan menggunakan MongoDB. Diterbitkan di bawah lisensi BSD.
+
+[[<img src=https://github.com/Strider-CD/strider/raw/master/docs/screenshots/dashboard.jpg>|http://strider-cd.github.io/]]
+
+====Giant Swarm====
+* [[Continuous Deployments with Docker Hub|https://blog.giantswarm.io/continuous-deployments-with-swarm-inception-and-docker-hub/]]
+[[Swarm Inception|https://github.com/giantswarm/swarm-inception/]] adalah aplikasi yang dijalankan via DockerHub webhook. Build dilakukan via [[Github webhooks|https://developer.github.com/webhooks/]]. Ketika selesai DockerHub akan memanggil handler untuk memicu pembaruan.
+
+```
+$ git clone https://github.com/giantswarm/swarm-inception.git
+$ cd swarm-inception/
+$ make deploy
+Configuration file written to swarmconfig.py...
+docker build -t registry.giantswarm.io/bant/inception .
+...<snip>
+Creating 'inception' in the 'bant/dev' environment…
+Service created successfully!
+Starting service 'inception'…
+Waiting for 'inception' to get started…
+Service 'inception' is up.
+You can see all components using this command:
+
+    swarm status inception
+
+Use http://inception-bant.gigantic.io/bant/dev/hook on Docker Hub's to deploy a service.
+```
+
+===Kubernetes Cluster===
+
+====Keel====
+* [[Kubernetes workflow with Github and Keel|https://itnext.io/setting-up-push-to-deploy-kubernetes-workflow-with-github-and-keel-43173d996587]]
+
+[[Keel|https://github.com/keel-hq/keel]] adalah alat untuk mengotomatisasi pembaruan penyebaran Kubernetes yang mendukung penyedia Helm Charts dan dapat dijalankan di Google Platform seperti berikut:
+
+[[<img src=https://camo.githubusercontent.com/e0c86b02e65a9302af6f5eb4d5b2fa849b260922/68747470733a2f2f6b65656c2e73682f696d672f6b65656c5f686967685f6c6576656c2e706e67>|https://keel.sh/]]
+
+====Rancher====
+[[Rancher|https://rancher.com]] adalah platform perangkat lunak sumber terbuka yang memungkinkan organisasi menjalankan dan mengelola Docker dan Kubernetes dalam produksi. Rancher memasok seluruh tumpukan perangkat lunak yang diperlukan untuk mengelola kontainer dalam produksi.
+
+[[<img src=https://rancher.com/docs/one-point-x/img/rancher/rancher_overview_2.png>|https://rancher.com/docs/rancher/v1.6/en/]]
+
+====OpenFaas====
+Jika Anda membangun project di GitLab maka ada baiknya untuk meninjau [[OpenFaaS Cloud|https://docs.openfaas.com/]]. Layanan ini di Kubernetes terhubung ke instance GitLab sehingga Anda dapat [[menjalankan fungsi Server|https://www.openfaas.com/blog/openfaas-cloud-gitlab/]] yang di-hosting-sendiri di cloud pribadi atau publik.
+
+[[<img src=https://www.openfaas.com/images/openfaas-cloud-gitlab/ofc-infra-layer.png>|https://www.openfaas.com/blog/openfaas-cloud-gitlab/]]
+
+====OpenShift====
+
+* [[Build Triggers Overview|https://docs.okd.io/latest/dev_guide/builds/triggering_builds.html]]
+* [[Installing Gogs Git Server on OpenShift|http://www.opensourcerers.org/installing-gogs-git-server-openshift-make-using-webhooks-trigger-builds/]]
+
+[[OpenShift®|https://www.openshift.com/learn/what-is-openshift]] adalah platform aplikasi cloud Kubernetes hybrid cloud mendukung Red Hat® Enterprise Linux dan standar Docker.<br><br>
+
+[[<img src=https://www.openshift.com/hubfs/images/illustrations/marketure-diagram.svg>|https://www.openshift.com/learn/what-is-openshift]]
+
+====GitHub Action====
+* [[An example workflow, using the GitHub Action for gcloud|https://github.com/actions/example-gcloud]]
+Proses alur kerja, menggunakan [[GitHub Action|https://github.com/actions]] untuk gcloud untuk menyebarkan situs web statis ke Google Kubernetes Engine Cluster yang ada.
+[[<img src=https://chetabahana.github.io/images/github/screencapture-github-actions-example-gcloud-blob-master-github-main-workflow.png>|https://github.com/actions/example-gcloud/blob/master/.github/main.workflow]]
+
+Untuk detil lebih lanjut silahkan simak [[Akun GitHub Actions|https://github.com/chetabahana/chetabahana.github.io/wiki/Akun-GitHub-Actions]].
+
+
+==Project Delivery==
+Dengan menggunakan sumber di atas maka kita akan terapkan untuk mendapatkan penerapan yang berkesinambungan. Hal ini penting untuk membangun, menguji, dan merilis perangkat lunak dengan kecepatan dan frekuensi yang lebih besar.
+[[<img src=https://jaxenter.com/wp-content/uploads/2017/08/codefresh-1-1024x578.png>|https://thenewstack.io/migrate-from-travisci-to-codefresh/]]
+
+===Alur===
+[[<img src=https://pbs.twimg.com/profile_banners/2691127848/1539363412/1500x500>|https://pbs.twimg.com/profile_banners/2691127848/1539363412/1500x500]]
+====Git Commit====
+====Image Push====
+
+===Tujuan===
+Karena project yang kita bahas adalah tentang e-Commerce maka tujuan dari CI/CD kita tetapkan untuk menunjang operasi dalam produksi.
+
+====Produk Unggulan====
+* Menampilkan produk unggulan secara dinamis sesuai Trend.
+* Jalankan SEO untuk produk unggulan dari Situs Toko via Google Site untuk berkompetisi di Google Search
+* Tampilan data terkini untuk Update Setelan AdWords Secara Otomatis guna peroleh sales return yang paling optimal.
+
+====Operasi Minimalis====
+* Tidak memerlukan database karena bisa akses dan pakai data di Google Merchant.
+* Tidak perlukan hosting berbayar karena Google Site adalah Free dan AppEngine bisa dijalankan secara gratis.
+
+====Target Terintegrasi====
+
+===Optimasi===
+Pendekatan ini membantu mengurangi biaya, waktu, dan risiko pengiriman perubahan dengan memungkinkan pembaruan lebih lanjut untuk aplikasi dalam produksi. Alur dari pilosopi diatur sbb:
+
+====Optimasi Internal====
+Pengelolaan hasil Optimasi Internal Toko sesuai dengan Publikasi Sesi yg Pertama via Google Sites API.
+====Optimasi Eksternal====
+Pendataan hasil Optimasi Eksternal sesuai dengan Publikasi Sesi yg Kedua via Google Content API.
+====Optimasi Promosi====
+Pendataan hasil Optimasi Promosi dari kinerja proses ke-1 dan -2 via Google AdWords API.
+====Optimasi Penjualan====
+Pengelolaan atas hasil Optimasi Penjualan dari kinerja proses ke-3 via Google AppEngine.
+
+===Detail Proses===
+Penerapan sumber² CI/CD baik berupa ''[[Continuous-Delivery#layanan|layanan]]'' maupun ''[[Continuous-Delivery#Setup_Server|setup server]]'' dalam rangka mencapai tujuan di atas tentu akan memerlukan pembahasan yang sangat detil seperti sesi ''[[Home|Tutorial-Buka-Toko]]'' ini. 
+
+Oleh karenanya kita akan bagi ke dalam proses demi proses. Pilosopi sederhananya bisa dijabarkan sesuai urutan berikut ini:
+====Iklan Shopping====
+Jalankan Iklan Shopping di AdWords untuk dapat data produk yang di rekomendasikan via Google Merchant.
+====Pilah Daftar Produk====
+Kemudian dari peta situs toko kita saring daftar semua produk yang memenuhi kriteria via Google AppEngine.
+====Simpan Daftar Produk====
+Hasilnya kita masukkan ke Google Merchant sehingga tersimpan menjadi database via Google Content API.
+====Saring Peluang Terbaik====
+Dari database ini kita pilah lagi produk yang mempunyai hasil dan peluang terbaik via Google AdWords API.
+====Tampilkan Produk Unggulan====
+Selanjutnya kita tampilkan sebagai produk unggulan di Situs Toko dari Google Sites via Google Sites API.
+
+[[<img src=https://user-images.githubusercontent.com/36441664/39117383-03b2a9a4-4711-11e8-9f72-1d1cb7d61634.png>|https://marketleader.github.io/Toko-Chetabahana/]]
+
+Proses diatas detilnya kita akan bahas satu persatu di sesi² berikutnya. Kemudian semuanya akan dirangkum di ''[[sesi terakhir|https://marketleader.github.io/Toko-Chetabahana/]]'' yang merupakan sesi penutup dari pubikasi ini:<br>  
+
+
+==''Referensi''==
+* [[GitOps-style CI/CD with Cloud Build|https://cloud.google.com/kubernetes-engine/docs/tutorials/gitops-cloud-build]]
+* [[Google Cloud Build, CI/CD for static websites|https://liatas.com/posts/hugo-gc-ci-cd/]]
+* CI/CD from GitHub to Kubernetes with [[CircleCI|https://medium.com/@dmaas/continuous-deployment-from-github-to-kubernetes-with-circleci-84c2bfdd38f6#becf]]
+* Continuous Delivery with Containers on GCP with [[Spinnaker|https://www.spinnaker.io/guides/tutorials/codelabs/gcp-kubernetes-source-to-prod/]]
+* Examine [[Spinnaker Vs. Codefresh|https://medium.com/containers-101/spinnaker-vs-codefresh-a843087008c3]] for CI/CD platform on Kubernetes
+

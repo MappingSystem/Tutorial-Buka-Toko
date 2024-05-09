@@ -1,0 +1,196 @@
+__TOC__
+
+
+==Syntax==
+* [[Errors and exceptions|https://python-textbok.readthedocs.io/en/1.0/Errors_and_Exceptions.html]]
+===If-Else===
+====Trap====
+```
+myfunction(x, y):
+    return x + y
+else:
+    print("Hello!")
+
+if mark >= 50
+    print("You passed!")
+
+if flag:
+    print("Flag is set!")
+esle:
+    print("Bye!")
+```
+====Checks====
+```
+# with checks
+
+n = None
+while n is None:
+    s = input("Please enter an integer: ")
+    if s.lstrip('-').isdigit():
+        n = int(s)
+    else:
+        print("%s is not an integer." % s)
+```
+
+===Try-Except===
+====Block====
+* [[Python Try Except|https://www.w3schools.com/python/python_try_except.asp]]
+```
+def main():
+    Do this
+    Do that
+    try:
+        dividend = int(input("Please enter the dividend: "))
+        divisor = int(input("Please enter the divisor: "))
+        print("%d / %d = %f" % (dividend, divisor, dividend/divisor))
+    except ValueError:
+        print("The divisor and dividend have to be numbers!")
+    except ZeroDivisionError:
+        print("The dividend may not be zero!")
+```
+====Specific====
+```
+def main():
+    Do this
+    Do that
+    try:
+        dividend = int(input("Please enter the dividend: "))
+    except ValueError:
+        print("The dividend has to be a number!")
+
+    try:
+        divisor = int(input("Please enter the divisor: "))
+    except ValueError:
+        print("The divisor has to be a number!")
+
+    try:
+        print("%d / %d = %f" % (dividend, divisor, dividend/divisor))
+    except ZeroDivisionError:
+        print("The dividend may not be zero!")
+```
+====Raise====
+* [[Re-Raising Exceptions|https://www.techbeamers.com/use-try-except-python/#raising-exceptions-in-Python]]
+
+```
+def main():
+    Do this
+    Do that
+    try:
+        file = open('input-file', 'open mode')
+    except:
+        # In case of any unhandled error, throw it away
+        raise
+```
+====Finally====
+* [[Re-Raising Exceptions|https://www.techbeamers.com/use-try-except-python/#raising-exceptions-in-Python]]
+
+```
+def main():
+    Do this
+    Do that
+    try:
+        age = int(input("Please enter your age: "))
+    except ValueError:
+        print("Hey, that wasn't a number!")
+    else:
+        print("I see that you are %d years old." % age)
+    finally:
+        print("It was really nice talking to you.  Goodbye!")
+```
+====Exceptions====
+* [[Re-Raising Exceptions|https://www.techbeamers.com/use-try-except-python/#raising-exceptions-in-Python]]
+
+```
+def main():
+    Do this
+    Do that
+    try:
+        age = int(input("Please enter your age: "))
+        if age < 0:
+            raise ValueError("%d is not a valid age. Age must be positive or zero.")
+    except ValueError as err:
+        print("You entered incorrect age input: %s" % err)
+    else:
+        print("I see that you are %d years old." % age)
+```
+
+==Logging==
+===Console===
+===Stackdriver===
+
+```
+import logging
+
+# log messages to a file, ignoring anything less severe than ERROR
+logging.basicConfig(filename='myprogram.log', level=logging.ERROR)
+
+# these messages should appear in our file
+logging.error("The washing machine is leaking!")
+logging.critical("The house is on fire!")
+
+# but these ones won't
+logging.warning("We're almost out of milk.")
+logging.info("It's sunny today.")
+logging.debug("I had eggs for breakfast.")
+```
+
+==Debug Tools==
+* [[What is the best way to debug a Django app?|https://www.quora.com/What-is-the-best-way-to-debug-a-Django-app]]
+* [[How to debug in Django, the good way?|https://stackoverflow.com/questions/1118183/how-to-debug-in-django-the-good-way]]
+
+===Offline===
+* [[Pdb & ipdb & pudb|https://www.bedjango.com/blog/how-debug-django-useful-tips/]]
+* [[Pyflakes, pylint, PyChecker and pep8|https://python-textbok.readthedocs.io/en/1.0/Errors_and_Exceptions.html#pyflakes-pylint-pychecker-and-pep8]]
+
+====Pdb====
+* [[Python Debugger (pdb)|https://stackoverflow.com/a/1118271/4058484]]
+* [[pdb: Using the Python debugger in Django|https://mike.tig.as/blog/2010/09/14/pdb/]]
+
+[[<img src=https://lh6.googleusercontent.com/gh3clchm190X866j0bEk9uulGfM0z9EAU428Z7WzABkqYX0gja-9JFQ79hmSXKhfvcwc58j4fa_y669_ym6i7D8Tsf-7q6SBg-Dt-UE8LKqksdO5eEj2R_sXQO9DyxHxBTPLmlg>|https://www.bedjango.com/blog/how-debug-django-useful-tips/]]
+
+====Pep8====
+====Pylint====
+[[<img src=https://user-images.githubusercontent.com/36441664/56910815-a75d5200-6ad5-11e9-8622-3b749e93b918.png>|https://www.pylint.org/]]
+
+====PyDev====
+* [[Install the PyDev plug-in for Eclipse|https://stackoverflow.com/a/49937770/4058484]]
+* [[How To Debug Django Project With Eclipse And PyDev|https://www.dev2qa.com/how-to-debug-django-project-with-eclipse-and-pydev/]]
+
+[[PyDev|https://en.wikipedia.org/wiki/PyDev]] adalah plug-in pihak ketiga untuk [[Eclipse|https://id.wikipedia.org/wiki/Eclipse_(perangkat_lunak)]] yang digunakan untuk pemrograman dengan Python yang mendukung refactoring kode, debugging grafis, analisis kode di antara fitur-fitur.
+<br><br>
+[[<img src=https://www.dev2qa.com/wp-content/uploads/2018/09/right-django-project-click-debug-as-pydev-django-project-1.png>|https://www.dev2qa.com/how-to-debug-django-project-with-eclipse-and-pydev/]]
+
+====Pyflakes====
+====PyCharm====
+[[<img src=https://www.jetbrains.com/pycharm-edu/img/screenshots/python_intro_debug@2x.png>|http://www.jetbrains.com/pycharm/documentation/]]
+
+====PyChecker====
+
+===Online===
+* [[Test Result|https://github.com/mirumee/saleor/pull/2626]]
+====Snyk====
+https://app.snyk.io
+====Travis====
+https://travis-ci.org/mirumee/saleor
+====Sentry====
+* [[Fitur - Error tracking|https://sentry.io/welcome/]]
+* [[Create|https://sentry.io/organizations/marketleader/projects/]] dan [[Install|https://sentry.io/marketleader/saleor/getting-started/python/]] Project
+
+```
+$ pip install --upgrade sentry-sdk==0.7.14
+
+import sentry_sdk
+sentry_sdk.init("https://xxxxxx@sentry.io/XXXXXX")
+```
+[[<img src=https://sentry.io/_assets/screenshots/features-page-dash-908c97e77f32851ac853bda396a20fe163dce86d24f4956c6db66f9269f60510.jpg>|https://sentry.io/features/]]
+
+====Codecov====
+https://codecov.io/gh/mirumee/saleor
+====Codeclimate====
+https://codeclimate.com/github/mirumee/saleor/pull/2626
+====Sourcegraph====
+* [[Enable Sourcegraph|https://github.com/mirumee/saleor/issues/227]]
+* [[saleor on @sourcegraph|https://sourcegraph.com/github.com/mirumee/saleor]]
+
+[[<img src=https://cdn-images-1.medium.com/max/800/1*pKHfud451X3oVgqEXhcjCw.png>|https://sourcegraph.com/welcome#code-navigation]]
+

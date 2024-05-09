@@ -1,0 +1,249 @@
+Dalam sesi ini, kita akan bahas tentang penyetelan untuk kerangka kerja [[Apa-Itu-Saleor#django|Django]].
+
+==Arsitektur==
+* [[Tutorial Django|https://docs.djangoproject.com/en/2.2/intro/tutorial01/]]<br>
+* [[DJANGO_SETTINGS_MODULE|https://stackoverflow.com/a/47700674/4058484]]<br>
+[[<img src=https://www.webforefront.com/static/images/beginningdjango/Figure_1-4.png>|https://www.webforefront.com/django/setupdjangocontent.html]]
+
+===Memulai===
+* [[Django admin and manage.py|https://docs.djangoproject.com/en/2.2/ref/django-admin]]<br>
+* [[Python 'Virtual-Env' works to run Saleor on Cygwin|https://github.com/MarketLeader/Toko-Chetabahana/releases]]<br>
+```
+$ source virtual-env/bin/activate
+(virtual-env)$ pip install Django
+(virtual-env)$ python -m django --version
+2.2
+(virtual-env)$ export DJANGO_SETTINGS_MODULE=mysite.settings
+(virtual-env)$ django-admin help
+Type 'django-admin help <subcommand>' for help on a specific subcommand.
+Available subcommands:
+[django]
+    check
+    compilemessages
+    createcachetable
+    dbshell
+    diffsettings
+    dumpdata
+    flush
+    inspectdb
+    loaddata
+    makemessages
+    makemigrations
+    migrate
+    runserver
+    sendtestemail
+    shell
+    showmigrations
+    sqlflush
+    sqlmigrate
+    sqlsequencereset
+    squashmigrations
+    startapp
+    startproject
+    test
+    testserver
+```
+
+====Project====
+* [[Start project|https://docs.djangoproject.com/en/2.2/ref/django-admin/#django-admin-startproject]]<br>
+
+```
+(virtual-env)$ django-admin startproject saleor
+saleor/
+    manage.py
+    saleor/
+        __init__.py
+        settings.py
+        urls.py
+        wsgi.py
+    static/
+    templates/
+```
+<table>
+  <thead><tr><th>file</th><th>mapping</th><th>dokumentasi</th></tr></thead>
+  <tbody>
+    <tr><td>[[<code>saleor/</code>|https://github.com/mirumee/saleor]]</td><td>[[<code>fork directory</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko]] / [[<code>branch directory</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/tree/Chetabahana/saleor]] / [[<code>virtual-env</code>|https://github.com/MarketLeader/Toko-Chetabahana/tree/master/virtual-env]]</td><td>[[Apa-Itu-Saleor|<code>saleor</code>]]</td></tr>
+    <tr><td>[[<code>manage.py</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/manage.py]]</td><td><code>set("DJANGO_SETTINGS_MODULE", "saleor.settings")</code><br><code>from</code> [[<code>django.core.management</code>|https://github.com/MarketLeader/Toko-Chetabahana/tree/master/virtual-env/lib/python3.7/site-packages/django/core/management]] <code>import</code> [[<code>execute_from_command_line</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/core/management/__init__.py#L378]]</td><td>[[Django#arsitektur|<code>Arsitektur</code>]]</td></tr>
+     <tr><td>[[<code>saleor/__init__.py</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/__init__.py]]</td><td><code>from</code> [[<code>.celeryconf</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/celeryconf.py#L7]] <code>import</code> [[<code>app</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/celery/app/base.py#L1279]] <code>as</code> [[<code>celery_app</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/celery/contrib/pytest.py#L148]]</td><td>[[Celery|<code>Celery</code>]]</td></tr>
+     <tr><td>[[<code>saleor/settings.py</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/settings.py]]</td><td><code>ROOT_URLCONF = 'saleor.urls'</code><br><code>WSGI_APPLICATION = 'saleor.wsgi.application'</code></td><td>[[Django#setting|<code>Setting</code>]]</td></tr>
+    <tr><td>[[<code>saleor/urls.py</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/urls.py]]</td><td><code>from</code> [[<code>django.conf</code>|https://github.com/MarketLeader/Toko-Chetabahana/tree/master/virtual-env/lib/python3.7/site-packages/django/conf]] <code>import</code> [[<code>settings</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/conf/global_settings.py]]</td><td>[[Django#url-router|<code>URL-Router</code>]]</td></tr>
+    <tr><td>[[<code>saleor/wsgi.py</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/wsgi/__init__.py]]</td><td><code>from</code> [[<code>django.core.wsgi</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/core/wsgi.py]] <code>import</code> [[<code>get_wsgi_application</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/core/wsgi.py#L5]]</td><td>[[Django#Web_Gateway|<code>Web-Gateway</code>]]</td></tr>
+    <tr><td>[[<code>static/</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/conf/global_settings.py#L599]]<br>[[<code>media/</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/conf/global_settings.py#L266]]</td><td>[[<code>STATICFILES_STORAGE</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/settings.py#L407]] / [[<code>DEFAULT_FILE_STORAGE</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/settings.py#L410]]<br>[[<code>django.contrib.staticfiles.storage.StaticFilesStorage</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/contrib/staticfiles/storage.py#L22]]<br>
+[[<code>django.core.files.storage.FileSystemStorage</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/core/files/storage.py#L170]]</td><td>[[Django#static-url|<code>Static URL</code>]]</td></tr>
+    <tr><td>[[<code>templates/</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/tree/Chetabahana/templates]]</td><td><code>templates directory</code></td><td>[[Django#templates|<code>Templates</code>]]</td></tr>
+   </tbody>
+</table>
+
+====Aplikasi====
+* [[Database setup|https://docs.djangoproject.com/en/2.2/intro/tutorial02/]]<br>
+```
+(virtual-env)$ cd saleor 
+(virtual-env)$ python manage.py runserver
+(virtual-env)$ python manage.py startapp products
+saleor/
+    manage.py
+    saleor/
+        products/
+            migrations/
+                __init__.py
+            models.py
+            tests.py
+            views.py        
+        __init__.py
+        settings.py
+        urls.py
+        wsgi.py
+    static/
+    templates/
+        products/
+```
+[[<img src=https://www.pythonstudio.us/system-administration/images/6033_14_7-django-template-system.jpg>|https://www.pythonstudio.us/system-administration/creating-web-pages-with-the-jinja-templating-system.html]]
+
+===Cara Kerja===
+* [[Settings|https://docs.djangoproject.com/en/2.2/ref/settings/]]<br>
+
+====Setting====
+* [[Django settings|https://docs.djangoproject.com/en/2.2/topics/settings/]]
+* [[Django ALLOWED_HOSTS IPs range|https://stackoverflow.com/a/37033587/4058484]]
+
+[[<img src=https://miro.medium.com/max/706/1*ogBWTa2xptrsZXMB34Pzgw.png>|https://medium.com/wemake-services/managing-djangos-settings-e2b7f496120d]]
+
+
+====URL Router====
+* [[URL dispatcher|https://docs.djangoproject.com/en/2.2/topics/http/urls/]]<br>
+Untuk pemetaan URL aplikasi, Django membuat modul Python yang disebut URLconf (konfigurasi URL). Modul ini  merupakan mapping antara ekspresi jalur URL ke fungsi Python (views).
+
+[[<img src=http://res.cloudinary.com/dyd911kmh/image/upload/f_auto,q_auto:best/v1536268058/basic-django_vgrgc9.png>|https://www.datacamp.com/community/tutorials/web-development-django]]
+<table>
+  <thead><tr><th>implementasi</th></tr></thead>
+</table>
+
+<table>
+  <thead><tr><th>file</th><th>mapping</th><th>dokumentasi</th></tr></thead>
+  <tbody>  
+    <tr><td>[[<code>saleor/urls.py</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/master/saleor/urls.py]]</td><td><code>from</code> [[<code>django.conf</code>|https://github.com/MarketLeader/Toko-Chetabahana/tree/master/virtual-env/lib/python3.7/site-packages/django/conf]] <code>import</code> [[<code>settings</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/django/conf/global_settings.py]]</td><td>[[<code>Configuration</code>|https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html]]</td></tr>
+   </tbody>
+</table>
+
+====Web Gateway====
+[[<img src=https://community.mcafee.com/t5/image/serverpage/image-id/592i72749CCDE0371B35/image-size/large?v=1.0&px=999>|https://community.mcafee.com/t5/Documents/Web-Gateway-Understanding-the-Rule-Engine-and-Optimizing-your/ta-p/553870]]
+
+
+===Static URL===
+* [[Serving static files in Django|https://www.agiliq.com/blog/2013/03/serving-static-files-in-django/]]
+====Gambar====
+```
+SCRIPT_NAME=/market
+MEDIA_URL=/market/media/
+STATIC_URL=/market/static/
+```
+
+====File js/css====
+[[Webpack|https://webpack.js.org/guides/getting-started/]] digunakan untuk mengkompilasi modul JavaScript. Setelah diinstal, Anda dapat berinteraksi dengan  baik dari CLI atau API-nya.
+
+[[<img src=https://miro.medium.com/max/1100/1*h9J7BAvjmdyBmyXnvytHDg.png>|https://blog.angularindepth.com/this-is-how-angular-cli-webpack-delivers-your-css-styles-to-the-client-d4adf15c4975]]
+
+
+===Templates===
+[[<img src=https://www.tangowithdjango.com/book17/_images/rango-template-inheritance.svg>|https://www.tangowithdjango.com/book17/chapters/templates.html]]
+
+Secara detil setiap page di atas diproduksi seperti berikut
+
+[[<img src=https://manikos.github.io/images/admin_template_inheritance.jpg>|https://www.w3school.in/django-template-system/]]
+
+==Konfigurasi==
+[[<img src=https://clarklabs.lib.umich.edu/wp-content/uploads/sites/5/2016/02/django_tree-1024x1010.jpg>|https://clarklabs.lib.umich.edu/2016/02/24/migrating-from-php-to-django/]]
+
+===Core===
+====init.py====
+====manage.py====
+```
+#!/usr/bin/env python
+"""Django's command-line utility for administrative tasks."""
+import os
+import sys
+
+
+def main():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dummy.settings')
+    try:
+        from django.core.management import execute_from_command_line
+    except ImportError as exc:
+        raise ImportError(
+            "Couldn't import Django. Are you sure it's installed and "
+            "available on your PYTHONPATH environment variable? Did you "
+            "forget to activate a virtual environment?"
+        ) from exc
+    execute_from_command_line(sys.argv)
+
+
+if __name__ == '__main__':
+    main()
+
+```
+===Setelan===
+====urls.py====
+* [[Django url debugger|https://stackoverflow.com/a/3616586/4058484]]
+```
+urlpatterns = non_translatable_urlpatterns + i18n_patterns(
+    *translatable_urlpatterns)
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [
+        url(r'^__debug__/', include(debug_toolbar.urls)),
+        # static files (images, css, javascript, etc.)
+        url(r'^static/(?P<path>.*)$', serve)] + static(
+            '/media/', document_root=settings.MEDIA_ROOT)
+```
+Anda dapat mengasumsikan, bahwa request melewati <code>urlpatterns</code> dari atas ke bawah dengan pola yang pertama yang cocok (Y) akan dieksekusi seperti analogi berikut:
+<br><br>
+* jika Y sebelum X: maka pola Y akan dieksekusi (tetapi tidak selalu seharusnya)
+* jika X adalah sebelum Y: pola X tidak cocok dengan url (tetapi harus didahulukan)
+
+====wsgi.py====
+* [[How to deploy with WSGI|https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/]]<br>
+* [[How to use Django with Gunicorn|https://docs.djangoproject.com/en/2.2/howto/deployment/wsgi/gunicorn/]]<br>
+
+[[Web Server Gateway Interface (WSGI)|https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface]] adalah konvensi untuk meneruskan URL ke aplikasi web atau kerangka kerja yang ditulis dalam bahasa pemrograman Python.
+
+[[<img src=https://learnbatta.com/media/cache/10/73/107391fd54a85f2fa6ed34ec937906c5.png>|https://learnbatta.com/blog/understanding-request-response-lifecycle-in-django-29/]]
+
+Untuk project saleor pengembang menggunakan <code>uwsgi</code> yang disetel fia ''[[Dockerfile|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/Dockerfile#L72]]'':
+```
+CMD ["uwsgi", "--ini", "/app/saleor/wsgi/uwsgi.ini"]
+```
+Untuk pemasangan di GCP maka [[sesuai arahan|https://cloud.google.com/appengine/docs/flexible/python/runtime#application_startup]] kita pakai <code>gunicorn</code> via entry di <code>app.yaml</code>:
+```
+entrypoint: gunicorn -b :$PORT saleor.wsgi --timeout 120
+```
+Pembahasan lebih lanjut silahkan simak di sesi [[Gunicorn]].
+
+
+====settings.py====
+* [[<code>saleor.core.storages.S3MediaStorage</code>|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/core/storages.py#L5]]
+* [[<code>storages.backends.s3boto3.S3Boto3Storage</code>|https://github.com/MarketLeader/Toko-Chetabahana/blob/master/virtual-env/lib/python3.7/site-packages/storages/backends/s3boto3.py#L171]]
+
+[[<img src=https://3.bp.blogspot.com/-5aJpobc_9JA/WNNBbHlui_I/AAAAAAAACD8/zfZ0bl24Mws5pw-u8VJEkbfTJTctFcQxQCLcB/s1600/django-templates-and-static-files.png>|http://django-easy-tutorial.blogspot.com/2017/03/django-templates-and-static-files.html]]
+
+Untuk file static/media sesuai [[requirements.txt|https://github.com/mirumee/saleor/blob/master/requirements.txt#L45]] Aplikasi Saleor menggunakan [[django-storages|https://django-storages.readthedocs.io/en/latest/index.html]]: versi  [[1.7.1|https://github.com/jschneier/django-storages/releases/tag/1.7.1]] disetel di [[settings.py|https://github.com/MarketLeader/Tutorial-Buka-Toko/blob/Chetabahana/saleor/settings.py#L406]] ke [[AWS Storage|https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html]] via migrasi [[boto3 library|https://django-storages.readthedocs.io/en/latest/backends/amazon-S3.html#migrating-boto-to-boto3]] sebagai berikut:
+```
+if AWS_STORAGE_BUCKET_NAME:
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+if AWS_MEDIA_BUCKET_NAME:
+    DEFAULT_FILE_STORAGE = 'saleor.core.storages.S3MediaStorage'
+    THUMBNAIL_DEFAULT_STORAGE = DEFAULT_FILE_STORAGE
+```
+
+Pembahasan lebih lanjut silahkan simak di sesi setelan [[Storage#Setelan|GCP Storage]].
+
+===Penerapan===
+====views.py====
+====models.py====
+====migrate.py====
+
+
+
+==''Referensi''==
+* [[WSGI master|https://www.slideshare.net/GrahamDumpleton/secrets-of-a-wsgi-master]]<br>

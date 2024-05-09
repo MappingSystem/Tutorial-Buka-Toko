@@ -1,0 +1,102 @@
+==Tools==
+===Hardware===
+====Local PC====
+====Koneksi Internet====
+Selain komputer maka hal yang utama adalah koneksi internet. Anda akan dibawa untuk mengenal banyak situs di [[Dunia Internet|https://github.com/chetabahana/chetabahana.github.io/wiki/Dunia-Internet]] yang menawarkan opsi untuk membantu kita membangun projek. 
+
+Hal yang penting dilakukan adalah cara aman untuk simpan password untuk akses ke banyak situs. ''[[Lasspass|https://en.wikipedia.org/wiki/LastPass]]'' adalah salah satu yang terbaik untuk bisa Anda pakai.
+
+===Software===
+
+====Editor====
+Ada begitu banyak perangkat editor yang bisa didapatkan secara online dengan gratis. 
+
+Ada ada baiknya Anda mencoba ''[[Notepad++|https://notepad-plus-plus.org//]]''. Banyak ''[[fitur|http://docs.notepad-plus-plus.org/index.php/Category:Keywords]]'' dan ''[[plugin|http://docs.notepad-plus-plus.org/index.php/Plugin_Central]]'' yang dapat ''[[diprogram|http://npppythonscript.sourceforge.net/]]'' agar kita lebih nyaman bekerja bahkan untuk ''[[otomatisasi|https://archive.codeplex.com/?p=nppscripts]]'' seperti ''[[update git repository|https://webdeveloperankitakulkarni.wordpress.com/2013/10/19/git-with-notepad/]]'' secara mudah. 
+
+====History====
+Dari sekian banyak langkah yang Anda lakukan ada baiknya mencatat apa saja yang sudah dilakukan agar dapat kita lakukan ''[[Penyetelan-Aplikasi#otomatisasi|otomatisasi]]'' maupun kilas balik jika ada masalah dengan pemrograman. 
+
+Pencatatan di [[GitHub Wiki|https://help.github.com/en/articles/about-wikis]] seperti yang anda baca ini adalah cara yang memungkinkan Anda agar tidak kehilangan jejak apa saja yang sudah diterapkan. Kita akan bahas sampai [[Continuous-Delivery#gcp-build-history|GCP Build History]].
+
+====Workspace====
+Pada tahap bekerja di Local PC kita perlu siapkan perangkat utama yaitu [[Perangkat#Jenis_Layanan|Gcloud SDK]], ikuti [[Local-PC#Windows|cara instal]] dan [[Local-PC#unix-utility|setel file batch]] agar otomatis berada di ruang kerja yang kita siapkan.
+
+
+===Sistem===
+====Windows====
+```
+Your current Cloud SDK version is: 241.0.0
+Installing components from version: 241.0.0
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                 These components will be installed.                 │
+├────────────────────────────────────────────────┬─────────┬──────────┤
+│                      Name                      │ Version │   Size   │
+├────────────────────────────────────────────────┼─────────┼──────────┤
+│ gcloud app Python Extensions (Extra Libraries) │  1.9.74 │ 28.5 MiB │
+└────────────────────────────────────────────────┴─────────┴──────────┘
+
+For the latest full release notes, please visit:
+  https://cloud.google.com/sdk/release_notes
+
+Do you want to continue (Y/n)?  y
+
+╔════════════════════════════════════════════════════════════╗
+╠═ Creating update staging area                             ═╣
+╠════════════════════════════════════════════════════════════╣
+╠═ Installing: gcloud app Python Extensions (Extra Libra... ═╣
+╠════════════════════════════════════════════════════════════╣
+╠═ Creating backup and activating new installation          ═╣
+╚════════════════════════════════════════════════════════════╝
+
+Performing post processing steps...done.
+
+Update done!
+
+WARNING:   There are alternate versions of the following Google Cloud Platform tools on
+  your system PATH. Please double check your PATH:
+
+  C:\Program Files\Google\Cloud SDK\google-cloud-sdk\platform\google_appengine\endpointscfg.py
+  C:\Program Files\Google\Cloud SDK\google-cloud-sdk\platform\google_appengine\dev_appserver.py
+
+
+Press any key to continue . . .
+```
+
+====Unix Utility====
+Karena pada tahap project kita akan bekerja di platform Unix maka ada baiknya kita mulai membiasakan perintah² Unix Standard spt [[<code>sed</code>|https://stackoverflow.com/a/55664924/4058484]], [[<code>grep</code>|http://qpeng.org/computer/grep.htm]] dll. 
+
+Ada beberapa macam tools yg ditawarkan, Anda bisa pilih [[UnxUtils|http://unxutils.sourceforge.net/]] atau [[Local-PC#Cygwin|Cygwin]]. 
+
+Download dan Unzip dimanapun Anda suka, misal di <code>C:\UnxUtils</code>. Kemudian setel PATH nya di file <code>cloud_env.bat</code> supaya otomatis aktif setiap buka perangkat [[Local-PC#Ruang_Kerja|Gcloud SDK]].
+
+<code>C:\Program Files\Google\Cloud SDK\cloud_env.bat</code>
+```
+ECHO OFF
+CLS
+SET Prompt=$$
+SET PATH=C:\UnxUtils\usr\local\wbin;%PATH%;
+SET PATH=C:\Program Files\Google\Cloud SDK\google-cloud-sdk\bin;%PATH%;
+SET PROJECT=C:\Users\Chetabahana\Documents\Project\Google\GAE\python\market
+ECHO Google Cloud SDK! Run "gcloud -h" to get available commands.
+
+CD %PROJECT%
+pwd
+git fetch origin
+git reset --hard origin/master
+
+SET date=%DATE:~0,2%
+SET hour=%TIME:~0,2%
+SET minute=%TIME:~3,2%
+IF "%date:~0,1%"==" " SET date=0%DATE:~1,1%
+IF "%hour:~0,1%"==" " SET hour=0%TIME:~1,1%
+IF "%minute:~0,1%"==" " SET minute=0%TIME:~1,1%
+SET VERSION=%date%%hour%%minute%
+sed -e "s/-[0-9]\{1,\}-\([a-zA-Z0-9_]*\)'/-%VERSION%-local'/g" cloudbuild.yaml > tmp.txt 
+mv -f tmp.txt cloudbuild.yaml
+findstr "\<version.*" cloudbuild.yaml | sed "s/  args: \['app', 'deploy', /SERVING: \[/g"
+
+REM tutorial-env\Scripts\activate.bat
+ECHO ---
+ECHO ON
+```

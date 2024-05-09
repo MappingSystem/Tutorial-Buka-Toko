@@ -1,0 +1,274 @@
+__TOC__
+
+
+==Antrian==
+* Histori: [[usulan|https://github.com/mirumee/saleor/issues/1153]] dan [[konfirmasi|https://github.com/mirumee/saleor/pull/1157]]
+Hampir setiap proyek membutuhkan antrian tugas begitu juga Saleor. 
+
+[[Celery|https://en.wikipedia.org/wiki/Celery_(software)]] adalah salah satu [[project antrian|https://en.wikipedia.org/wiki/Celery_(software)]] paling populer untuk Python dan juga mudah untuk diintegrasikan dan digunakan. 
+
+Hal-hal yang dijalankan Celery dalam antrian secara default meliputi:
+
+* mengirim email
+* membuat gambar thumbnails
+* menghasilkan file umpan (umpan Google Merchant)
+===Cara Kerja===
+* [[Celery and Django and Docker|https://www.revsys.com/tidbits/celery-and-django-and-docker-oh-my/]]
+
+Celery bekerja berdasarkan sinkronisasi pengiriman pesan yang didistribusikan. Ini difokuskan pada operasi real-time, tetapi mendukung penjadwalan juga.
+
+Unit eksekusi, yang disebut tugas, dieksekusi bersamaan pada satu atau lebih server pekerja menggunakan multiprosesor, Eventlet, atau gevent. 
+
+Tugas dapat dieksekusi sbb
+* secara tidak sinkron (di latar belakang) atau 
+* secara sinkron (tunggu sampai siap).
+
+===Pialang pesan===
+* [[Generating the thumbnails|https://stackoverflow.com/a/55764254/4058484]]
+
+Da lam melakukan tugasnya, celery bekerja via [[pialang pesan|https://en.wikipedia.org/wiki/Message_broker]]. Pialang pesan yang disarankan adalah [[RabbitMQ|https://en.wikipedia.org/wiki/RabbitMQ]] atau [[Redis|https://en.wikipedia.org/wiki/RabbitMQ]]. 
+
+Saleor menggunakan Redis disetel via lingkungan:
+
+[[common.env|https://github.com/mirumee/saleor/blob/master/common.env]]
+```
+DATABASE_URL=postgres://saleor:saleor@db/saleor
+DEFAULT_FROM_EMAIL=noreply@example.com
+OPENEXCHANGERATES_API_KEY
+CACHE_URL=redis://redis:6379/0
+CELERY_BROKER_URL=redis://redis:6379/1
+SECRET_KEY=changeme
+JWT_VERIFY_EXPIRATION=True
+VATLAYER_ACCESS_KEY
+```
+
+==Setelan==
+* [[Update history|https://github.com/mirumee/saleor/pull/1157/files/f15e8f99f6f0d9c9ec84129be521bd209f005a3e]] meliputi file berikut
+* saleor/settings.py
+* saleor/celeryconf.py
+* saleor/userprofile/management/commands/__init__.py
+* saleor/search/backends/elasticsearch.py
+* saleor/product/models.py
+
+Setelan secara lengkap bisa diikuti via [[search repo|https://github.com/mirumee/saleor/search?q=celery&unscoped_q=celery]]
+
+
+===Arguments===
+```
+$ docker ps
+CONTAINER ID        IMAGE                COMMAND                  NAMES
+0abb19d50414        chetabahana/saleor   "celery -A saleor wo…"   backend_celery_1
+529752a79fe3        postgres             "docker-entrypoint.s…"   backend_postgres_1
+812a0a46cf74        redis                "docker-entrypoint.s…"   backend_redis_1
+
+$ docker exec -it backend_celery_1 bash
+saleor@0abb19d50414:/app$ celery --help
+usage: celery <command> [options] 
+
+Show help screen and exit.
+
+positional arguments:
+  args
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+
+Global Options:
+  -A APP, --app APP
+  -b BROKER, --broker BROKER
+  --result-backend RESULT_BACKEND
+  --loader LOADER
+  --config CONFIG
+  --workdir WORKDIR
+  --no-color, -C
+  --quiet, -q
+
+---- -- - - ---- Commands- -------------- --- ------------
+
++ Main: 
+|    celery worker
+|    celery events
+|    celery beat
+|    celery shell
+|    celery multi
+|    celery amqp
+
++ Remote Control: 
+|    celery status
+ 
+|    celery inspect --help
+|    celery inspect active 
+|    celery inspect active_queues 
+|    celery inspect clock 
+|    celery inspect conf [include_defaults=False]
+|    celery inspect memdump [n_samples=10]
+|    celery inspect memsample 
+|    celery inspect objgraph [object_type=Request] [num=200 [max_depth=10]]
+|    celery inspect ping 
+|    celery inspect query_task [id1 [id2 [... [idN]]]]
+|    celery inspect registered [attr1 [attr2 [... [attrN]]]]
+|    celery inspect report 
+|    celery inspect reserved 
+|    celery inspect revoked 
+|    celery inspect scheduled 
+|    celery inspect stats 
+ 
+|    celery control --help
+|    celery control add_consumer <queue> [exchange [type [routing_key]]]
+|    celery control autoscale [max [min]]
+|    celery control cancel_consumer <queue>
+|    celery control disable_events 
+|    celery control election 
+|    celery control enable_events 
+|    celery control heartbeat 
+|    celery control pool_grow [N=1]
+|    celery control pool_restart 
+|    celery control pool_shrink [N=1]
+|    celery control rate_limit <task_name> <rate_limit (e.g., 5/s | 5/m | 5/h)>
+|    celery control revoke [id1 [id2 [... [idN]]]]
+|    celery control shutdown 
+|    celery control terminate <signal> [id1 [id2 [... [idN]]]]
+|    celery control time_limit <task_name> <soft_secs> [hard_secs]
+
++ Utils: 
+|    celery purge
+|    celery list
+|    celery call
+|    celery result
+|    celery migrate
+|    celery graph
+|    celery upgrade
+
++ Debugging: 
+|    celery report
+|    celery logtool
+---- -- - - --------- -- - -------------- --- ------------
+
+Type 'celery <command> --help' for help using a specific command.
+```
+
+===Daemonization===
+* [[User Guide - Daemonization|http://docs.celeryproject.org/en/latest/userguide/daemonizing.html]]
+
+```
+# Names of nodes to start
+#   most people will only start one node:
+CELERYD_NODES="worker1"
+#   but you can also start multiple and configure settings
+#   for each in CELERYD_OPTS
+#CELERYD_NODES="worker1 worker2 worker3"
+#   alternatively, you can specify the number of nodes to start:
+#CELERYD_NODES=10
+
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/usr/local/bin/celery"
+#CELERY_BIN="/virtualenvs/def/bin/celery"
+
+# App instance to use
+# comment out this line if you don't use an app
+CELERY_APP="proj"
+# or fully qualified:
+#CELERY_APP="proj.tasks:app"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/opt/Myproject/"
+
+# Extra command-line arguments to the worker
+CELERYD_OPTS="--time-limit=300 --concurrency=8"
+# Configure node-specific settings by appending node name to arguments:
+#CELERYD_OPTS="--time-limit=300 -c 8 -c:worker2 4 -c:worker3 2 -Ofair:worker1"
+
+# Set logging level to DEBUG
+#CELERYD_LOG_LEVEL="DEBUG"
+
+# %n will be replaced with the first part of the nodename.
+CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
+CELERYD_PID_FILE="/var/run/celery/%n.pid"
+
+# Workers should run as an unprivileged user.
+#   You need to create this user manually (or you can choose
+#   a user/group combination that already exists (e.g., nobody).
+CELERYD_USER="celery"
+CELERYD_GROUP="celery"
+
+# If enabled pid and log directories will be created if missing,
+# and owned by the userid/group configured.
+CELERY_CREATE_DIRS=1
+```
+
+====Running Worker====
+* [[Celery user permission denied to /bin/celery|https://stackoverflow.com/a/51855648/4058484]]
+
+```
+$ docker exec -it backend_celery_1 bash
+saleor@0abb19d50414:/app$ id
+uid=999(saleor) gid=999(saleor) groups=999(saleor)
+
+saleor@0abb19d50414:/app$ celery -A saleor worker --app=saleor.celeryconf:app \
+    --loglevel=info
+ 
+ -------------- celery@0abb19d50414 v4.3.0 (rhubarb)
+---- **** ----- 
+--- * ***  * -- Linux-4.15.0-1029-gcp-x86_64-with-debian-9.8 2019-04-20 17:38:35
+-- * - **** --- 
+- ** ---------- [config]
+- ** ---------- .> app:         saleor:0x7ff1fbacfeb8
+- ** ---------- .> transport:   redis://redis:6379/1
+- ** ---------- .> results:     
+- *** --- * --- .> concurrency: 1 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . saleor.account.emails.send_account_delete_confirmation_email
+  . saleor.account.emails.send_password_reset_email
+  . saleor.account.thumbnails.create_user_avatar_thumbnails
+  . saleor.core.analytics.ga_report
+  . saleor.core.utils.update_conversion_rates_from_openexchangerates
+  . saleor.dashboard.emails.send_promote_customer_to_staff_email
+  . saleor.dashboard.emails.send_set_password_customer_email
+  . saleor.dashboard.emails.send_set_password_staff_email
+  . saleor.order.emails.send_fulfillment_confirmation
+  . saleor.order.emails.send_fulfillment_update
+  . saleor.order.emails.send_order_confirmation
+  . saleor.order.emails.send_payment_confirmation
+  . saleor.product.tasks.update_variants_names
+  . saleor.product.thumbnails.create_category_background_image_thumbnails
+  . saleor.product.thumbnails.create_collection_background_image_thumbnails
+  . saleor.product.thumbnails.create_product_thumbnails
+
+[2019-04-20 17:38:38,001: INFO/MainProcess] Connected to redis://redis:6379/1
+[2019-04-20 17:38:38,919: INFO/MainProcess] mingle: searching for neighbors
+[2019-04-20 17:38:40,690: INFO/MainProcess] mingle: all alone
+[2019-04-20 17:38:42,946: WARNING/MainProcess] /usr/local/lib/python3.7/site-packages/\
+      celery/fixups/django.py:202: UserWarning: Using settings.DEBUG leads to a memory \
+      leak, never use this setting in production environments!\
+      warnings.warn('Using settings.DEBUG leads to a memory leak, never '
+[2019-04-20 17:38:42,955: INFO/MainProcess] celery@0abb19d50414 ready.
+
+```
+
+==Deploy==
+===Scaling===
+* [[Scaling elements|https://cloud.google.com/appengine/docs/standard/php7/config/appref#scaling_elements]]
+* [[How Instances are Managed|https://cloud.google.com/appengine/docs/standard/python3/how-instances-are-managed]]
+
+```
+service: celery
+runtime: python37
+instance_class: B1
+entrypoint: celery -A saleor worker --app=saleor.celeryconf:app --loglevel=info
+
+basic_scaling:
+  max_instances: 1
+  idle_timeout: 10m
+  
+
+```
+==''Referensi''==
+* [[Understand how celery works by building a clone|https://www.komu.engineer/blogs/celery-clone/understand-how-celery-works]]
+* [[Run Celery on Kubernetes of Google Cloud Container Service|https://esciencegroup.com/2016/08/18/kubernetes-and-the-google-cloud-container-service-fun-with-pods-of-celery/]]

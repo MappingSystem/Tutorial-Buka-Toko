@@ -1,0 +1,3 @@
+https://cloud.google.com/functions/docs/writing/background
+
+https://www.zesty.io/mindshare/marketing-technology/using-environment-variables-with-google-cloud-functions/

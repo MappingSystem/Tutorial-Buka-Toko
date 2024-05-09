@@ -1,0 +1,1 @@
+* [[Cygwin Venv - Release: 'Run Saleor with CI/CD'|https://github.com/MarketLeader/Toko-Chetabahana/releases/tag/v1.4]]

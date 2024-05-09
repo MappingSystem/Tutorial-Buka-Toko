@@ -1,0 +1,228 @@
+
+===Struktur===
+* [[Non Root URL|https://github.com/mirumee/saleor/pull/1529]]
+
+[[<img src=https://i.stack.imgur.com/tSjPa.png>|https://i.stack.imgur.com/tSjPa.png]]
+
+* Article: Deploy Django on a [[subdirectory|https://masci.wordpress.com/2012/02/14/deploy-django-on-a-subdirectory-or-a-subpath-with-mod_python/]], or [[sub-path|https://docs.webfaction.com/software/django/config.html#mounting-a-django-application-on-a-subpath]]
+* Stackoverflow: Case-1: [[appended-twice|https://stackoverflow.com/questions/25289880/django-admin-force-script-name-is-appended-twice-to-url-when-posting]], Case-2: [[Login redirects incorrectly|https://stackoverflow.com/questions/19103470/django-admin-force-script-name-login-redirects-incorrectly]], Case [[lainnya|https://stackoverflow.com/search?q=FORCE_SCRIPT_NAME]]
+
+Setel: [[FORCE_SCRIPT_NAME|https://docs.djangoproject.com/en/2.1/ref/settings/#std:setting-FORCE_SCRIPT_NAME]]<br>  
+Default: Tidak Ada (None)
+<br><br>
+Jika tidak ada (None), maka akan digunakan sebagai nilai variabel lingkungan <code>SCRIPT_NAME</code> dalam permintaan HTTP apa pun. 
+<br><br>
+Pengaturan ini ''[[dapat digunakan untuk mengganti nilai <code>SCRIPT_NAME</code> yang disediakan server|https://www.programcreek.com/python/example/100191/django.conf.settings.FORCE_SCRIPT_NAME]]'', yang mungkin merupakan versi yang ditulis ulang dari nilai default atau tidak disediakan sama sekali. 
+<br><br>
+Ini juga digunakan oleh <code>django.setup ()</code> untuk menetapkan awalan skrip penyelesai URL di luar siklus permintaan <code>/</code> respons (mis. Dalam perintah manajemen dan skrip mandiri) untuk menghasilkan URL yang benar ketika <code>SCRIPT_NAME</code> tidak /</code>.
+<br><br>
+settings.py
+```
+FORCE_SCRIPT_NAME = "/django/sample/"
+```
+
+====Case====
+test
+```
+http://server/django/sample/admin
+```
+hasil
+```
+http://server/django/sample/django/sample/admin
+```
+
+====Nginx====
+[[<img src=https://static.vndeveloper.com/uploads/2017/07/django-behind-uwsgi-nginx.png>|https://www.vndeveloper.com/django-behind-uwsgi-nginx-centos-7/]]
+
+setelan untuk [[nginx.conf|https://codeday.me/bug/20190107/490403.html]] sbb:
+```
+location /django/sample {
+    fastcgi_split_path_info ^(/django/sample)(.*)$;
+    include fastcgi_params;
+    fastcgi_pass 127.0.0.1:8025;
+}
+```
+
+====Apache====
+setelan untuk [[apache.conf|https://opensourcemissions.wordpress.com/2010/03/12/finally-a-working-django-non-root-url-with-mod_wsgi/]] sbb:
+
+settings.py:
+```
+SUB_SITE = "/donut/"
+```
+
+wsgi.py
+```
+import os, sys
+sys.path.append('/path/to') #parent directory of project
+sys.path.append('/path/to/donut_code')
+#You might not need this next line. 
+# But if you do, this directory needs to be world-writable.
+os.environ['PYTHON_EGG_CACHE'] = '/path/to/.python-eggs'
+os.environ['DJANGO_SETTINGS_MODULE'] = 'donut_code.settings'
+
+import django.core.handlers.wsgi
+
+_application = django.core.handlers.wsgi.WSGIHandler()
+def application(environ, start_response):
+    environ['PATH_INFO'] = environ['SCRIPT_NAME'] + environ['PATH_INFO']
+    environ['SCRIPT_NAME'] = '' # my little addition to make it work
+    return _application(environ, start_response)
+```
+
+urls.py
+```
+from django.conf.urls.defaults import *
+import settings
+
+urlpatterns = patterns('',
+    (r'^%s/' % settings.SUB_SITE, include('urls_subsite')),
+)
+```
+
+settings.py:
+```
+from django.conf.urls.defaults import *
+import settings
+
+# NOTE: I don't really like defining this here, but the only other place it
+# should logically go is in an overall site-level app.  Seems like too much
+# overhead.
+from django.shortcuts import Http404
+def no_view(request):
+    """
+    We don't really want anyone going to the static_root.
+    However, since we're raising a 404, this allows flatpages middleware to
+    step in and serve a page, if there is one defined for the URL.
+    """
+    raise Http404
+
+urlpatterns = patterns('',
+    #Normal includes for app URLs:
+    (r'^accounts/', include('accounts.urls')),
+
+    # Special URL defined here, so that we have DRY in templates, without RequestContext.
+    url(r'site_media/$', no_view, name='static_root'),
+)
+```
+
+urls_subsite.py:
+```
+from django.conf.urls.defaults import *
+import settings
+
+# Enable the Django admin:
+from django.contrib import admin
+admin.autodiscover()
+
+# NOTE: I don't really like defining this here, but the only other place it
+# should logically go is in an overall site-level app.  Seems like too much
+# overhead for this two little, very simple views.
+from django.shortcuts import render_to_response, Http404
+from django.contrib.auth.decorators import login_required
+from django.template import RequestContext
+@login_required
+def welcome_view(request):
+    return render_to_response('welcome.html',
+                              context_instance=RequestContext(request))
+
+def no_view(request):
+    """
+    We don't really want anyone going to the static_root.
+    However, since we're raising a 404, this allows flatpages middleware to
+    step in and serve a page, if there is one defined for the URL.
+    """
+    raise Http404
+
+urlpatterns = patterns('',
+    # Uncomment the next line to enable the admin:
+    (r'^admin/', include(admin.site.urls)),
+
+    # Enable language switching.  This way, you can write a template that POSTs 
+    # to {% url set_language %}.
+    url(r'^i18n/setlang/$', 'django.views.i18n.set_language',
+        name="set_language"),
+    (r'^i18n/setlang/$', include('django.conf.urls.i18n')),
+
+    # Other app views
+    (r'^accounts/', include('accounts.urls')),
+    (r'^holes/', include('holes.urls')),
+    (r'^fillings/', include('fillings.urls')),
+
+    # A welcome page at the SUB_SITE root.
+    url(r'^$', welcome_view, name='welcome'),
+
+    # URLs defined here, so that we have DRY in templates, without RequestContext.
+    url(r'site_media/$', no_view, name='static_root'),
+   # This next one lets me use {% url help_root %} in templates.
+    # Practically, I'm using flatpages to handle any help documents.
+    # This means I'll have to update each flatpage's URL if I move the SUB_SITE.
+    # Not too bad, esp. if I use Django's ORM to update them.
+    url(r'help/$', no_view, name='help_root'),
+)
+
+if settings.DEBUG:
+    urlpatterns += patterns('',
+        # Uncomment on non-production servers, if you want to debug with "runserver":
+        # For static files during DEBUG mode:
+        (r'^site_media/(?P.*)$', 'django.views.static.serve',
+            {'document_root': '/path/to/donut/static/' }),
+```
+
+===Building===
+Static_URL disetel via [[Dockerfile|https://github.com/mirumee/saleor/blob/master/Dockerfile]] yang diatur berdasarkan [[nilai lingkungan|https://github.com/mirumee/saleor/pull/2693/files]]
+
+```
+### Build static assets
+FROM node:10 as build-nodejs
+
+ARG STATIC_URL
+ENV STATIC_URL ${STATIC_URL:-/static/}
+```
+
+Nilai ini akan berlaku bagi template:
+```
+# Build static
+COPY ./saleor/static /app/saleor/static/
+COPY ./templates /app/templates/
+RUN STATIC_URL=${STATIC_URL} npm run build-assets --production \
+  && npm run build-emails --production
+
+```
+Yang kemudian image dikoleksi sbb:
+```
+### Final image
+FROM python:3.6-slim
+
+RUN SECRET_KEY=dummy STATIC_URL=${STATIC_URL} python3 manage.py collectstatic --no-input
+```
+====Workspace====
+[[Local-PC#symlinks|Symlinks]]
+```
+STATICFILES_DIRS	
+[('assets', '/srv/saleor/static/assets'),
+ ('favicons', '/srv/saleor/static/favicons'),
+ ('images', '/srv/saleor/static/images'),
+ ('dashboard/images', '/srv/saleor/static/dashboard/images')]
+STATICFILES_FINDERS	
+['django.contrib.staticfiles.finders.FileSystemFinder',
+ 'django.contrib.staticfiles.finders.AppDirectoriesFinder']
+STATICFILES_STORAGE	
+'django.contrib.staticfiles.storage.StaticFilesStorage'
+STATIC_ROOT	
+'/srv/static'
+STATIC_URL	
+'/market/static/'
+STRIPE	
+'stripe'
+TEMPLATES	
+[{'BACKEND': 'django.template.backends.django.DjangoTemplates',
+  'DIRS': ['/srv/templates'],
+```
+[[<img src=https://chetabahana.github.io/images/google/screencapture-chetabahana-market-id.png>|https://chetabahana.github.io/images/google/screencapture-chetabahana-market-id.png]]
+
+==''Referensi''==
+* [[Django non-root URL|https://www.google.com/search?q=django+non-root]]
+* [[Running Django on a subpath|https://integricho.github.io/2014/02/22/running-django-on-a-subpath/]]
+* [[Finally! a working Django non-root URL with mod_wsgi|https://opensourcemissions.wordpress.com/2010/03/12/finally-a-working-django-non-root-url-with-mod_wsgi/]]
+* [[Django Admin - FORCE_SCRIPT_NAME is appended twice to URL when POSTing|https://stackoverflow.com/questions/25289880/django-admin-force-script-name-is-appended-twice-to-url-when-posting]]

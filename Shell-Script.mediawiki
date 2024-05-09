@@ -1,0 +1,212 @@
+Berikut ini kita akan ulas tentang otomatisasi dalam [[Shell Script|https://en.wikipedia.org/wiki/Shell_script]] dengan ''[[Regular expression|https://en.wikipedia.org/wiki/Regular_expression]]''
+
+__TOC__
+
+==Pattern==
+===Regex===
+* [[Regex pattern including all special characters|https://stackoverflow.com/questions/18057962/regex-pattern-including-all-special-characters/56131930#56131930]]
+====Sed====
+* [[GNU sed|http://www.gnu.org/software/sed/]]
+* [[Sed pattern matching|https://unix.stackexchange.com/a/37369/158462]]
+```
+sed 's/ [ ]* / /g'
+\_/  | \____/ | |
+ |   |    |   | \- g=globally (not just one occurence)
+ |   |    |   |
+ |   |    |   \- to
+ |   |    |
+ |   |    \- from
+ |   |
+ |   \- s=substitute
+ |
+ \- program sed
+
+
+The from part:
+/ [ ]* /
+| \_/| 
+|  | \- repeated 0-infinite times
+|  |
+|   \- group of characters
+|
+\- boundary
+
+```
+Contoh 
+* [[Simpel Tutorial|http://gilmation.com/articles/regexp-keeping-parts-of-a-pattern-in-sed/]]
+
+```
+$ echo 'href="{{ grandchild.url }}"' | \
+  sed 's|href="{{ grandchild.url }}"|href="/market{{ grandchild.url }}"|g'
+href="/market{{ grandchild.url }}"
+
+$ echo 'href="{{ grandchild.url }}"' | \
+  sed 's|href="{{ \([a-zA-Z0-9_]*\).url|href="/market{{ \1.url|g'
+href="/market{{ grandchild.url }}"
+
+```
+
+
+====Quote====
+* How to [[escape a double quote inside double quotes|https://stackoverflow.com/questions/3834839/how-to-escape-a-double-quote-inside-double-quotes]]?
+
+====Remove====
+* [[sed delete lines not containing specific string|https://stackoverflow.com/questions/9541867/sed-delete-lines-not-containing-specific-string]]
+```
+some text here
+blah blah 123
+another new line
+some other text as well
+another line
+
+$ sed '/text\|blah/!d' file
+some text here
+blah blah 123
+some other text as well
+
+```
+====Replace====
+* [[sed: subsitute in line that contains X but does not contain Y|https://unix.stackexchange.com/questions/168180/sed-subsitute-in-line-that-contains-x-but-does-not-contain-y]]
+```
+$ sed '/X/ {/Y/! s/replace/with/}' << EOF
+X replace X
+X replace Y
+Y replace X
+Y replace Y
+EOF
+X with X
+X replace Y
+Y replace X
+Y replace Y
+```
+==Otomatisasi==
+* [[Script to execute command on all files in a directory|https://stackoverflow.com/questions/10523415/bash-script-to-execute-command-on-all-files-in-a-directory/56543895#56543895]]
+
+===Semua===
+```
+$ export DIR=/path/dir && cd $DIR && chmod -R +x *
+$ find . -maxdepth 1 -type f -name '*.sh' -exec {} \; > results.out
+```
+
+===Berurut===
+
+```
+$ export DIR=/path/dir && cd $DIR && chmod -R +x *
+find . -maxdepth 2 -type f -name '*.sh' | sort | bash > results.out
+```
+urutan eksekusi
+```
+bash: 1: ./assets/main.sh
+bash: 2: ./builder/clean.sh
+bash: 3: ./builder/concept/compose.sh
+bash: 4: ./builder/concept/market.sh
+bash: 5: ./builder/concept/services.sh
+bash: 6: ./builder/curl.sh
+bash: 7: ./builder/identity.sh
+bash: 8: ./concept/compose.sh
+bash: 9: ./concept/market.sh
+bash: 10: ./concept/services.sh
+bash: 11: ./product/compose.sh
+bash: 12: ./product/market.sh
+bash: 13: ./product/services.sh
+bash: 14: ./xferlog.sh
+```
+===Unlimited===
+```
+export DIR=/path/dir && cd $DIR && chmod -R +x *
+find . -type f -name '*.sh' | sort | bash > results.out
+```
+
+==Eksekusi==
+
+```
+$ echo `
+#!/bin/sh
+ if [ -d /home/chetabahana/.docker/backend ]; then
+ 	cd /home/chetabahana/.docker/backend && docker-compose down --volumes
+ 	cd .. && sudo rm -rf /home/chetabahana/.docker/backend
+ fi
+ gcloud source repos clone github_chetabahana_backend backend
+ cd /home/chetabahana/.docker/backend/scripts && chmod +x main.sh && ./main.sh
+' > init.sh
+
+$ chmod +x init.sh
+```
+===Via Dockerfile===
+* [[Quickstart for Docker|https://cloud.google.com/cloud-build/docs/quickstart-docker]]
+```
+$ echo `
+FROM alpine
+COPY init.sh /
+CMD ["/init.sh"]
+' > Dockerfile
+
+$ gcloud builds submit --tag gcr.io/[PROJECT_ID]/init .
+$ gcloud compute --project "chetabahana" ssh --zone "us-central1-c" "backend"
+chetabahana@backend:~$ /home/chetabahana/.docker && docker run gcr.io/[PROJECT_ID]/init
+```
+
+===Via Cloud Build===
+* [[Biaya Cloud Build|https://cloud.google.com/cloud-build/pricing]]
+Biaya Cloud Build untuk build-menit yang dikonsumsi di atas ambang batas tertentu.
+
+```
+$ echo '
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/init', '.' ]
+images:
+- 'gcr.io/$PROJECT_ID/init'
+' > cloudbuild.yaml
+
+$ gcloud builds submit --config cloudbuild.yaml .
+$ gcloud compute --project "chetabahana" ssh --zone "us-central1-c" "backend"
+chetabahana@backend:~$ /home/chetabahana/.docker && docker run gcr.io/[PROJECT_ID]/init
+```
+
+===Via Gcloud SSH===
+
+```
+steps:
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["compute", "ssh", "${_USER_NAME}@${_INSTANCE_NAME}", "--zone", "${_ZONE}", 
+  "--command", "cd ${_DOCKER_DIRECTORY} && docker run gcr.io/[PROJECT_ID]/init"]
+
+substitutions:
+  _ZONE: us-central1-c
+  _USER_NAME: chetabahana # default value
+  _INSTANCE_NAME: backend # default value 
+  _DOCKER_DIRECTORY: /home/chetabahana/.docker # default value
+
+timeout: "1600s"  
+
+```
+
+
+===Via Gcloud Build===
+
+```
+steps:
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["compute", "ssh", "${_USER_NAME}@${_INSTANCE_NAME}", "--zone", "${_ZONE}", 
+  "--command", "cd ${_DOCKER_DIRECTORY} && echo '
+#!/bin/sh\n
+if [ -d /home/chetabahana/.docker/backend ]; then\n
+\tcd /home/chetabahana/.docker/backend && docker-compose down --volumes\n
+\tcd .. && sudo rm -rf /home/chetabahana/.docker/backend\n
+fi\n
+gcloud source repos clone github_chetabahana_backend backend\n
+cd /home/chetabahana/.docker/backend/scripts && chmod +x main.sh && ./main.sh\n
+#EOF\n
+' > init.txt && rm -rf init.sh && mv init.txt init.sh && chmod +x init.sh && ./init.sh"]
+
+substitutions:
+  _ZONE: us-central1-c
+  _USER_NAME: chetabahana # default value
+  _INSTANCE_NAME: backend # default value 
+  _DOCKER_DIRECTORY: /home/chetabahana/.docker # default value
+
+timeout: "1600s"  
+
+```
+

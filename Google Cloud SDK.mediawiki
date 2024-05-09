@@ -1,0 +1,110 @@
+Setelah Anda mendapat gambaran tentang ''[[Konsep Dasar|https://github.com/MarketLeader/marketleader.github.io/wiki]]'' dari projek ini maka kita akan mulai masuk ke tahapan untuk mewujudkannya kedalam bentuk ril. Sesuai ''[[Skema Kerja|https://marketleader.github.io/]]'' maka sebagai tahap awal kita perlu membuat website eCommerce untuk dapat menjalankan bisnis secara online.
+
+__TOC__
+==Metoda Pemilihan==
+[[<img src=https://user-images.githubusercontent.com/36441664/69991542-787ef100-157a-11ea-85d5-20907c99b5d7.png>|https://github.com/chetabahana/chetabahana.github.io/wiki/Mapping#Package]]
+
+Di sesi ini kita akan bahas secara detil bagaimana caranya agar kita mempersiapkan apa saja yang dibutuhkan untuk menjalankan bisnis eCommerce.
+
+Sebelum kita melangkah lebih jauh kita perlu pertimbangkan segala hal segi baik biaya, waktu dan tenaga. Hal yang paling penting selayaknya orang yang akan terjun ke dunia bisnis adalah memilih jenis dan metoda apa yang akan kita jalankan.
+
+===Kenapa Saleor===
+
+Untuk memilih jenis eCommerce maka sebaiknya kita mulai dari bahasa pemrograman di web. Dari penjelasan di sesi sebelumnya kita sudah mendapatkan data [[bahasa pemrogranan web|https://github.com/chetabahana/chetabahana.github.io/wiki/Situs-Online#bahasa-web]] yang perkembangannya paling menjanjikan yaitu ''[[Phyton|https://stackoverflow.blog/2017/09/06/incredible-growth-python/]]''. 
+
+Jadi untuk tutorial eCommerce kita bisa cari projek apa di GitHub yang paling trend dapat bintang (''[[Most Starts|https://help.github.com/articles/about-stars/]]'') dengan cara penelusuran seperti berikut ini:
+
+'''''https://github.com/search?type=Repositories&s=stars&q=python+ecommerce'''''
+
+Dengan hasil pencaharian di atas maka kita dapatkan projek bernama ''[[Apa Itu Saleor|Saleor|]]'' dari [[Mirumee Software|http://mirumee.com/]]. Projek ini kita akan pakai sebagai tutorial dengan cara ''[[fork|https://help.github.com/articles/fork-a-repo/]]'' dahulu [[reponya|https://github.com/mirumee/saleor]] kedalam [[organisasi|https://github.com/MarketLeader/Tutorial-Buka-Toko]].
+
+[[Apa Itu Saleor|<img src=https://user-images.githubusercontent.com/5421321/47800694-19bec680-dd2d-11e8-8625-2ed7c690bc13.jpg>]]
+
+===Kenapa Docker===
+Cara terbaik untuk menjalankan aplikasi di web adalah menempatkannya di server.
+
+Umumnya pada server orang akan membuat Virtual Machines (VM) yang menjadi pijakan aplikasi. Beberapa tahun terakhir muncul pendekatan baru yaitu ''[[Teknologi Containerization|http://blog.nostratech.com/2017/03/mengenal-teknologi-containerization.html?m=1]]''. 
+
+Dengan teknologi ini maka kita dapat mengelola dan membagi suatu aplikasi di berbagai sistem operasi komputer namun semuanya bisa berjalan dengan konfigurasi yang sepenuhnya sama. 
+
+Sebenarnya teknologi ini sudah lama ada, namun baru menjadi hype ketika ''[[Apa Itu Docker|Docker]]'' memperkenalkan produk mereka kepada dunia.
+
+[[Apa Itu Docker|<img src=https://cdn-images-1.medium.com/max/1000/1*K_QSn5hR6vdyxaLJH_Wqgg.png>]]
+
+===Kenapa Kubernetes===
+
+Di layanan publik umumnya terdapat 4 jenis komputasi yaitu App Engine, Compute Engine, Kubernetes Engine dan Cloud Function. Dari keempat jenis layanan ini didapat bahwa tempat terbaik untuk ''[[Teknologi Container|https://cloud.google.com/compute/docs/containers/deploying-containers#limitations]]'' adalah di cluster dari ''[[Kubernetes-Engine|Kubernetes]]''.
+
+Sebelum kita melangkah lebih jauh kita perlu simak bagaimana kondisi Aplikasi Saleor jika ''[[Image Docker|https://cloud.google.com/cloud-build/docs/quickstart-docker]]'' ditempatkan di Kubernetes.
+
+Dari sumber yang didapat ternyata Saleor belum dikonfigurasi sepenuhnya untuk Lingkungan. Dengan hal tersebut maka kita perlu metoda yang untuk menyempurnakan kinerja yang dinamakan ''[[Apa Itu HELM Charts|HELM Charts]]''.
+
+
+===Kenapa Google Cloud===
+
+Dari semua [[jenis server|https://en.wikipedia.org/wiki/Server_(computing)]] yang disewakan ke publik maka jenis yang bisa kita tempatkan aplikasi yang sudah dikonfigurasi dalam kontainer adalah ''Cloud Computing''. Istilah populernya ''[[CLOUD|https://en.wikipedia.org/wiki/Cloud_computing]]''.
+
+Dari berbagai tempat penginangan server yang menyediakan ''[[sumber daya cloud|https://en.wikipedia.org/wiki/Category:Cloud_computing_providers]]'' kita akan pilih provider yang paling banyak diminati publik. Cara simpel adalah dengan melihat ke ''[[tag populer stackoferflow|https://stackoverflow.com/tags?tab=popular]]'', tempat dimana orang² yang bergelut di dunia pemrograman berinteraksi. 
+
+Di tag populer tersebut kita masukan kata ''[[<code>cloud</code>|https://stackoverflow.com/tags]]'' maka akan terlihat bahwa ''[[GCP: google-cloud-platform|https://stackoverflow.com/questions/tagged/google-cloud-platform]]'' mempunyai rating tertinggi dibanding provider lain spt amazon, azure, cloudflare, ibm, alibaba dll. 
+
+[[<img src=https://user-images.githubusercontent.com/36441664/86505897-39f13380-bdf4-11ea-95cb-45f1584f004a.png>|https://stackoverflow.com/tags]]
+
+Dari segi keamanan [[Forrester Wave ™ Research|https://forrester.com]] menyebut Google Cloud sebagai yang terbaik dalam [[Platform Cloud Publik Native Security Wave Q2 2018|https://go.google-mkto.com/Eb20T36UPFT0A0VC1s0BC0v]]. 
+
+Laporan tersebut mengevaluasi kemampuan dan fitur keamanan asli penyedia cloud publik, seperti enkripsi, identitas dan manajemen akses (IAM) dan keamanan beban kerja. 
+
+Dari tujuh vendor: Alibaba, Amazon Web Services (AWS), CenturyLink, Google, IBM, Microsoft, and Rackspace, [[Google Cloud|https://id.wikipedia.org/wiki/Google_Cloud_Platform]] mendapat nilai tertinggi dalam kategori Strategi.
+
+Berikut ini [[analisa dan tabel perbandingan|https://raw.githubusercontent.com/MarketLeader/Toko-Chetabahana/master/docs/cloud/analysis/cloud-computing.pdf]] sebagai ilustrasi.
+
+[[<img src=https://raw.githubusercontent.com/MarketLeader/Toko-Chetabahana/master/docs/cloud/analysis/cloud-computing-7.jpg>|https://raw.githubusercontent.com/MarketLeader/Toko-Chetabahana/master/docs/cloud/analysis/cloud-computing-7.jpg]]
+
+Berita baiknya dari ratusan negara di dunia ini, ''[[GCP memilih Jakarta sebagai cabang ke-8|https://m.detik.com/inet/business/d-4242136/google-buka-cloud-region-di-indonesia-apa-itu]]'' setelah Mumbai, Singapura, Taiwan, Sydney, Tokyo, Osaka dan Hong Kong. 
+
+[[<img src=https://user-images.githubusercontent.com/36441664/82875112-2a630d00-9f61-11ea-946c-254f87819294.jpg>|https://amp.kompas.com/tekno/read/2020/03/04/18054197/server-cloud-google-di-indonesia-bakal-ditempatkan-di-3-zona]]
+
+Jadi kita akan diuntungkan, berupa tingkat latency rendah dan kinerja tinggi dalam penggunaan dan data berbasis cloud
+
+[[<img src=https://cloud.google.com/images/locations/regions.png>|https://cloud.google.com/about/locations/?region=asia-pacific#meet-our-network]]
+
+GCP enggan menyebutkan jumlah pelanggan mereka di Indonesia, namun mereka menyebutkan nama Blue Bird Group, CT Corp, Sale Stock, Go-Jek, Emtek, Tokopedia, dan Traveloka.
+
+Anda bisa pelajari cara mendesain, mengembangkan, dan men-deploy aplikasi menggunakan layanan di [[GCP On Air|https://cloudonair.withgoogle.com/]] untuk membuat aplikasi berbasis cloud yang aman, scalable, dan cerdas.
+
+[[<img src=https://raw.githubusercontent.com/chetabahana/chetabahana.github.io/master/images/google/gcp_cheat_sheet.png>|https://raw.githubusercontent.com/chetabahana/chetabahana.github.io/master/images/google/gcp_cheat_sheet.png]]
+
+==Cara Instalasi==
+
+Ada begitu banyak cara yang diuraikan untuk memasang Saleor ke dalam kontainer ke Kebernetes. 
+Berikut ini adalah cara instalasi yang diuraikan secara garis besar saja. Detilnya bisa Anda ikuti di halaman² selanjutnya
+
+===Metoda FrontEnd===
+
+[[<img src=https://chetabahana.files.wordpress.com/2019/01/deploy-saleor.png>|https://github.com/mirumee/saleor/issues/3613]]
+
+If a specific issue is keeping you back, Some details about it might be helpful.
+
+I used a kubernetes cluster to succesfully run the base saleor project in the cloud with public IP address and postgres running in Google Cloud as well.
+
+* Build your ''[[docker|https://docs.docker.com/docker-for-windows/install/]]'' image ''[[locally|https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app#option_b_use_command-line_tools_locally]]'', and ''[[publish|https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app#step_2_upload_the_container_image]]'' to ''[[Google Cloud Container Registry|https://cloud.google.com/container-registry/]]''. 
+* Follow a guide to setup "generic" ''[[Kubernetes cluster|https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app#step_4_create_a_container_cluster]]'' and remember to '''''[[set environment variables|https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html]]''''' when creating your ''[[workload|https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/]]'' based on the uploaded image.
+* Go to your workload and pick ''[[Expose|https://cloud.google.com/kubernetes-engine/docs/tutorials/hello-app#step_6_expose_your_application_to_the_internet]]'' in the top to create a public IP pointing to your application.
+* Setup ''[[Postgres|https://docs.getsaleor.com/en/latest/gettingstarted/installation-linux.html#installation]]'' in ''[[cloud|https://cloud.google.com/sql/docs/postgres/connect-kubernetes-engine]]''. Many options, I went with their ''[[Cloud SQL|https://codelabs.developers.google.com/codelabs/cloud-postgresql-gke-memegen/#5]]'' solution, which was quite straightforward.
+
+===Metoda Codefresh===
+Untuk mengembangkan aplikasi maka kita dapat melakukan sistem otomatisasi dengan mengintegrasikan semua akun yang digunakan via Codefresh.
+
+Dengan menggunakan layanan ini kita bisa otomatisasi pembuatan aplikasi supaya menyederhanakan rutinitas pemasangan setiap ada perubahan yang dilakukan.
+===Metoda HELM Charts===
+Setelah kita berhasil menampilkan ''[[Apa-Itu-Saleor|Aplikasi Saleor]]'' maka kita perlu menyetel komponen² yang penting dari sistem antara lain Arsitektur, Konfigurasi, Upgrade dan Maintenance.
+
+Untuk itu kita sempurnakan dengan ''[[Apa Itu HELM Charts|HELM Charts]]'' termasuk implementasi ''[[Metoda IT|https://github.com/ansible/ansible]]'' kedalam otomatisasi pembuatan baik itu di ''[[Cloud Builder|https://cloud.google.com/cloud-build]]'' maupun di layanan lainnya seperti ''[[Apa-Itu-Codefresh|Codefresh]]''.
+
+===Metoda BackEnd Domain===
+Berikutnya kita akan ulas tentang bagaimana mengoptimalkan database, penampilan tema, cara pembayaran, konfigurasi web, dan memanfaatkan ''[[Backend API|https://codelabs.developers.google.com/codelabs/cloud-endpoints-appengine/index.html]]'' untuk menunjang kinerja sistem.
+
+Philosophy dari projek akan mengutamakan halaman statis. Halaman dinamis akan di clone menjadi halaman statis di belakang layar dengan ''[[Cloud Scheduler|https://cloud.google.com/scheduler/docs/quickstart?hl=in]]'' dan ''[[Cloud Functions|https://cloud.google.com/functions/]]'' sedemikian rupa dengan tujuan untuk mendapatkan kinerja tinggi sekaligus mengoptimalkan ''[[biaya tagihan|https://cloud.google.com/pricing/]]''.
+
+[[Menjalankan-Backend-API|Metoda Backend]] adalah tahap terakhir dari cara Instalasi. Detilnya akan meliputi cara yang ditempuh untuk menjalankan jalannya aplikasi sesuai ''[[bagan rencana|https://github.com/chetabahana/chetabahana.github.io/wiki/Bagan-Project]]'' secara otomatis dan terkendali.
+

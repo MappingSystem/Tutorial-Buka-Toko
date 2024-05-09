@@ -1,0 +1,3 @@
+==''Referensi''==
+* [[ReCaptcha|https://docs.getsaleor.com/en/latest/guides/recaptcha.html]]
+* [[Facebook and Gmail login feature|https://github.com/mirumee/saleor/issues/2066]]

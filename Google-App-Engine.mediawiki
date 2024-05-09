@@ -1,0 +1,173 @@
+Pada sesi ini kita akan bahas tentang cara tampilkan Frontend di GAE.
+__TOC__
+
+==Layanan==
+
+===Konfigurasi===
+[[<img src=https://cloud.google.com/appengine/docs/images/modules_hierarchy.svg>|https://cloud.google.com/appengine/docs/standard/python/an-overview-of-app-engine#components_of_an_application]]
+URL dari aplikasi (''[[Rute|https://cloud.google.com/appengine/docs/standard/python/how-requests-are-routed?hl=in]]''):
+* URL dari aplikasi (default): <code>http://<app-version>.<application-id>.appspot.com</code>
+* URL (service): <code>http://<app-version>.<service-name>-dot-<application-id>.appspot.com</code>
+
+===GAE Region===
+Layanan tersedia untuk ''[[Region|https://cloud.google.com/appengine/docs/locations]]'' berikut:
+```
+[1] asia-east2    (supports standard and flexible)
+[2] asia-northeast1 (supports standard and flexible)
+[3] asia-south1   (supports standard and flexible)
+[4] australia-southeast1 (supports standard and flexible)
+[5] europe-west   (supports standard and flexible)
+[6] europe-west2  (supports standard and flexible)
+[7] europe-west3  (supports standard and flexible)
+[8] northamerica-northeast1 (supports standard and flexible)
+[9] southamerica-east1 (supports standard and flexible)
+[10] us-central    (supports standard and flexible)
+[11] us-east1      (supports standard and flexible)
+[12] us-east4      (supports standard and flexible)
+[13] us-west2      (supports standard and flexible)
+```
+
+==Setelan==
+
+===Limit Aplikasi===
+Jumlah [[limit services and versi|https://cloud.google.com/appengine/docs/standard/python/an-overview-of-app-engine#limits]]
+* Maksimum service per aplikasi: 5 (Gratis), 105 (Berbayar)
+* Maksimum versi per aplikasi: 15 (Gratis), 210 (Berbayar)
+* Maksimum Instance per manual/basic: 20 (Gratis), 25 (Berbayar), 200 (Berbayar kusus us-central)
+
+===Dispatch URL===
+Dispatch rute URL kita bisa arahkan sampai ''[[20 service|https://cloud.google.com/appengine/docs/standard/python3/reference/dispatch-yaml#limits]]''
+```bash
+#gcloud app deploy dispatch.yaml
+dispatch:
+  # Default service serves the typical web resources and all static resources.
+  - url: "*/img/favicon.ico"
+    service: default
+
+  # Send to portfolio
+  - url: "*/konsep/portfolio/*"
+    service: portfolio
+
+  # Send to Frontstore
+  - url: "*/product/*"
+    service: product
+
+  # Send to wordpress
+  - url: "*/blog/*"
+    service: wordpress
+
+  # Send to reverse-proxy
+  - url: "*/ansible/*"
+    service: proxy
+
+  # Default service serves simple hostname request.
+  - url: "www.chetabahana.com/*"
+    service: default
+```
+
+==Service==
+===Default===
+File app.yaml
+```bash
+runtime: python37
+instance_class: F1
+default_expiration: "365d"
+
+handlers:
+# site root
+- url: /
+  static_files: index.html
+  upload: index.html
+  
+- url: /(.*)
+  static_files: \1
+  upload: .*
+
+- url: /.*
+  secure: always
+  redirect_http_response_code: 301
+  script: auto
+```
+
+===Portfolio===
+File [[app.yaml|https://github.com/chetabahana/portfolio/blob/master/app.yaml]]
+```bash
+runtime: python27
+api_version: '1'
+env: standard
+threadsafe: true
+service: portfolio
+handlers:
+- url: /konsep/portfolio/
+  static_files: _build/html/index.html
+  upload: _build/html/index.html
+  secure: always
+  # login: admin
+
+- url: /konsep/portfolio/
+  static_dir: _build/html
+  secure: always
+  # login: admin
+
+- url: /konsep/portfolio/(.*\.(gif|png|jpg|ico|js|css|html))
+  static_files: /
+  upload: _build/html/(.*\.(gif|png|jpg|ico|js|css|html))
+  secure: always
+  # login: admin
+
+skip_files:
+- ^parts
+- ^bootstrap.py
+- ^env$
+- ^buildout.cfg
+- ^downloads$
+- ^eggs$
+- ^bin$
+- .installed.cfg
+- develop-eggs
+- ^venv
+
+```
+Instalasi via Cloud Shell
+```bash
+cd .. 
+rm -rf portfolio 
+git clone https://github.com/chetabahana/portfolio.git 
+cd portfolio 
+sh install.sh
+```
+Output ''[[shell logs|https://github.com/chetabahana/portfolio/blob/master/shell.logs]]''
+
+===Frontstore===
+Untuk Frontend dari Fronstore kita pakai ''Build Image''. 
+
+Kita sudah bahas di ''[[Instalasi-di-GAE#deploy-image|Instalasi di GAE]]'' jika pemasangan tidak dapat dilakukan di GAE Standard. Jadi kita pasang di GAE Flexible supaya transaksi bisa dilakukan dalam satu host.
+
+Seperti halnya [[Google-App-Engine#service-portfolio|Portfolio]] kita akan tampilkan ''[[Google-App-Engine#dispatch-url|via disptach di GAE]]'' dengan menyetel template halaman sesuai halaman utama.
+
+===Wordpress===
+Salah satu kelebihan dari GAE Standar adalah kita bisa setel ''[[Batas Biaya Harian|https://cloud.google.com/appengine/docs/standard/python/console/#setting_a_spending_limit]]''. Karenanya untuk optimalkan biaya tagihan, kita bisa memperkaya Site maka diluar Frontend dari [[Google-App-Engine#service-portfolio|Portfolio]] dan [[Google-App-Engine#Service_Frontstore|Frontstore]] kita perlu pasang juga untuk menampilkan layanan lain seperti Blog, Panduan dll.
+
+Namun jika dia memerlukan instance MySQL di Cloud SQL sementara kita sudah pasang Postgres maka ongkosnya tidak akan efektif karena secara keseluruhan hanya sebagai penunjang. 
+
+Solusi yang dapat dilakukan agar tidak perlu pasang instance MySQL adalah: 
+* ''[[Pasang di GAE|https://cloud.google.com/community/tutorials/run-wordpress-on-appengine-standard]]'' dengan ''[[PostgreSQL for WordPress (PG4WP)|https://wordpress.org/plugins/postgresql-for-wordpress/]]''.
+* ''[[Google-Compute-Engine|Pasang di GCE]]'' berikut dengan ''[[Google-Compute-Engine#Instal_MySQL|MySQL]]'' dalam satu localhost.
+* ''[[Pasang di GAE|https://cloud.google.com/community/tutorials/run-wordpress-on-appengine-standard]]'' dengan ''[[Google-Compute-Engine#Instal_MySQL|MySQL di GCE]]'' konek via ''[[VPC Peering|https://cloud.google.com/sdk/gcloud/reference/beta/services/vpc-peerings/]]''.
+
+Catatan: 
+* Untuk  update plugins-and-themes lakukan via ''[[wp-cli|https://cloud.google.com/community/tutorials/run-wordpress-on-appengine-standard#install-and-update-wordpress-plugins-and-themes]]''
+* Simak untuk pasang ''[[Joomla|https://forum.joomla.org/viewtopic.php?t=828565]]'', ''[[drupal|https://www.appnovation.com/blog/drupal-setup-google-app-engine]]''
+
+===Reverse Proxy===
+Sepanjang bisa  dilakukan maka sebaiknya aplikasi dipasang di GAE Standard. 
+
+Apabila tidak bisa maka jika tidak harus pasang di GAE Fleksibel (misal tidak perlu transaksi di domain utama), akan lebih hemat jika dilakukan pakai type ''[[GCE yang Always Free|https://cloud.google.com/free/docs/gcp-free-tier#always-free-usage-limits]]'' dan disetel sbb:
+
+* Pakai 1 non-preemptible f1-micro VM US regions dengan manual instance 
+* Pasang dan operasikan HDD dibawah 30 GB-months
+
+Namun supaya Frontend nya berada dalam domain maka tampilan bisa tetap dimunculkan ''[[Google-App-Engine#dispatch-url|via disptach]]'' dengan memasang ''[[Reverse Proxy|https://github.com/bechurch/reverse-proxy-demo]]'' atau ''[[https proxy|https://medium.com/@mlowicki/http-s-proxy-in-golang-in-less-than-100-lines-of-code-6a51c2f2c38c]]'' di GAE.
+
+==''Referensi''==
+* [[Laravel 5.7 Lands on Google App Engine Standard Environment|http://www.skychin.me/posts/2018-10-27/laravel-5.7-lands-on-google-app-engine-standard-environment/]]

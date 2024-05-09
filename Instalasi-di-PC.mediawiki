@@ -1,0 +1,113 @@
+Sesi ini kita akan kupas tentang cara mempersiapkan [[Apa itu Saleor|Aplikasi Saleor]] di PC.
+__TOC__
+==Kebutuhan==
+
+===Minimum===
+
+Lihat [[Kebutuhan minimum|https://docs.getsaleor.com/en/latest/gettingstarted/installation-linux.html#prerequisites]]
+* Python 3.5 or later
+* Node.js Version 10 or later
+* PostgreSQL version 9.4 or above
+
+===Setel Python===
+* [[Change the Python default version|https://unix.stackexchange.com/questions/410579/change-the-python3-default-version-in-ubuntu]]
+* [[Testing and deploying your application|https://cloud.google.com/appengine/docs/standard/python3/testing-and-deploying-your-app]]
+
+====Default====
+Via Alias
+```
+$ which python
+which: no python in /usr/local/bin:/usr/bin:/cygdrive/c/Windows/system32:
+
+$ ls /usr/bin/python*
+/usr/bin/python3.7         /usr/bin/python3.7m.exe
+/usr/bin/python3.7-config  /usr/bin/python3.7m-config
+
+$ ln -s /usr/bin/python3.7 /usr/bin/python
+
+$ which python
+/usr/bin/python
+
+$ python --version
+Python 3.7.3
+
+```
+
+Via Alternative
+```
+$ ls /usr/bin/python*
+
+$ python --version
+Python 2.7.15rc1
+$ python3 --version
+Python 3.6.7
+$ sudo update-alternatives --install /usr/bin/python python /usr/bin/python3.6 1
+$ python --version
+Python 3.6.7
+
+$ sudo apt install python-pip
+$ sudo apt-get install build-essential python3-dev python3-pip python3-cffi \
+libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev \
+shared-mime-info
+
+$ curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
+$ sudo apt-get install -y nodejs
+$ sudo npm install -g npm@latest
+
+$ sudo apt-get update
+$ sudo apt-get install gtk2.0
+```
+====Virtual Env====
+* [[Virtual Environments and Packages|https://docs.python.org/3/tutorial/venv.html]]
+* [[The headers or library files could not be found for jpeg” installing Pillow|https://stackoverflow.com/questions/44043906/the-headers-or-library-files-could-not-be-found-for-jpeg-installing-pillow-on]]
+
+
+```bash
+$ ls /usr/bin/pip*
+/usr/bin/pip3.7
+$ ln -s /usr/bin/pip3.7 /usr/bin/pip
+
+$ pip --version
+pip 19.0.3 from /usr/lib/python3.7/site-packages/pip (python 3.7)
+
+$ python -m venv virtual-env
+$ source virtual-env/bin/activate
+(virtual-env)
+
+$ sudo apt-get install libjpeg-dev zlib1g-dev
+$ pip install Pillow
+$ pip install -r requirements.txt
+```
+
+====Solusi Rebase====
+Jika terdapat error fixing-fork-failures
+```
+2 [main] python3.7m 1771 child_info_fork::abort: address space needed by 
+'cygcrypto-1.1.dll' (0x830000) is already occupied
+```
+Maka lakukan [[full rebase|https://cygwin.com/faq/faq.html#faq.using.fixing-fork-failures]] atau [[fixing bloda|https://cygwin.com/faq/faq.html#faq.using.bloda]] bila perlu
+# run <code>rebase-trigger fullrebase</code>, matikan semua proses dan layanan Cygwin, jalankan setup
+# start ash atau dash (jangan gunakan bash atau terminal emulator seperti rxvt atau mintty). 
+# cara termudah untuk melakukan ini adalah menggunakan Windows Explorer dan arahkan ke tingkat atas instalasi cygwin Anda, dan klik dua kali ash.exe atau dash.exe di direktori bin /.
+# jalankan /bin/rebaseall (di jendela ash / dash), restart komputer
+
+
+===Database===
+Create a PostgreSQL user<br>
+Create a PostgreSQL database
+
+http://toguko.com/blog/install-saleor-e-commerce.html
+```bash
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgres://USER:PASS@localhost:5432/saleor',
+        conn_max_age=600)}
+```
+
+
+===Setel npm===
+* jika [[npm ERR! code ELIFECYCLE|https://stackoverflow.com/questions/42308879/npm-err-code-elifecycle]] delete <code>node_modules</code> dan <code>package-lock.json</code>
+* jika ada ditemukan ''vulnerabilities'' jalankan: <code>npm audit fix</code>
+* jika [[npm istall stack di extract core=js|https://github.com/npm/npm/issues/18448]]
+* konflik [[path sistem di nodejs|https://docs.npmjs.com/try-the-latest-stable-version-of-npm]]
+

@@ -1,0 +1,228 @@
+[[Saleor|https://getsaleor.com/]] dapat diartikan sebagai sebuah ''[[Aplikasi e-Commerce - Sumber Terbuka |https://github.com/mirumee/saleor]]'' beretalase modular yang diklaim berkinerja tinggi dibangun dengan [[Apa-Itu-Saleor#python|Python]], [[Apa-Itu-Saleor#graphql|GraphQL]], [[Apa-Itu-Saleor#django|Django]], dan [[Apa-Itu-Saleor#reactjs|ReactJS]].
+
+__TOC__
+
+==Arsitektur==
+
+* Demo: [[Web|https://demo.getsaleor.com/]] dan [[Mobile|https://pwa.getsaleor.com/]]
+* Developer: [[Mirumee Software|https://mirumee.com/]]
+* Case Study: [[Pretty Green - e-Commerce|https://mirumee.com/projects/pretty-green/]]
+* Running Web: https://www.prettygreen.com/
+* Tryout di: [[CircleCI|https://github.com/mirumee/saleor/wiki/Demo-deployment]]. Gratis ''[[1 Container|https://circleci.com/pricing]]'', ''[[1 Projek|https://github.com/mirumee/saleor/search?q=CircleCI&unscoped_q=CircleCI]]'', ''[[1 Image|https://cloud.docker.com/repository/docker/chetabahana/saleor]]'' 
+
+[[<img src=https://user-images.githubusercontent.com/36441664/71597425-a0f80c00-2b75-11ea-9b1e-a0f4ded7a9a1.png>|https://github.com/mirumee/saleor]]
+
+===Python===
+[[Python|https://id.wikipedia.org/wiki/Python_(bahasa_pemrograman)]] adalah ''[[Bahasa Pemrograman - Open Source |https://github.com/python/cpython]]'' yang interpretatif multiguna dengan filosofi perancangan yang berfokus pada tingkat keterbacaan kode.
+
+Python diklaim sebagai bahasa yang menggabungkan kapabilitas, kemampuan, dengan sintaksis kode yang sangat jelas,[11] dan dilengkapi dengan fungsionalitas pustaka standar yang besar serta komprehensif. Python juga didukung oleh komunitas yang besar.
+
+[[<img src=https://user-images.githubusercontent.com/36441664/71596301-950a4b00-2b71-11ea-9fd2-a053c40103a1.png>|https://stackoverflow.blog/2017/09/06/incredible-growth-python/]]
+
+Bahasa pemrograman Python dalam lima tahun terakhir, seperti yang terlihat oleh lalu lintas Stack Overflow denga istilah "yang paling cepat berkembang" mungkin sulit untuk didefinisikan secara tepat, tetapi bahwa Python memiliki klaim kuat untuk menjadi bahasa pemrograman utama yang paling cepat berkembang.
+
+===Django===
+[[Django|https://en.wikipedia.org/wiki/Django_(web_framework)]] adalah ''[[Kerangka kerja web - Open Source|https://github.com/django/django]]'' berbasis-Python, yang mengikuti [[pola arsitektur|https://www.digitalocean.com/community/tutorials/how-to-serve-django-applications-with-uwsgi-and-nginx-on-ubuntu-16-04]] model-view-template, dikelola oleh [[Django Software Foundation|https://en.wikipedia.org/wiki/Django_Software_Foundation]], organisasi nirlaba.
+
+[[<img src=https://3.bp.blogspot.com/-AtUznsbX32s/WM1BnQWfETI/AAAAAAAACDk/_j_hYq82IQEDYNUj6XgqoaCSWcK5QVl6wCLcB/s1600/django-project-structure.png>|http://django-easy-tutorial.blogspot.com/2017/03/django-project-layout-and-settings.html]]
+
+Selama 5 tahun terakhir, solusi open source berbasis Django telah menjadi salah satu solusi e-commerce Python yang paling cepat berkembang di dunia. 
+
+Ia dipercaya oleh pengecer volume tinggi dari merek-merek mapan — di sektor-sektor seperti pakaian pria dan penerbitan online — serta startup yang mengganggu termasuk portal penjualan online yang diakui dalam daftar Forbes 30 Under 30. 
+
+Ini adalah salah satu platform e-commerce paling populer untuk programmer, didukung oleh komunitas pengembang dari lebih dari 60 negara, dengan lebih dari 2600 bintang di Github.
+
+Dalam mengembangkan saleor, pengembang mengandalkan solusi e-Commerce dengan menggunakan flatform ini. Pembahasan secara detil silahkan simak di sesi setelan [[Django]].
+
+===GraphQL===
+[[GraphQL|https://en.wikipedia.org/wiki/GraphQL]] adalah kueri sumber dan manipulasi data sumber terbuka untuk ''[[API - Open Source|https://github.com/graphql/graphiql]]'', dan runtime untuk memenuhi kueri dengan data yang ada. GraphQL dikembangkan secara internal oleh Facebook pada tahun 2012 sebelum dirilis secara publik pada tahun 2015
+
+[[<img src=https://cdn-images-1.medium.com/max/1200/1*ObWwLWml6KVvh-ZXbYSTVQ.png>|https://cdn-images-1.medium.com/max/1200/1*ObWwLWml6KVvh-ZXbYSTVQ.png]]
+
+Saleor 2.0 bergeser dari struktur monolitik berbasis Django, dan memperkenalkan GraphQL API terpisah dengan dashboard dinamis dan modul etalase yang ditulis dalam React. 
+
+Kerangka kerja yang fleksibel namun fungsional ini berarti Saleor 2.0 mungkin merupakan satu-satunya platform open source yang menawarkan GraphQL API dengan pengalaman e-commerce penuh. Saleor 2.0 memungkinkan platform sebagai aplikasi satu halaman yang menawarkan pengalaman seluler PWA seperti aplikasi asli. 
+
+Misi Saleor selalu untuk mentransformasikan bisnis dan memberikan teknologi kepada pengembang yang mereka sukai untuk bekerja sama — arsitektur baru menghadirkan keduanya.
+
+===ReactJs===
+[[ReactJs|https://en.wikipedia.org/wiki/React_(JavaScript_library)]] adalah ''[[Perpustakaan JavaScript - Open Source|https://github.com/reactjs/reactjs.org]]'' untuk membangun antarmuka pengguna. Itu dikelola oleh Facebook dan komunitas pengembang dan perusahaan individu. ReactJs dapat digunakan sebagai dasar dalam pengembangan aplikasi satu halaman atau mobile.  
+
+[[<img src=https://user-images.githubusercontent.com/36441664/71597156-b9b3f200-2b74-11ea-86f8-f0d5e89db017.png>|https://create.roadtonaukri.com/server-side-rendering-in-react-js-applications-using-redux-and-react-router-21404a12ea05]]
+
+==Konfigurasi==
+
+* '''[[PWA|https://github.com/mirumee/saleor-storefront]]''': Pengguna akhir dapat berbelanja offline untuk pengalaman penjualan dan belanja yang lebih baik
+* '''GraphQL API''': Akses semua data dari web atau klien seluler apa pun menggunakan teknologi terbaru
+* '''Headless commerce''': Bangun aplikasi seluler, sesuaikan tampilan toko dan proses eksternalisasi
+* '''UX dan UI''': Dirancang untuk pengalaman pengguna yang menyaingi bahkan platform komersial teratas
+* '''Dashboard''': Administrator memiliki kontrol penuh terhadap pengguna, proses dan produk
+* '''Orders''': Sistem komprehensif untuk pesanan, pengiriman dan pengembalian uang
+* '''Cart''': Pembayaran lanjutan dan opsi pajak, dengan kontrol penuh atas diskon dan promosi
+* '''Pembayaran ''': Arsitektur API fleksibel memungkinkan integrasi metode pembayaran apa pun. Dilengkapi dengan dukungan Braintree di luar kotak.
+* '''Geo-adaptif''': Harga yang dilokalkan secara otomatis. Lebih dari 20 bahasa lokal. Pengalaman checkout yang dilokalkan oleh negara.
+* '''SEO''': Dikemas dengan fitur yang membuat toko ke audiens yang lebih luas
+* '''Cloud''': Dioptimalkan untuk penyebaran menggunakan Docker
+* '''Analytics''': Google Analytics sisi-server melaporkan metrik e-niaga tanpa memengaruhi privasi
+
+===Repository===
+<table>
+<thead><tr><th>Nama</th></tr></thead>
+<tbody>
+<tr><td>
+deployment
+: elasticbeanstalk
+:: Dockerrun.aws.json
+</td></tr>
+<tr><td>locale</td></tr>
+<tr><td>
+saleor
+: celeryconf.py
+: settings.py
+: urls.py
+</td></tr>
+<tr><td>scripts</td></tr>
+<tr><td>templates</td></tr>
+<tr><td>test</td></tr>
+<tr><td>common.env</td></tr>
+<tr><td>docker-compose.override.yml</td></tr>
+<tr><td>docker-compose.yml</td></tr>
+<tr><td>manage.py</td></tr>
+<tr><td>requirements.txt</td></tr>
+<tr><td>requirements_dev.txt</td></tr>
+<tr><td>runtime.txt</td></tr>
+<tr><td>setup.cfg</td></tr>
+</tbody>
+</table>
+
+===Data Skema===
+Berdasarkan <code>products/models/base.py</code> and <code>images.py</code> dan <code>postgresql</code> database tables
+
+[[<img src=https://i.stack.imgur.com/17aW2.png>|https://i.stack.imgur.com/17aW2.png]]
+
+===Data Model===
+Data Model dapat dibuat dengan [[django-extensions|http://django-extensions.readthedocs.io/en/latest/graph_models.html]]
+
+[[<img src=https://user-images.githubusercontent.com/36441664/71596076-bf0f3d80-2b70-11ea-84bb-a10164f0c3ba.png>|https://i.stack.imgur.com/a45YV.jpg]]
+
+===Dokumentasi===
+[[Dokumentasi|https://docs.getsaleor.com/en/latest/]] bisa di download [[disini|https://readthedocs.org/projects/saleor/downloads/]]
+
+Contents:
+
+* [[Getting Started|https://docs.getsaleor.com/en/latest/gettingstarted.html]]
+** [[Installation for macOS|https://docs.getsaleor.com/en/latest/gettingstarted/installation-macos.html]]
+** [[Installation for Windows|https://docs.getsaleor.com/en/latest/gettingstarted/installation-windows.html]]
+** [[Installation for Linux|https://docs.getsaleor.com/en/latest/gettingstarted/installation-linux.html]]
+** [[Configuration|https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html]]
+** [[Creating an Administrator Account|https://docs.getsaleor.com/en/latest/gettingstarted/superuser.html]]
+** [[Debug tools|https://docs.getsaleor.com/en/latest/gettingstarted/dev-tools.html]]
+** [[Example Data|https://docs.getsaleor.com/en/latest/gettingstarted/example-data.html]]
+* [[Customizing Saleor|https://docs.getsaleor.com/en/latest/customization.html]]
+** [[Using Docker for Development|https://docs.getsaleor.com/en/latest/customization/docker.html]]
+** [[Customizing Templates|https://docs.getsaleor.com/en/latest/customization/templates.html]]
+** [[Customizing Emails|https://docs.getsaleor.com/en/latest/customization/emails.html]]
+** [[Customizing CSS and JavaScript|https://docs.getsaleor.com/en/latest/customization/frontend.html]]
+** [[Working with Python Code|https://docs.getsaleor.com/en/latest/customization/backend.html]]
+** [[Internationalization|https://docs.getsaleor.com/en/latest/customization/i18n.html]]
+** [[Running Tests|https://docs.getsaleor.com/en/latest/customization/tests.html]]
+** [[Continuous Integration|https://docs.getsaleor.com/en/latest/customization/ci.html]]
+** [[Running with PyPy 3.5|https://docs.getsaleor.com/en/latest/customization/pypy.html]]
+* [[Supported Payment Gateways|https://docs.getsaleor.com/en/latest/payment-gateways.html]]
+** [[Braintree (supports PayPal and Credit Cards)|https://docs.getsaleor.com/en/latest/payment-gateways/braintree.html]]
+** [[Razorpay (supports only the paisa currency)|https://docs.getsaleor.com/en/latest/payment-gateways/razorpay.html]]
+** [[Stripe (supports Credit Cards)|https://docs.getsaleor.com/en/latest/payment-gateways/stripe.html]]
+* [[Contributing Guides|https://docs.getsaleor.com/en/latest/contributing.html]]
+** [[EditorConfig|https://docs.getsaleor.com/en/latest/contributing/editorconfig.html]]
+** [[Coding Style|https://docs.getsaleor.com/en/latest/contributing/coding-style.html]]
+** [[Naming Conventions|https://docs.getsaleor.com/en/latest/contributing/naming.html]]
+* [[Architecture|https://docs.getsaleor.com/en/latest/architecture.html]]
+** [[Handling Money Amounts|https://docs.getsaleor.com/en/latest/architecture/money.html]]
+** [[Product Structure|https://docs.getsaleor.com/en/latest/architecture/products.html]]
+** [[Thumbnails|https://docs.getsaleor.com/en/latest/architecture/thumbnails.html]]
+** [[Stock Management|https://docs.getsaleor.com/en/latest/architecture/stock.html]]
+** [[[[Order Management|https://docs.getsaleor.com/en/latest/architecture/orders.html]]
+** [[Events|https://docs.getsaleor.com/en/latest/architecture/events.html]]
+** [[Internationalization|https://docs.getsaleor.com/en/latest/architecture/i18n.html]]
+** [[Model Translations|https://docs.getsaleor.com/en/latest/architecture/translations.html]]
+** [[Search|https://docs.getsaleor.com/en/latest/architecture/search.html]]
+** [[Payments Architecture|https://docs.getsaleor.com/en/latest/architecture/payments.html]]
+** [[Shippings|https://docs.getsaleor.com/en/latest/architecture/shippings.html]]
+** [[Site Settings|https://docs.getsaleor.com/en/latest/architecture/settings.html]]
+** [[Pages|https://docs.getsaleor.com/en/latest/architecture/page.html]]
+** [[GDPR Compliance|https://docs.getsaleor.com/en/latest/architecture/gdpr.html]]
+** [[Manual actions required|https://docs.getsaleor.com/en/latest/architecture/gdpr.html#manual-actions-required]]
+** [[GraphQL API (Beta)|https://docs.getsaleor.com/en/latest/architecture/graphql.html]]
+* [[Integrations|https://docs.getsaleor.com/en/latest/integrations.html]]
+** [[Search Engine Optimization (SEO)|https://docs.getsaleor.com/en/latest/integrations/seo.html]]
+** [[Social Media Optimization (SMO)|https://docs.getsaleor.com/en/latest/integrations/smo.html]]
+** [[Email Markup|https://docs.getsaleor.com/en/latest/integrations/emailmarkup.html]]
+** [[Elasticsearch|https://docs.getsaleor.com/en/latest/integrations/elasticsearch.html]]
+** [[Google Analytics|https://docs.getsaleor.com/en/latest/integrations/googleanalytics.html]]
+** [[Google for Retail|https://docs.getsaleor.com/en/latest/integrations/googleforretail.html]]
+** [[Open Exchange Rates|https://docs.getsaleor.com/en/latest/integrations/openexchangerates.html]]
+** [[Error tracking with Sentry|https://docs.getsaleor.com/en/latest/integrations/sentry.html]]
+* [[Deployment|https://docs.getsaleor.com/en/latest/deployment.html]]
+** [[Docker|https://docs.getsaleor.com/en/latest/deployment/docker.html]]
+** [[Heroku|https://docs.getsaleor.com/en/latest/deployment/heroku.html]]
+** [[Storing Files on Amazon S3|https://docs.getsaleor.com/en/latest/deployment/s3.html]]
+* [[Guides|https://docs.getsaleor.com/en/latest/guides.html]]
+** [[Orders|https://docs.getsaleor.com/en/latest/guides/orders.html]]
+** [[Payments|https://docs.getsaleor.com/en/latest/guides/payments.html]]
+** [[Example|https://docs.getsaleor.com/en/latest/guides/payments.html#id8]]
+** [[Navigation|https://docs.getsaleor.com/en/latest/guides/navigation.html]]
+** [[Taxes|https://docs.getsaleor.com/en/latest/guides/taxes.html]]
+** [[ReCaptcha|https://docs.getsaleor.com/en/latest/guides/recaptcha.html]]
+** [[Email Configuration and Integration|https://docs.getsaleor.com/en/latest/guides/email_integration.html]]
+
+
+==Pengembangan==
+* [[Release Announcement|https://medium.com/saleor]]
+
+===Etalase===
+Etalase PWA (Aplikasi Web Progresif) memungkinkan pengguna untuk menelusuri dan membeli produk di seluruh perangkat dan platform, memberikan pengalaman berbelanja yang menarik
+
+[[<img src=https://user-images.githubusercontent.com/36441664/71596703-e535dd00-2b72-11ea-87d8-413a4a9cded3.png>|https://github.com/mirumee/saleor#features]]
+
+===Platform===
+API GraphQL, menggunakan Bereaksi, menggeser Saleor menjadi e-commerce tanpa kepala dan memindahkan solusi ke platform yang kedepan-bukti untuk tim pengembangan
+
+Saleor 2.0 dibangun berdasarkan kesuksesan itu tetapi menghadirkan pengalaman pengguna yang lebih baik, memperkenalkan solusi e-commerce tanpa kepala dengan PWA sebagai fitur standar, ditambah dengan tampilan dan nuansa yang telah diganti merek, dashboard yang lebih baik, dan etalase baru.
+
+“Kami merintis dengan GraphQL karena kami percaya bahwa gelombang ketiga e-commerce adalah tentang pengalaman. Perlu teknologi baru yang membuatnya mudah untuk bekerja dengan klien seluler dan PWA. Dan kami pikir pengalaman pengguna akhir yang lebih baik dimulai dengan pengalaman hebat bagi pengembang. Jika kami memberi mereka alat baru yang hebat untuk dikerjakan, mereka dapat fokus pada inovasi yang akhirnya bermanfaat bagi pelanggan. "
+
+- Mirek Mencel, CEO, Mirumee
+
+===Modul===
+Modularitas dari GraphQL API memungkinkan administrator untuk menjaga backend up-to-date tanpa perubahan minimal di frontend
+[[<img src=https://user-images.githubusercontent.com/5421321/47799917-8afd7a00-dd2b-11e8-88c7-63588e25bcea.png?w=1000px>|https://user-images.githubusercontent.com/5421321/47799917-8afd7a00-dd2b-11e8-88c7-63588e25bcea.png]]
+
+===Dasbor===
+Dasbor baru membuat fungsi terbaik dari versi sebelumnya tetapi menggunakan fitur pengalaman yang paling diinginkan seperti Shopify
+[[<img src=http://scotttactical.com/images/saleor4.png>|http://scotttactical.com/images/saleor4.png]]
+
+
+==Maintenance==
+===Pengelola===
+Pengelola Aplikasi Saleor adalah [[Mirumee Software|https://mirumee.com/]] yang didirikan pada tahun 2009, sebuah rumah perangkat lunak yang berspesialisasi dalam aplikasi dan e-commerce Python dan kinerja tinggi. 
+
+Perusahaan ini menawarkan layanan pengembangan web dan konsultasi untuk bisnis dari pengecer online volume tinggi hingga inovator yang mengganggu di Forbes 30 Under 30 List. Mirumee adalah kontributor aktif dalam komunitas open source dan diperingkatkan sebagai kontributor Python open source teratas di Polandia.
+
+===Komitmen===
+Mirumee melihat Saleor 2.0 sebagai platform e-commerce open source untuk era PWA. Fungsionalitas tambahan seperti kemampuan multi-vendor, API permintaan pembayaran, dan perhitungan pajak lanjutan dengan integrasi Avalara ditargetkan dalam beberapa bulan mendatang seiring berkembangnya solusi. 
+
+Perusahaan juga bertujuan untuk implementasi lebih lanjut untuk perusahaan ritel bervolume tinggi dan sedang mempersiapkan perluasan yang diperlukan dari platform Saleor saat basis pelanggan tumbuh.
+
+===Gabung Tim===
+Anda dapat meminta untuk bergabung dengan tim proyek "Saleor" dengan cara sbb
+* Kontrusi koding di [[GitHub|https://github.com/mirumee/saleor]]
+* Diskusi tentang masa depan Saleor di [[Gitter|https://gitter.im/mirumee/saleor]]
+* Kemukakan keiinginan / peroleh jawaban di [[Spectrum|https://spectrum.chat/saleor]]
+* Membagi solusi masalah pemrograman di [[Stackoverflow|https://stackoverflow.com/questions/tagged/saleor]]
+* Membantu menterjemahkan ke bahasa Indonesia di [[Transifex|https://www.transifex.com/mirumee/teams/34782/id/]]
+
+==''Referensi''==
+* [[Getting Started|https://docs.getsaleor.com/en/latest/gettingstarted.html#getting-started]]
+* [[Documentation - pdf|https://media.readthedocs.org/pdf/saleor/stable/saleor.pdf]]
+* [[Saleor Releases - zip/tar.gz|https://github.com/mirumee/saleor/releases]]
+* [[Guides - Install in Google Cloud|https://github.com/mirumee/saleor/issues/2533#issuecomment-468963508]]

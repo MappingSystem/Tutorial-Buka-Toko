@@ -1,0 +1,184 @@
+__TOC__
+
+===Cluster===
+* [[Deploy Docker Compose (v3) to Swarm (mode) Cluster|https://codefresh.io/docker-tutorial/deploy-docker-compose-v3-swarm-mode-cluster/]]
+
+====Bootstrap====
+
+```
+#!/bin/bash
+
+# vars
+[ -z "$NUM_WORKERS" ] && NUM_WORKERS=3
+
+# init swarm (need for service command); if not created
+docker node ls 2> /dev/null | grep "Leader"
+if [ $? -ne 0 ]; then
+  docker swarm init > /dev/null 2>&1
+fi
+
+# get join token
+SWARM_TOKEN=$(docker swarm join-token -q worker)
+
+# get Swarm master IP (Docker for Mac xhyve VM IP)
+SWARM_MASTER=$(docker info --format "{{.Swarm.NodeAddr}}")
+echo "Swarm master IP: ${SWARM_MASTER}"
+sleep 10
+
+# start Docker registry mirror
+docker run -d --restart=always -p 4000:5000 --name v2_mirror \
+  -v $PWD/rdata:/var/lib/registry \
+  -e REGISTRY_PROXY_REMOTEURL=https://registry-1.docker.io \
+  registry:2.5
+
+# run NUM_WORKERS workers with SWARM_TOKEN
+for i in $(seq "${NUM_WORKERS}"); do
+  # remove node from cluster if exists
+  docker node rm --force $(docker node ls --filter "name=worker-${i}" -q) > /dev/null 2>&1
+  # remove worker contianer with same name if exists
+  docker rm --force $(docker ps -q --filter "name=worker-${i}") > /dev/null 2>&1
+  # run new worker container
+  docker run -d --privileged --name worker-${i} --hostname=worker-${i} \
+    -p ${i}2375:2375 \
+    -p ${i}5000:5000 \
+    -p ${i}5001:5001 \
+    -p ${i}5601:5601 \
+    docker:1.13-rc-dind --registry-mirror http://${SWARM_MASTER}:4000
+  # add worker container to the cluster
+  docker --host=localhost:${i}2375 swarm join --token ${SWARM_TOKEN} ${SWARM_MASTER}:2377
+done
+
+# show swarm cluster
+printf "\nLocal Swarm Cluster\n===================\n"
+
+docker node ls
+
+# echo swarm visualizer
+printf "\nLocal Swarm Visualizer\n===================\n"
+docker run -it -d --name swarm_visualizer \
+  -p 8000:8080 -e HOST=localhost \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  manomarks/visualizer:beta
+```
+
+===Compose===
+====File Format====
+* [[docker-stack.yml|https://github.com/dockersamples/example-voting-app/blob/master/docker-stack.yml]]
+```
+version: "3"
+ 
+services:
+ 
+  redis:
+    image: redis:3.2-alpine
+    ports:
+      - "6379"
+    networks:
+      - voteapp
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+ 
+  db:
+    image: postgres:9.4
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - voteapp
+    deploy:
+      placement:
+        constraints: [node.role == manager]
+ 
+  voting-app:
+    image: gaiadocker/example-voting-app-vote:good
+    ports:
+      - 5000:80
+    networks:
+      - voteapp
+    depends_on:
+      - redis
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=VOTING]
+      placement:
+        constraints: [node.role == worker]
+ 
+  result-app:
+    image: gaiadocker/example-voting-app-result:latest
+    ports:
+      - 5001:80
+    networks:
+      - voteapp
+    depends_on:
+      - db
+ 
+  worker:
+    image: gaiadocker/example-voting-app-worker:latest
+    networks:
+      voteapp:
+        aliases:
+          - workers
+    depends_on:
+      - db
+      - redis
+    # service deployment
+    deploy:
+      mode: replicated
+      replicas: 2
+      labels: [APP=VOTING]
+      # service resource management
+      resources:
+        # Hard limit - Docker does not allow to allocate more
+        limits:
+          cpus: '0.25'
+          memory: 512M
+        # Soft limit - Docker makes best effort to return to it
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+      # service restart policy
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      # service update configuration
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+      # placement constraint - in this case on 'worker' nodes only
+      placement:
+        constraints: [node.role == worker]
+ 
+networks:
+    voteapp:
+ 
+volumes:
+```
+===Deploy Step===
+* [[GitHub: Example-app|https://github.com/dockersamples/example-voting-app]]
+* [[Deploy to Docker Swarm with a YML ste|https://codefresh.io/docs/docs/deploy-your-containers/docker-swarm/]]
+
+[[<img src=https://github.com/dockersamples/example-voting-app/raw/master/architecture.png>|https://github.com/dockersamples/example-voting-app]]
+
+====Single Host====
+```
+docker-compose up
+```
+
+====Swarm Cluster====
+```
+docker stack deploy --compose-file docker-stack.yml vote
+```
+
+====Kubernetes Engine====
+* [[Set Kubernetes Cluster configuration manually|https://codefresh.io/docs/docs/deploy-to-kubernetes/add-kubernetes-cluster/#get-cluster-configuration-manually]]
+```
+$ kubectl create namespace vote
+```
+==''Referensi''==
+* [[How to disable docker swarm mode?|https://stackoverflow.com/questions/46929965/how-to-disable-docker-swarm-mode]]

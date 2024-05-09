@@ -1,0 +1,703 @@
+[[Docker|https://en.wikipedia.org/wiki/Docker_(software)]] adalah platform virtualisasi tingkat sistem operasi yang digunakan oleh ''[[Apa-itu-Saleor|Saleor]]'' untuk mengembangkan dan mengirimkan perangkat lunak dalam paket yang disebut kontainer.
+
+__TOC__
+
+==Arsitektur==
+
+[[Docker|https://en.wikipedia.org/wiki/Docker_(software)]] adalah program komputer yang melakukan virtualisasi tingkat sistem operasi. Ini pertama kali dirilis pada 2013 dan dikembangkan oleh [[Docker, Inc|https://en.wikipedia.org/wiki/Docker,_Inc.]]. Docker digunakan untuk menjalankan paket perangkat lunak yang disebut [[wadah|https://en.wikipedia.org/wiki/Container_(virtualization)]].
+
+Wadah diisolasi dari satu sama lain dan bundel aplikasi mereka sendiri, alat, perpustakaan dan file konfigurasi; mereka dapat berkomunikasi satu sama lain melalui saluran dijalankan oleh kernel sistem operasi tunggal dan karenanya lebih ringan dari mesin virtual. 
+
+Wadah dibuat dari gambar yang menentukan konten tepatnya. Gambar sering dibuat dengan menggabungkan dan memodifikasi gambar standar yang diunduh dari repositori publik.
+[[<img src=https://docs.docker.com/engine/images/architecture.svg>|https://docs.docker.com/engine/docker-overview/]]
+===Software===
+Daemon Docker, disebut dockerd, adalah proses persisten yang mengelola kontainer Docker dan menangani objek kontainer. Daemon mendengarkan permintaan yang dikirim melalui Docker Engine API. Program klien Docker, yang disebut docker, menyediakan antarmuka baris perintah yang memungkinkan pengguna untuk berinteraksi dengan daemon Docker.
+
+===Objects===
+Objek utama objek Docker adalah gambar, wadah, dan layanan. 
+* Wadah Docker adalah lingkungan berstandar, terbungkus yang menjalankan aplikasi. Wadah dikelola menggunakan Docker API atau CLI.
+* Gambar Docker adalah templat baca-saja yang digunakan untuk membuat wadah. Gambar digunakan untuk menyimpan dan mengirimkan aplikasi.
+* Layanan Docker memungkinkan penskalaan ditingkatkan di beberapa daemon Docker. Hasilnya dikenal sebagai swarm, yaitu seperangkat daemon yang berkomunikasi melalui Docker API.
+
+===Registry===
+Registri Docker adalah repositori untuk gambar Docker. Klien Docker terhubung ke pendaftar untuk mengunduh ("pull") gambar untuk digunakan atau mengunggah ("push") gambar yang telah mereka buat. Pendaftaran via Docker ID. Dapat bersifat publik atau pribadi. 
+
+Registri utama adalah [[Docker Hub|https://www.docker.com/products/docker-hub]] dan [[Docker Cloud|https://docs.docker.com/v17.12/docker-cloud/getting-started/intro_cloud/]].
+
+* [[Docker Hub|https://hub.docker.com/]] adalah registri default tempat Docker mencari gambar. Registri [[Docker Hub|https://docs.docker.com/docker-hub/]] juga memungkinkan pembuatan notifikasi berdasarkan peristiwa.
+
+* [[Docker Cloud|https://cloud.docker.com/]] adalah untuk meninjau skala aplikasi Anda di berbagai node. Di [[Docker Cloud|https://docs.docker.com/docker-hub/]] Anda menyeret slider untuk menambah atau mengurangi ketersediaan, kinerja, dan redundansi. 
+
+Layanan dapat ditautkan satu sama lain bahkan jika mereka ditempatkan di berbagai node, wilayah, atau bahkan penyedia cloud. Anda juga dapat [[pasang dan operasikan registry|https://docs.docker.com/registry/deploying/]] untuk mengunggah ("push") gambar ke server Anda via perintah seperti berikut ini:
+```
+docker push myregistrydomain.com:5000/saleor
+```
+
+==Konfigurasi==
+===Docker Engine===
+
+Docker tersedia dalam dua edisi:
+
+* Docker [[Community Edition (CE)|https://www.docker.com/products/docker-engine]] sangat ideal untuk pengembang individu dan tim kecil yang ingin memulai dengan Docker dan bereksperimen dengan aplikasi berbasis wadah (Free}.
+
+* Docker [[Enterprise Edition (EE)|https://www.docker.com/products/docker-enterprise]] dirancang untuk pengembangan perusahaan dan tim TI yang membangun dan menjalankan aplikasi bisnis skala besar (Basic, Standard & Advance).
+<img src=https://static01.m-square.com.au/wp-content/uploads/2017/03/i1.wp.com14aa59d4-ea1f-42fb-b328-e-9b69cb38d92fd3e1865efa0fe53d7f4c998453df.png>
+
+===Docker Compose===
+Adalah alat untuk mendefinisikan dan menjalankan aplikasi Docker multi-kontainer menggunakan ''[[file YAML|https://en.wikipedia.org/wiki/YAML]]'' untuk mengkonfigurasi layanan aplikasi dan melakukan proses penciptaan dan memulai semua wadah dengan satu perintah. 
+
+Utilitas CLI-compose docker memungkinkan pengguna untuk menjalankan perintah pada beberapa kontainer sekaligus, misalnya, membangun gambar, penskalaan kontainer, menjalankan kontainer yang dihentikan, dan banyak lagi. 
+
+Perintah yang terkait dengan manipulasi gambar, atau opsi interaktif pengguna, tidak relevan di Docker Compose karena mereka menangani satu wadah. 
+
+File <code>docker-compose.yml</code> digunakan untuk mendefinisikan layanan aplikasi dan menyertakan berbagai opsi konfigurasi. Misalnya, opsi build mendefinisikan opsi konfigurasi seperti jalur Dockerfile, opsi perintah memungkinkan seseorang untuk menimpah (override) perintah Docker default, dan banyak lagi.
+
+===Docker Swarm===
+Menyediakan fungsionalitas pengelompokan asli untuk wadah Docker, yang mengubah sekelompok mesin Docker menjadi mesin Docker virtual tunggal. Di Docker 1.12 dan lebih tinggi, [[mode Swarm|https://docs.docker.com/engine/swarm/]] terintegrasi dengan [[Apa-itu-Docker#docker-engine|Docker Engine]]. 
+
+Utilitas swarm CLI memungkinkan pengguna untuk menjalankan wadah Swarm, membuat token penemuan, daftar node dalam cluster, dan banyak lagi. 
+
+Utilitas docker node CLI memungkinkan pengguna untuk menjalankan berbagai perintah untuk mengelola node dalam swarm, misalnya, daftar node dalam segerombolan, memperbarui node, dan menghapus node dari swarm. 
+
+Docker mengelola swarm menggunakan Algoritma Konsensus Raft. Menurut Raft, agar pembaruan dapat dilakukan, sebagian besar simpul Swarm harus menyetujui pembaruan tersebut.
+
+===Docker Stacks===
+
+[[Fungsi Docker Stack|https://docs.docker.com/engine/reference/commandline/stack/]], disertakan dengan mesin Docker. Anda tidak perlu menginstal paket tambahan untuk menggunakannya Menyebarkan tumpukan buruh pelabuhan adalah bagian dari mode swarm. 
+
+Ini mendukung jenis penulisan file yang sama, tetapi penanganannya terjadi pada kode Go, di dalam Docker Engine. [[Docker Stacks dan Bundel Aplikasi Terdistribusi|https://github.com/docker/cli/blob/master/experimental/docker-stacks-and-bundles.md]] adalah fitur eksperimental yang diperkenalkan di Docker 1.12 dan Docker Compose 1.8, di samping konsep mode segerombolan, dan Node dan Layanan di API Mesin.
+
+Dockerfile dapat dibangun menjadi gambar, dan wadah dapat dibuat dari gambar itu. Demikian pula, docker-compose.yml dapat dibangun ke dalam bundel aplikasi terdistribusi, dan tumpukan dapat dibuat dari bundel itu. Dalam pengertian itu, bundel adalah format gambar yang dapat didistribusikan secara multi-layanan.
+
+Pada Docker 1.12 dan Compose 1.8, fitur-fiturnya masih eksperimental. Baik Docker Engine maupun Docker Registry tidak mendukung distribusi bundel.
+
+==Dokumentasi==
+[[Dokumentasi|https://docs.docker.com/]] bisa di download [[disini|https://docs.docker.com/docsarchive/]]
+
+===Guides===
+
+* Get Docker
+** [[Overview of Docker editions|https://docs.docker.com/install/overview/]]
+** Docker CE
+*** [[About Docker CE|https://docs.docker.com/install/]]
+*** Cloud
+*** [[Linux|https://docs.docker.com/install/linux/linux-postinstall/]]
+*** MacOS
+*** Microsoft Windows
+*** Docker Toolbox (legacy)
+*** Release notes
+** Docker EE
+*** About Docker EE
+*** Linux
+*** Microsoft Windows Server
+*** Release notes
+** Compatibility between Docker versions
+*** CE-EE Node Activate
+*** Migrate to Docker 1.10
+*** Breaking changes
+*** Deprecated Docker features
+*** FAQ
+* Get started
+** Get started with Docker
+*** Part 1: Orientation
+*** Part 2: Containers
+*** Part 3: Services
+*** Part 4: Swarms
+*** Part 5: Stacks
+*** Part 6: Deploy your app
+** Docker overview
+* Develop with Docker
+** Develop your apps on Docker
+*** App development overview
+*** App development best practices
+*** Develop images
+*** Best practices for writing Dockerfiles
+*** Create a base image
+*** Docker build enhancements for 18.09
+*** Use multi-stage builds
+*** Dockerfile reference
+*** Manage images
+*** Docker app examples
+** Develop using the Docker Engine SDKs and API
+*** Overview
+*** SDK and API examples
+* Configure networking
+** Networking overview
+** Use bridge networks
+** Use overlay networks
+** Use host networking
+** Use Macvlan networks
+** Disable networking for a container
+** Networking tutorials
+*** Bridge network tutorial
+*** Host networking tutorial
+*** Overlay networking tutorial
+*** Macvlan network tutorial
+** Configure the daemon and containers
+*** Configure the daemon for IPv6
+*** Docker and iptables
+*** Container networking
+*** Configure Docker to use a proxy server
+** Legacy networking content
+*** (Legacy) Container links
+*** Overlay networks for Swarm Classic
+* Manage application data
+** Storage overview
+** Volumes
+** Bind mounts
+** tmpfs mounts
+** Troubleshoot volume problems
+** Store data within containers
+*** About storage drivers
+*** Select a storage driver
+*** Use the AUFS storage driver
+*** Use the Btrfs storage driver
+*** Use the Device mapper storage driver
+*** Use the OverlayFS storage driver
+*** Use the ZFS storage driver
+*** Use the VFS storage driver
+* Run your app in production
+** Configure all objects
+*** Apply custom metadata to objects
+*** Prune unused objects
+*** Format command and log output
+** Configure the daemon
+*** Configure and run Docker
+*** Control Docker with systemd
+*** Apply custom metadata to daemons
+*** Configuring default drivers
+** Work with external tools
+*** Third-party monitoring tools
+*** Collect Docker metrics with Prometheus
+** Configure containers
+*** Start containers automatically
+*** Keep containers alive during daemon downtime
+*** Run multiple services in a container
+*** Container runtime metrics
+*** Limit a container's resources
+*** Apply custom metadata to containers
+*** Prune unused containers
+*** Logging
+*** View a container's logs
+*** Configure logging drivers
+*** Use a logging driver plugin
+*** Customize log driver output
+*** Logging driver details
+*** Run a local registry mirror
+*** Work with external tools
+*** PowerShell DSC usage
+*** Ansible
+*** Chef
+*** Puppet
+*** (Obsolete) Link via an ambassador container
+*** Security
+*** Docker security
+*** Docker security non-events
+*** Protect the Docker daemon socket
+*** Using certificates for repository client verification
+*** Use trusted images
+*** Content trust in Docker
+*** Automation with content trust
+*** Delegations for content trust
+*** Deploying Notary
+*** Manage keys for content trust
+*** Play in a content trust sandbox
+*** Antivirus software and Docker
+*** AppArmor security profiles for Docker
+*** Seccomp security profiles for Docker
+*** Isolate containers with a user namespace
+*** Scale your app
+*** Swarm mode overview
+*** Swarm mode key concepts
+*** Get started with swarm mode
+*** How swarm mode works
+*** Run Docker in swarm mode
+*** Join nodes to a swarm
+*** Manage nodes in a swarm
+*** Deploy services to a swarm
+*** Store service configuration data
+*** Manage sensitive data with Docker secrets
+*** Lock your swarm
+*** Manage swarm service networks
+*** Swarm administration guide
+*** Raft consensus in swarm mode
+*** Extend Docker
+*** Managed plugin system
+*** Access authorization plugin
+*** Extending Docker with plugins
+*** Docker network driver plugins
+*** Volume plugins
+*** Plugin configuration
+*** Plugins API
+** Standards and compliance
+*** Docker standards and compliance
+*** NIST
+*** CIS Benchmarks
+*** Docker EE Benchmark
+*** Docker CE Benchmark
+*** Kubernetes Benchmark
+*** FedRAMP
+*** FISMA
+** Open source at Docker
+*** Contribute to documentation
+*** Other ways to contribute
+** Documentation archive
+*** View the docs archives
+*** Docs hackathon results
+
+===Manual===
+* Docker Enterprise Edition
+** About Docker EE
+** Try Docker EE on the cloud
+** Supported platforms
+** Deploy Docker EE standard
+** Backup Docker EE
+** Upgrade Docker EE
+** Docker EE Architecture
+** Manage usage data collection
+** Docker EE Engine
+** Universal Control Plane
+** Docker Trusted Registry
+** Get support
+* Docker Compose
+** [[Overview of Docker Compose|https://docs.docker.com/compose/overview/]]
+** [[Install Compose|https://docs.docker.com/compose/install/]]
+** [[Getting started|https://docs.docker.com/compose/gettingstarted/]]
+** Compose (docker-compose) CLI reference
+** [[Compose file reference|https://docs.docker.com/compose/reference/overview/]]
+** [[Docker stacks and distributed application bundles|https://docs.docker.com/compose/bundles/]]
+** [[Using Compose with Swarm|https://docs.docker.com/compose/swarm/]]
+** [[Environment file|https://docs.docker.com/compose/env-file/]]
+** [[Environment variables in Compose|https://docs.docker.com/compose/environment-variables/]]
+** [[Extend services in Compose|https://docs.docker.com/compose/extends/]]
+*** [[Networking in Compose|https://docs.docker.com/compose/networking/]]
+*** [[Using Compose in production|https://docs.docker.com/compose/production/]]
+*** [[Link environment variables (deprecated)|https://docs.docker.com/compose/link-env-deprecated/]]
+** [[Control startup order|https://docs.docker.com/compose/startup-order/]]
+** [[Sample apps with Compose|https://docs.docker.com/compose/samples-for-compose/]]
+** [[Docker Compose release notes|https://docs.docker.com/release-notes/docker-compose/]]
+* Docker Desktop for Mac
+* Docker Desktop for Windows
+** Getting started
+** Install Docker Desktop for Windows
+** Deploy on Kubernetes
+** Networking
+** Migrate Docker Toolbox
+** Logs and troubleshooting
+** FAQs
+** Open source licensing
+** Stable release notes
+** Edge release notes
+* Docker ID accounts
+* Docker Machine
+* Docker Hub
+** Quickstart
+** Repositories
+** Official Images
+** Teams & Organizations
+** Webhooks
+** Slack Integration
+** Upgrading your plan
+** Automated Builds
+** Publisher & Certified Content
+* Open-source projects
+** Docker Notary
+** Docker Registry
+* Release notes
+** Overview
+** Docker EE and CE
+** CS Docker Engine
+** Docker (1.13 and earlier)
+** Docker Desktop for Mac
+** Docker Desktop for Windows
+** Docker Compose
+** Docker for AWS
+** Docker for Azure
+** Docker Machine release notes
+** Docker Swarm release notes
+* Superseded products and tools
+** Commercially supported Docker Engine
+** Docker Swarm (standalone)
+
+===Reference===
+* File formats
+** Dockerfile reference
+** Compose file reference
+** Command-Line Interfaces (CLIs)
+** Docker CLI (docker)
+** Daemon CLI (dockerd)
+** Machine (docker-machine) CLI
+** Compose (docker-compose) CLI
+** DTR CLI
+** UCP CLI
+* Application Programming Interfaces (APIs)
+** Docker Engine API
+** DTR API
+** UCP API
+** Registry API
+* Drivers and specifications
+** Image specification
+** Machine drivers
+** Registry token authentication
+** Registry storage drivers
+* Compliance control references
+***NIST 800-53
+
+===Samples===
+* Tutorial labs
+** Library references
+*** adminer
+*** aerospike
+*** alpine
+*** alt
+*** amazoncorretto
+*** amazonlinux
+*** arangodb
+*** backdrop
+*** bash
+*** bonita
+*** buildpack-deps
+*** busybox
+*** cassandra
+*** centos
+*** chronograf
+*** cirros
+*** clearlinux
+*** clefos
+*** clojure
+*** composer
+*** consul
+*** convertigo
+*** couchbase
+*** couchdb
+*** crate
+*** crux
+*** debian
+*** docker
+*** drupal
+*** eclipse-mosquitto
+*** eggdrop
+*** elasticsearch
+*** elixir
+*** erlang
+*** euleros
+*** express-gateway
+*** fedora
+*** flink
+*** fsharp
+*** gazebo
+*** gcc
+*** geonetwork
+*** ghost
+*** golang
+*** gradle
+*** groovy
+*** haproxy
+*** haskell
+*** haxe
+*** hello-seattle
+*** hello-world
+*** hola-mundo
+*** httpd
+*** hylang
+*** ibmjava
+*** influxdb
+*** irssi
+*** jetty
+*** joomla
+*** jruby
+*** julia
+*** kaazing-gateway
+*** kapacitor
+*** kibana
+*** known
+*** kong
+*** lightstreamer
+*** logstash
+*** mageia
+*** mariadb
+*** matomo
+*** maven
+*** mediawiki
+*** memcached
+*** mongo-express
+*** mongo
+*** mono
+*** [[mysql|https://docs.docker.com/samples/library/mysql/]]
+*** nats-streaming
+*** nats
+*** neo4j
+*** neurodebian
+*** nextcloud
+*** [[nginx|https://docs.docker.com/samples/library/nginx/]]
+*** node
+*** notary
+*** nuxeo
+*** odoo
+*** open-liberty
+*** openjdk
+*** opensuse
+*** oraclelinux
+*** orientdb
+*** percona
+*** perl
+*** photon
+*** php-zendserver
+*** php
+*** plone
+*** postfixadmin
+*** [[postgres|https://docs.docker.com/samples/library/postgres/]]
+*** pypy
+*** python
+*** r-base
+*** rabbitmq
+*** rakudo-star
+*** rapidoid
+*** [[redis|https://docs.docker.com/samples/library/redis/]]
+*** redmine
+*** registry
+*** rethinkdb
+*** rocket.chat
+*** ros
+*** ruby
+*** rust
+*** scratch
+*** sentry
+*** silverpeas
+*** sl
+*** solr
+*** sonarqube
+*** sourcemage
+*** spiped
+*** storm
+*** swarm
+*** swift
+*** swipl
+*** teamspeak
+*** telegraf
+*** thrift
+*** tomcat
+*** tomee
+*** traefik
+*** ubuntu
+*** vault
+*** websphere-liberty
+*** wordpress
+*** xwiki
+*** yourls
+*** znc
+*** zookeeper
+** Sample applications
+*** Samples home
+*** apt-cacher-ng
+*** .NET Core application
+*** ASP.NET Core + SQL Server on Linux
+*** CouchDB
+*** Django and PostgreSQL
+*** PostgreSQL
+*** Rails and PostgreSQL
+*** Riak
+*** SSHd
+
+==Menjalankan==
+```
+$ docker run --rm gcr.io/chetabahana/saleor --env-file ~/.env.list ubuntu bash
+```
+Maka:
+* Perintah Utama adalah <code>run</code>
+* Opsi Perintah <code>run</code> yg dipakai <code>--rm</code> dan <code>--env-file</code>
+
+===Perintah===
+```
+$ docker --help
+Usage:  docker [OPTIONS] COMMAND
+
+A self-sufficient runtime for containers
+
+Options:
+      --config string      Location of client config files (default "/home/chetabahana_gmail_com/.docker")
+  -D, --debug              Enable debug mode
+  -H, --host list          Daemon socket(s) to connect to
+  -l, --log-level string   Set the logging level ("debug"|"info"|"warn"|"error"|"fatal") (default "info")
+      --tls                Use TLS; implied by --tlsverify
+      --tlscacert string   Trust certs signed only by this CA (default "/home/chetabahana_gmail_com/.docker/ca.pem")
+      --tlscert string     Path to TLS certificate file (default "/home/chetabahana_gmail_com/.docker/cert.pem")
+      --tlskey string      Path to TLS key file (default "/home/chetabahana_gmail_com/.docker/key.pem")
+      --tlsverify          Use TLS and verify the remote
+  -v, --version            Print version information and quit
+
+Management Commands:
+  config      Manage Docker configs
+  container   Manage containers
+  image       Manage images
+  network     Manage networks
+  node        Manage Swarm nodes
+  plugin      Manage plugins
+  secret      Manage Docker secrets
+  service     Manage services
+  stack       Manage Docker stacks
+  swarm       Manage Swarm
+  system      Manage Docker
+  trust       Manage trust on Docker images
+  volume      Manage volumes
+
+Commands:
+  attach      Attach local standard input, output, and error streams to a running container
+  build       Build an image from a Dockerfile  commit      Create a new image from a container's changes
+  cp          Copy files/folders between a container and the local filesystem
+  create      Create a new container
+  deploy      Deploy a new stack or update an existing stack
+  diff        Inspect changes to files or directories on a container's filesystem
+  events      Get real time events from the server
+  exec        Run a command in a running container
+  export      Export a container's filesystem as a tar archive
+  history     Show the history of an image
+  images      List images
+  import      Import the contents from a tarball to create a filesystem image
+  info        Display system-wide information
+  inspect     Return low-level information on Docker objects
+  kill        Kill one or more running containers
+  load        Load an image from a tar archive or STDIN
+  login       Log in to a Docker registry
+  logout      Log out from a Docker registry
+  logs        Fetch the logs of a container
+  pause       Pause all processes within one or more containers
+  port        List port mappings or a specific mapping for the container
+  ps          List containers
+  pull        Pull an image or a repository from a registry
+  push        Push an image or a repository to a registry
+  rename      Rename a container
+  restart     Restart one or more containers
+  rm          Remove one or more containers
+  rmi         Remove one or more images
+  run         Run a command in a new container
+  save        Save one or more images to a tar archive (streamed to STDOUT by default)
+  search      Search the Docker Hub for images
+  start       Start one or more stopped containers
+  stats       Display a live stream of container(s) resource usage statistics
+  stop        Stop one or more running containers
+  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+  top         Display the running processes of a container
+  unpause     Unpause all processes within one or more containers
+  update      Update configuration of one or more containers
+  version     Show the Docker version information
+  wait        Block until one or more containers stop, then print their exit codes
+
+```
+
+===Opsi Perintah===
+ <code>run</code>
+```
+$ docker run --help
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run a command in a new container
+
+Options:
+      --add-host list                  Add a custom host-to-IP mapping (host:ip)
+  -a, --attach list                    Attach to STDIN, STDOUT or STDERR
+      --blkio-weight uint16            Block IO (relative weight), between 10 and 1000, or 0 to disable (default 0)
+      --blkio-weight-device list       Block IO weight (relative device weight) (default [])
+      --cap-add list                   Add Linux capabilities
+      --cap-drop list                  Drop Linux capabilities
+      --cgroup-parent string           Optional parent cgroup for the container
+      --cidfile string                 Write the container ID to the file
+      --cpu-count int                  CPU count (Windows only)
+      --cpu-percent int                CPU percent (Windows only)
+      --cpu-period int                 Limit CPU CFS (Completely Fair Scheduler) period
+      --cpu-quota int                  Limit CPU CFS (Completely Fair Scheduler) quota
+      --cpu-rt-period int              Limit CPU real-time period in microseconds
+      --cpu-rt-runtime int             Limit CPU real-time runtime in microseconds
+  -c, --cpu-shares int                 CPU shares (relative weight)
+      --cpus decimal                   Number of CPUs
+      --cpuset-cpus string             CPUs in which to allow execution (0-3, 0,1)
+      --cpuset-mems string             MEMs in which to allow execution (0-3, 0,1)
+  -d, --detach                         Run container in background and print container ID
+      --detach-keys string             Override the key sequence for detaching a container
+      --device list                    Add a host device to the container
+      --device-cgroup-rule list        Add a rule to the cgroup allowed devices list
+      --device-read-bps list           Limit read rate (bytes per second) from a device (default [])
+      --device-read-iops list          Limit read rate (IO per second) from a device (default [])
+      --device-write-bps list          Limit write rate (bytes per second) to a device (default [])
+      --device-write-iops list         Limit write rate (IO per second) to a device (default [])
+      --disable-content-trust          Skip image verification (default true)
+      --dns list                       Set custom DNS servers
+      --dns-option list                Set DNS options      --dns-search list                Set custom DNS search domains
+      --entrypoint string              Overwrite the default ENTRYPOINT of the image
+  -e, --env list                       Set environment variables
+      --env-file list                  Read in a file of environment variables
+      --expose list                    Expose a port or a range of ports
+      --group-add list                 Add additional groups to join
+      --health-cmd string              Command to run to check health
+      --health-interval duration       Time between running the check (ms|s|m|h) (default 0s)
+      --health-retries int             Consecutive failures needed to report unhealthy
+      --health-start-period duration   Start period for the container to initialize before starting health-retries countdown (ms|s|m|h) (default 0s)
+      --health-timeout duration        Maximum time to allow one check to run (ms|s|m|h) (default 0s)
+      --help                           Print usage
+  -h, --hostname string                Container host name
+      --init                           Run an init inside the container that forwards signals and reaps processes
+  -i, --interactive                    Keep STDIN open even if not attached
+      --io-maxbandwidth bytes          Maximum IO bandwidth limit for the system drive (Windows only)
+      --io-maxiops uint                Maximum IOps limit for the system drive (Windows only)
+      --ip string                      IPv4 address (e.g., 172.30.100.104)
+      --ip6 string                     IPv6 address (e.g., 2001:db8::33)
+      --ipc string                     IPC mode to use
+      --isolation string               Container isolation technology
+      --kernel-memory bytes            Kernel memory limit
+  -l, --label list                     Set meta data on a container
+      --label-file list                Read in a line delimited file of labels
+      --link list                      Add link to another container
+      --link-local-ip list             Container IPv4/IPv6 link-local addresses
+      --log-driver string              Logging driver for the container
+      --log-opt list                   Log driver options
+      --mac-address string             Container MAC address (e.g., 92:d0:c6:0a:29:33)
+  -m, --memory bytes                   Memory limit
+      --memory-reservation bytes       Memory soft limit
+      --memory-swap bytes              Swap limit equal to memory plus swap: '-1' to enable unlimited swap
+      --memory-swappiness int          Tune container memory swappiness (0 to 100) (default -1)      --mount mount                    Attach a filesystem mount to the container
+      --name string                    Assign a name to the container
+      --network string                 Connect a container to a network (default "default")
+      --network-alias list             Add network-scoped alias for the container
+      --no-healthcheck                 Disable any container-specified HEALTHCHECK
+      --oom-kill-disable               Disable OOM Killer
+      --oom-score-adj int              Tune host's OOM preferences (-1000 to 1000)
+      --pid string                     PID namespace to use
+      --pids-limit int                 Tune container pids limit (set -1 for unlimited)
+      --platform string                Set platform if server is multi-platform capable
+      --privileged                     Give extended privileges to this container
+  -p, --publish list                   Publish a container's port(s) to the host
+  -P, --publish-all                    Publish all exposed ports to random ports
+      --read-only                      Mount the container's root filesystem as read only
+      --restart string                 Restart policy to apply when a container exits (default "no")
+      --rm                             Automatically remove the container when it exits
+      --runtime string                 Runtime to use for this container
+      --security-opt list              Security Options
+      --shm-size bytes                 Size of /dev/shm
+      --sig-proxy                      Proxy received signals to the process (default true)
+      --stop-signal string             Signal to stop a container (default "SIGTERM")
+      --stop-timeout int               Timeout (in seconds) to stop a container
+      --storage-opt list               Storage driver options for the container
+      --sysctl map                     Sysctl options (default map[])
+      --tmpfs list                     Mount a tmpfs directory
+  -t, --tty                            Allocate a pseudo-TTY
+      --ulimit ulimit                  Ulimit options (default [])
+  -u, --user string                    Username or UID (format: <name|uid>[:<group|gid>])
+      --userns string                  User namespace to use
+      --uts string                     UTS namespace to use
+  -v, --volume list                    Bind mount a volume
+      --volume-driver string           Optional volume driver for the container
+      --volumes-from list              Mount volumes from the specified container(s)
+  -w, --workdir string                 Working directory inside the container
+```
+
+===File yaml===
+
+===Dockerfile===
+
+
+
+==''Referensi''==
+* https://chocolatey.org/install
+* https://github.com/chocolatey/choco/issues/991
+* https://github.com/docker/toolbox/issues/453
+* https://medium.com/redbubble/running-a-docker-container-as-a-non-root-user-7d2e00f8ee15

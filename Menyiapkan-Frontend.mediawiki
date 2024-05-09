@@ -1,0 +1,31 @@
+Begitu Anda sudah menjalankan aplikasi sehingga dapat berfungsi sebagai layanan publik maka tahap berikutnya adalah mengatur optimasi dari landing page dan detil produk sehingga dapat meningkatkan branding dari bisnis Anda secara efektif.
+
+__TOC__
+
+==Dasar Pertimbangan==
+
+GCE dan GAE adalah dapur dan kurir utama dari projek ini. Keduanya akan bekerja dibelakang layar secara paruh waktu agar biaya tagihannya semurah mungkin. Dengan demikian keduanya tidak memerlukan domain Anda untuk diarahkan pada keduanya.
+
+Alasan utama dari skema ini adalah faktor biaya, karena selain penagihan dalam menjalankan ''[[GAE|https://cloud.google.com/appengine/pricing]]'' dan ''[[GCE|https://cloud.google.com/compute/pricing]]'' maka untuk mengelola domain kedalam GCE Anda juga harus mengaktifkan Cloud DNS API yang akan ditagihkan ''[[biaya zone|https://cloud.google.com/dns/pricing]]'' untuk mengoperasikannya. 
+
+Alasan lain selain faktor biaya adalah faktor keamanan data, tanpa arahkan domain disertai dengan firewall maka keamanan di dapur bisnis kita akan lebih tinggi. 
+
+===Domain Utama===
+Untuk domain utama akan kita ''[[arahkan|https://cloud.google.com/storage/docs/website-configuration#tips]]'' ke (Cloud Storage GCS) yang ''[[biaya bulanan|https://cloud.google.com/storage/pricing]]'' nya paling murah karena halaman yang ditampilkan adalah halaman statik. Biayanya bahkan ''[[free|https://cloud.google.com/storage/pricing#cloud-storage-always-free]]'' untuk penyimpanan di ''[[Regional Storage|https://cloud.google.com/storage/docs/locations#location-r]]'' dibawah 5GB/bulan + operasi 5000/50.000(''[[Class A/B|https://cloud.google.com/storage/pricing#operations-by-class]]'').
+
+Halaman statik justeru akan mengoptimalkan web karena pantauan dari sisi mesin pencaharian akan mendapatkan kecepatan tampilan dan ''[[retensi data|https://cloud.google.com/storage/docs/bucket-lock]]'' yang lebih tinggi dibanding halaman dinamik yang memerlukan pengoperasian bahasa pemrograman di server. 
+
+Halaman statik ini akan kita buat di belakang layar via beberapa API di GAE yang dioperasikan dengan ''[[akses|https://stackoverflow.com/a/29395746/4058484]]'' secara terjadwal ke GCS menggunakan hasil perhitungan yang diolah di GCE. 
+
+Jadi keuntungannya selain halaman akan tampil lebih cepat dan murah karena statik tapi juga akan mengalami perubahan dengan menggunakan hasil analisa data yang ''[[diproses|https://cloud.google.com/storage/quotas]]'' di belakang layar sedemikian rupa agar ''[[tampil aman|https://firebase.google.com/docs/storage/web/start?hl=id]]'' dan efektif sebagai layanan layaknya halaman dinamik. 
+
+===Optimasi Branding===
+Kita sebaiknya konsentrasikan branding bisnis maupun optimasi tampilan hanya di domain utama. Jikapun Anda ingin optimalkan subdomain untuk meningkatkan brand Anda maka Anda bisa arahkan ke konten Anda di ''[[Google Site|https://support.google.com/domains/answer/6069257?hl=id]]'' atau ''[[Blogspot|https://support.google.com/domains/answer/6069231?hl=id]]'' maupun ke ''[[Wordpress|https://marketplace.alibabacloud.com/products/56720001/_em_WordPress_em_em_4_9_8_em_em_powered_em_em_by_em_em_Miri_em_em_Infotech_em_em_LAMP_em_UBUNTU_16_-sgcmjj024561.html?spm=a3c0i.7939108.1302179.2.416e1588pLnIgs]]'' secara gratis.
+
+Anda juga bisa mengambil konfigurasi cloud di provider lainnya spt di ''[[AliBaba Cloud|https://www.alibabacloud.com/]]'' dengan mengambil level layanan yang ''[[always free|https://www.alibabacloud.com/campaign/free-trial/enterprise#a3c0i.205893.1092955.i0.2f18690aKjwyMv]]'' namun sesuai peningkatan bisnis yang Anda jalankan.
+
+Konfigurasi ini memang akan perlu setelan yang lebih rumit namun setidaknya bisa saya tawarkan kepada Anda yang perlu ''[[menekan biaya|https://stackoverflow.com/a/26654430/4058484]]'' operasi karena baru mulai berbisnis online.
+
+Kedepan jika bisnis Anda berjalan baik maka Anda pun bisa membayar beban tagihan lebih besar untuk tingkatkan layanan kepada langganan. 
+
+[[<img src=https://user-images.githubusercontent.com/36441664/70721601-75c58e00-1d28-11ea-8329-d780c27ee7bd.png>|https://user-images.githubusercontent.com/36441664/70721601-75c58e00-1d28-11ea-8329-d780c27ee7bd.png]]

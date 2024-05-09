@@ -1,0 +1,13 @@
+Sesi ini kita akan kupas tentang cara mempersiapkan [[Apa Itu HELM Charts|Instalasi Saleor - HELM Charts]]
+__TOC__
+
+==Integrasi==
+Dengan mendaftar layanan spt ''[[Codefresh|https://g.codefresh.io/signup?ref=ByhLQyoQ4]]'' kita bisa otomatisasi robot (Built»Test»Deploy) dalam membuat aplikasi ''[[Docker|https://www.docker.com/]]'' dan menjalankannya di ''[[Google Cloud|https://cloud.google.com/]]''.
+
+Untuk membuat akun Anda bisa masuk dengan akun Google Anda di ataupun akun project Anda di ''[[GitHub|https://github.com/]]'', ''[[GitLab|https://gitlab.com/]]'', ''[[BitBucket|https://bitbucket.org/]]'', ''[[Stash|https://www.atlassian.com/git]]'' dan ''[[Azure|https://azure.microsoft.com]]''. Karena kita menyiapkan aplikasi kita di Google maka saya anjurkan untuk menggunakan Akun Google Anda yang Anda gunakan di ''[[Google Registry (GCR)|https://cloud.google.com/container-registry/]]''. 
+
+Setelah Anda mendapatkan ''[[Akun Codefresh|https://codefresh.io/docs/docs/getting-started/create-a-codefresh-account/]]'' maka langkah pertama adalah ''[[integrasikan|https://g.codefresh.io/https://g.codefresh.io/account-admin/account-conf/integration]]'' semua akun di atas via ''[[Token Codefresh|https://g.codefresh.io/account-admin/account-conf/tokens]]'' agar terkoneksi dengan ''[[Google Registry|https://g.codefresh.io/account-admin/account-conf/integration/registry]]'' dan ''[[Kubernetes Cluster|https://g.codefresh.io/account-admin/account-conf/integration/kubernetes]]''. Hal yang sama bisa kita lakukan juga untuk ''[[Akun HELM|https://g.codefresh.io/account-admin/account-conf/integration/helm]]'', ''[[Akun Slack|https://g.codefresh.io/account-admin/account-conf/integration/slack]]'', dan ''[[Akun Cloud Storage|https://g.codefresh.io/account-admin/account-conf/integration/google]]''.
+
+==Referensi==
+* https://github.com/stephenmoloney/saleor-helm/tree/master/deployment/helm
+

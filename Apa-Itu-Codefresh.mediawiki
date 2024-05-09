@@ -1,0 +1,261 @@
+[[Codefresh|https://g.codefresh.io/signup?ref=ByhLQyoQ4]] adalah salah satu ''[[layanan CI/CD|https://en.wikipedia.org/wiki/CI/CD]]'' untuk aplikasi berbasis [[Apa-itu-Docker|Docker]]. Secara instan membangun, menguji, dan menggunakan gambar aplikasi umum di ''[[Apa-Itu-Kubernetes|Kubernetes]]''.
+
+__TOC__
+==Arsitektur==
+* [[Manage GIT Triggers with Codefresh UI|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/git-triggers/]]
+* [[Triggering Codefresh pipeline with DockerHub push|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/dockerhub-triggers/triggering-codefresh-pipeline-with-dockerhub-push]]
+[[<img src=https://camo.githubusercontent.com/71d430b68664a927065f7dc3f7ac0f8578c26ed7/68747470733a2f2f63646e2d696d616765732d312e6d656469756d2e636f6d2f6d61782f3830302f302a693778386f775f49505f596b3046787a2e706e67>|https://wideops.com/introducing-automated-deployment-to-kubernetes-and-google-container-engine-with-codefresh/]]
+===Akun===
+====Invite====
+====Internal====
+====External====
+
+===Integrasi===
+* [[Calling Codefresh pipelines from Github actions|https://codefresh.io/codefresh-news/codefresh-github-action/]]
+====Layanan====
+[[<img src=https://res.cloudinary.com/snyk/image/upload/v1541595807/image20.png>|https://snyk.io/blog/codefresh-snyk-ship-fast-and-securely/]]
+====GCP Billing====
+Billing juga dapat diintegrasikan via [[Google Marketplace|https://console.cloud.google.com/marketplace/details/codefresh-gke/codefresh?filter=category:developer-tools]]
+
+
+===Format===
+====Pipeline====
+
+Codefresh bekerja berdasarkan [[step|https://github.com/codefresh-io/yaml-examples/wiki/Description-step-of-yml]] (langkah) dan [[type|https://codefresh.io/docs/docs/codefresh-yaml/steps/]] yang diformasikan kedalam [[Yml format|https://id.wikipedia.org/wiki/YAML]] seperti [[contoh² di github|https://github.com/codefresh-io/yaml-examples]]. Setiap step dapat dijelaskan sbb:
+```
+step-id:
+  description: [Free-text description]
+  working-directory: [ID of another step or a relative path] 
+  environment:
+    - key=value
+  [step contents]
+  on-fail:
+    - command
+  on-success:
+    - command
+  on-finish:
+    - command
+  fail-fast: false # default true
+```
+====Multi Step====
+Saluran pipa Anda tidak perlu dimulai dan diakhiri dalam satu langkah. Anda dapat [[menjalankan langkah-langkah paralel|https://codefresh.io/codefresh-news/parallel-pipelines/]] dalam pipa Codefresh. Anda dapat memiliki langkah "mulai" sebanyak yang Anda inginkan dan langkah "berakhir" sebanyak mungkin.<br><br>
+[[<img src=https://codefresh.io/wp-content/uploads/2019/04/pipeline-graph.png>|https://codefresh.io/codefresh-news/parallel-pipelines/]]
+
+==Konfigurasi==
+* [[Codefresh YAML|https://codefresh.io/docs/docs/codefresh-yaml/what-is-the-codefresh-yaml/]]
+
+Codefresh menawarkan format bawaannya sendiri untuk membuat saluran pipa. Spesifikasi pipa didasarkan pada sintaks YAML yang memungkinkan Anda untuk menggambarkan saluran pipa Anda dengan cara yang sepenuhnya deklaratif.
+<br><br>
+[[<img src=https://user-images.githubusercontent.com/36441664/59958357-64b16800-94cf-11e9-9215-b63ff64cf4aa.png>|https://user-images.githubusercontent.com/36441664/59958357-64b16800-94cf-11e9-9215-b63ff64cf4aa.png]]
+
+File YAML terdiri dari serangkaian langkah yang dieksekusi dalam urutan yang ditentukan.
+
+<table>
+  <thead><tr><th>Fitur</th><th>Deskripsi</th></tr></thead>
+  <tbody>  
+    <tr><td>[[Freestyle|https://codefresh.io/docs/docs/codefresh-yaml/steps/freestyle/]]</td><td>Menjalankan satu atau lebih perintah shell dalam wadah yang mirip dengan docker run.</td></tr>
+    <tr><td>[[Build|https://codefresh.io/docs/docs/codefresh-yaml/steps/build/]]</td><td>Membangun gambar Docker seperti build docker</td></tr>
+    <tr><td>[[Push|https://codefresh.io/docs/docs/codefresh-yaml/steps/push/]]</td><td>Mendorong gambar Docker ke registri Docker mirip dengan tag docker dan push docker</td></tr>
+    <tr><td>[[Git Clone|https://codefresh.io/docs/docs/codefresh-yaml/steps/git-clone/]]</td><td>Mengesampingkan perilaku git clone default</td></tr>
+    <tr><td>[[Composition|https://codefresh.io/docs/docs/codefresh-yaml/steps/composition/]]</td><td>Memulai Docker Komposisi seperti docker-compose. Buang begitu pipa selesai.</td></tr>
+    <tr><td>[[Launch|https://codefresh.io/docs/docs/codefresh-yaml/steps/launch-composition/]]</td><td>Komposisi Memulai komposisi Docker jangka panjang yang tetap setelah akhir pipa</td></tr>
+    <tr><td>[[Deploy|https://codefresh.io/docs/docs/codefresh-yaml/steps/deploy/]]</td><td>Menyebarkan ke cluster Kubernetes</td></tr>
+    <tr><td>[[Approval|https://codefresh.io/docs/docs/codefresh-yaml/steps/approval/]]</td><td>Menjeda pipa dan menunggu intervensi manusia</td></tr>
+ </tbody>
+</table>
+
+===Build===
+====Pipelines====
+* [[Reuse a Git token from Codefresh integrations|https://stackoverflow.com/a/56705685/4058484]]
+```
+version: '1.0'
+steps:
+  get_git_token:
+    title: Reading Github token
+    image: codefresh/cli
+    commands:
+      - cf_export GITHUB_TOKEN=$(codefresh get context github --decrypt -o yaml | yq -y .spec.data.auth.password)
+  main_clone:
+    title: Updating the repo
+    image: alpine/git:latest
+    commands:
+      - if [ -d compose ]; then rm -Rf compose; fi
+      - git clone https://chetabahana:$GITHUB_TOKEN@github.com/chetabahana/compose.git
+      - cd compose && git remote rm origin
+      - git config --global user.name "chetabahana"
+      - git config --global user.email "chetabahana@gmail.com"
+      - git remote add origin https://chetabahana:$GITHUB_TOKEN@github.com/chetabahana/compose.git
+      - sed -i "s/-[0-9]\{1,\}-\([a-zA-Z0-9_]*\)'/-`date +%d%H%M`-whatever'/g" cloudbuild.yaml
+      - git status && git add . && git commit -m "fresh commit" && git push -u origin master
+```
+====Variable Key====
+* [[Using Codefresh variables in your pipelines|https://codefresh.io/docs/docs/codefresh-yaml/variables/#using-codefresh-variables-in-your-pipelines]]
+
+Variabel yang disediakan pengguna dapat didefinisikan pada 4 level:
+
+* Definisi langkah freestyle: menggunakan bidang lingkungan.
+* Eksekusi pipa: setelah mengklik tombol "Bangun", buka bagian "Opsi lanjutan".
+* Definisi saluran pipa: di bawah bagian “Variabel lingkungan” di tampilan saluran pipa.
+* Konfigurasi Bersama: didefinisikan di bawah pengaturan akun Anda.
+Opsi terdaftar sesuai urutan kepentingannya, jadi dalam kasus beberapa variabel didefinisikan di lokasi berbeda dengan nama yang sama, urutan penggantian akan seperti yang tercantum di sini.
+[[<img src=https://user-images.githubusercontent.com/36441664/60767273-cf71be80-a0df-11e9-9f3e-fc005a4cfb60.png>|https://user-images.githubusercontent.com/36441664/60767273-cf71be80-a0df-11e9-9f3e-fc005a4cfb60.png]]
+
+====Shared Volume====
+* [[Accessing your project folder from a composition|https://codefresh.io/docs/docs/codefresh-yaml/steps/composition/#accessing-your-project-folder-from-a-composition]]
+```
+version: '1.0'
+steps:
+  create_test_data_step: 
+    title: Creating dummy data
+    image: alpine
+    commands:
+      - echo "Writing in shared volume" > /codefresh/volume/sample_text.txt 
+  my_sample_composition:
+    type: composition
+    title: Composition with volume
+    composition:
+      version: '2'
+      services:
+        my_sample_service:
+          image: node
+          volumes:
+            - '${{CF_VOLUME_NAME}}:${{CF_VOLUME_PATH}}'
+          working_dir: '${{CF_VOLUME_PATH}}'
+          command: bash -c "pwd && cat sample_text.txt"
+    composition_candidates:
+      my_unit_tests:
+        image: python
+        volumes:
+          - '${{CF_VOLUME_NAME}}:${{CF_VOLUME_PATH}}'
+        working_dir: '${{CF_VOLUME_PATH}}'
+        command: bash -c "pwd && echo 'Finished tests' > test_result.txt"
+  read_test_data_step:
+    title: Reading dummy data
+    image: alpine
+    commands:
+      - ls -l /codefresh/volume
+      - cat /codefresh/volume/test_result.txt 
+```
+====Registry====
+[[<img src=https://codefresh.io/docs/images/artifacts/cfcr/codefresh-registry-list.png>|https://codefresh.io/docs/docs/docker-registries/codefresh-registry/]]
+
+===Compose===
+
+[[<img src=https://codefresh.io/wp-content/uploads/2016/04/envi.comp_-2.png>|https://codefresh.io/codefresh-news/new-feature-composition-environment-variables/]]
+
+====Compute====
+* [[Docker Swarm on Google Cloud Platform|https://engineering.galleon.ph/posts/docker-swarm-gcp/]]
+====Kubernetes====
+
+===Deploy===
+====Swarm====
+* [[How to deploy to Docker Swarm with Codefresh|https://codefresh.io/docs/docs/deploy-your-containers/docker-swarm/]]
+[[<img src=https://codefresh.io/docs/images/0a66a41-image3.png>|https://codefresh.io/docs/images/0a66a41-image3.png]]
+* [[Deploy Docker Compose (v3) to Swarm (mode) Cluster|https://codefresh.io/docker-tutorial/deploy-docker-compose-v3-swarm-mode-cluster/]]
+
+Jika Anda jalankan [[Apa-itu-Docker#docker-swarm|Docker Swarm]] di Server maka Codefresh dapat dengan mudah [[deploy aplikasi ke Docker Swarm|https://codefresh.io/docs/docs/deploy-your-containers/docker-swarm/]] menggunakan saluran pipa GUI atau YAML.
+
+* [[Docker-stack.yml|https://stackoverflow.com/a/56844406/4058484]] yang berisi definisi aplikasi
+* Host tempat Docker Swarm Anda berjalan
+* Kunci SSH yang dapat digunakan Codefresh untuk mengakses host
+* Nama tumpukan yang akan digunakan setelah aplikasi dikerahkan.
+* Semua informasi ini akan diteruskan ke pipa dalam bentuk parameter build.
+
+====Stacks====
+
+===Integration===
+====Caching====
+[[<img src=https://codefresh.io/wp-content/uploads/2016/11/test_it_step.png>|https://codefresh.io/containers/caching-build-dependencies-codefresh-volumes/]]
+
+
+====Tes Dinamik====
+* [[Codefresh + Snyk = Ship Fast and Securely|https://snyk.io/blog/codefresh-snyk-ship-fast-and-securely/]]
+
+[[<img src=https://res.cloudinary.com/snyk/image/upload/v1541595781/image8.png>|https://snyk.io/blog/codefresh-snyk-ship-fast-and-securely/]]
+
+====Helm Charts====
+[[<img src=https://cdn-images-1.medium.com/max/2600/1*h2fY9FgEXLXZyBv_L7qh_A.png>|https://cdn-images-1.medium.com/max/2600/1*h2fY9FgEXLXZyBv_L7qh_A.png]]
+
+==Menjalankan==
+[[<img src=https://camo.githubusercontent.com/3c6d86d6739e35db0bc4b47c919fe821090c64b3/68747470733a2f2f6a6178656e7465722e636f6d2f77702d636f6e74656e742f75706c6f6164732f323031372f30382f636f646566726573682d312d31303234783537382e706e67>|https://camo.githubusercontent.com/3c6d86d6739e35db0bc4b47c919fe821090c64b3/68747470733a2f2f6a6178656e7465722e636f6d2f77702d636f6e74656e742f75706c6f6164732f323031372f30382f636f646566726573682d312d31303234783537382e706e67]]
+
+===Codefresh Plugin===
+* [[Codefresh CI/CD Plug-in Directory|http://steps.codefresh.io/]]
+Codefresh juga menawarkan direktori plugin di http://steps.codefresh.io/ yang dibuat khusus untuk operasi CI / CD seperti 
+[[google-kms|https://steps.codefresh.io/plugin/google-kms]] berikut ini:
+```
+- description: example-1
+  workflow:
+    version: '1.0'
+    steps:
+      google_kms:
+        image: codefreshplugins/google-kms
+        commands:
+          - kms encrypt VALUE_1 VALUE_n
+```
+===Codefresh API/CLI===
+* [[Codefresh Trigger Types|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/]]
+[[<img src=https://res.cloudinary.com/snyk/image/upload/v1541595830/image14.png>|https://snyk.io/blog/codefresh-snyk-ship-fast-and-securely/]]
+
+Type Trigger
+* Git Triggers
+* Dockerhub Triggers
+* Azure Registry Triggers
+* Quay Triggers
+* Artifactory Triggers
+* Cron Trigger
+* API/CLI Trigger
+
+====Git Commit====
+Seperti halnya Docker Hub atau Google Registry dll Pemicu GIT adalah jenis pemicu build. Namun dengan Codefresh Anda [[dapat memilih repositori lain|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/git-triggers/]] selain dari milik proyek itu sendiri. Bahkan untuk memicu build pada proyek A meskipun komit terjadi pada proyek B.
+
+[[<img src=https://codefresh.io/docs/images/pipeline/triggers/add-trigger-dialog.png>|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/git-triggers/]]
+
+
+====Image Push====
+Codefresh ''[[Apa-Itu-Codefresh#pipelines|piplines]]'' bisa disetel memicu eksekusi yang terkait dengan ''[[image push|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/dockerhub-triggers/#manage-dockerhub-triggers-with-codefresh-ui]]'' ke DockerHub. Anda juga dapat [[menggunakan klien baris perintah|https://codefresh.io/docs/docs/configure-ci-cd-pipeline/triggers/dockerhub-triggers/#manage-dockerhub-triggers-with-codefresh-cli]] via [[Codefresh CLI|https://cli.codefresh.io/]] untuk mengelola pemicu.
+```
+# get trigger-event details for previously created trigger-event
+codefresh get trigger-event -o yaml registry:dockerhub:codefresh:fortune:push:107e9db97062
+
+uri: 'registry:dockerhub:codefresh:fortune:push:107e9db97062'
+type: registry
+kind: dockerhub
+public: false
+secret: aGao5weuez2G6WF9
+status: active
+endpoint: >-
+  https://g.codefresh.io/nomios/dockerhub?account=107e9db97062&secret=aGao5weuez2G6WF9
+description: Docker Hub codefresh/fortune push event
+help: >-
+  Docker Hub webhooks fire when an image is built in, pushed or a new tag is
+  added to, your repository.
+
+  Configure Docker Hub webhooks on
+  https://hub.docker.com/r/codefresh/fortune/~/settings/webhooks/
+
+  Add following Codefresh Docker Hub webhook endpoint
+  https://g.codefresh.io/nomios/dockerhub?account=107e9db97062&secret=aGao5weuez2G6WF9
+```
+====Triggering====
+* [[API/CLI Call|https://codefresh.io/docs/docs/integrations/codefresh-api/#example---triggering-pipelines]]
+Codefresh menawarkan API komprehensif yang dapat Anda gunakan untuk berintegrasi dengan aplikasi atau solusi lain yang sudah Anda miliki. Detail lengkap lihat [[API dokumentasi|https://g.codefresh.io/api/]].
+[[<img src=https://codefresh.io/docs/images/integrations/api/overview.png>|https://codefresh.io/docs/docs/integrations/codefresh-api/]]
+
+Untuk memicu jaringan pipa dari jarak jauh Anda dapat menemukan perintah Curl premade (termasuk kunci api) di pengaturan build untuk setiap pipa:
+[[<img src=https://codefresh.io/docs/images/integrations/api/webhook-url.png>|https://codefresh.io/docs/images/integrations/api/webhook-url.png]]
+
+Anda juga dapat memasukkan variabel lingkungan tambahan menggunakan array:
+```
+curl 'https://g.codefresh.io/api/builds/5b1a78d1bdbf074c8a9b3458' \
+--compressed -H 'content-type:application/json; charset=utf-8' \
+-H 'Authorization: <your_key_here>' \
+--data-binary '{"serviceId":"5b1a78d1bdbf074c8a9b3458",\
+"type":"build","repoOwner":"kostis-codefresh",\
+"branch":"master","repoName":"nestjs-example",\
+"variables":{"sample-var1":"sample1","SAMPLE_VAR2":"SAMPLE2"}}'
+```
+
+==''Referensi''==
+* [[Use parallel steps in your Codefresh pipelines|https://codefresh.io/codefresh-news/parallel-pipelines/]]
+* [[Advanced Workflows with Parallel steps|https://codefresh.io/docs/docs/codefresh-yaml/advanced-workflows/]]

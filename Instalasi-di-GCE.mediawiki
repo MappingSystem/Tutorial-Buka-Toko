@@ -1,0 +1,857 @@
+Instalasi Saleor di sesi GCE ini bisa dilakukan per komponen atau sekaligus dalam ''[[Instalasi-di-GCE#Paket|satu paket berikut database dll]]''. Kita akan bahas secara masing² komponen terlebih dahulu.
+
+__TOC__
+
+==Gcloud==
+* Metode [[Authentication|https://cloud.google.com/container-registry/docs/advanced-authentication]], Urutan [[gcr-credentials|https://github.com/GoogleCloudPlatform/docker-credential-gcr#gcr-credentials]] dan [[solusi path|https://stackoverflow.com/a/49958213/4058484]]
+* Docker Dokumentasi: [[Docker --driver Google Compute Engine|https://docs.docker.com/machine/drivers/gce/]]
+
+===Separasi===
+*  [[Debian and Ubuntu|https://cloud.google.com/sdk/docs/quickstart-debian-ubuntu]]
+
+```bash
+
+$ gcloud --version
+Google Cloud SDK 237.0.0 \ alpha/beta/core 2019.03.01 \ bq 2.0.42 \ gsutil 4.37
+
+$ gcloud components update
+ERROR: (gcloud.components.update) You cannot perform this action because this 
+Cloud SDK installation is managed by an external package manager.
+Please consider using a separate installation of the Cloud SDK created through 
+the default mechanism described at: https://cloud.google.com/sdk/
+
+$ export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+$ echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | \
+    sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+deb http://packages.cloud.google.com/apt cloud-sdk-bionic main
+$ curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  1326  100  1326    0     0  15975      0 --:--:-- --:--:-- --:--:-- 15975
+OK
+$ sudo apt-get update && sudo apt-get install google-cloud-sdk
+Setting up google-cloud-sdk (237.0.0-0) ...
+```
+
+===Inisialisasi===
+```
+$ gcloud init
+Welcome! This command will take you through the configuration of gcloud.
+
+Your current configuration has been set to: [default]
+
+You can skip diagnostics next time by using the following flag:
+  gcloud init --skip-diagnostics
+
+Network diagnostic detects and fixes local network connection issues.
+Checking network connection...done.                                                                              
+Reachability Check passed.
+Network diagnostic (1/1 checks) passed.
+
+Choose the account you would like to use to perform operations for 
+this configuration:
+ [1] project-owner@chetabahana.iam.gserviceaccount.com
+ [2] Log in with a new account
+Please enter your numeric choice:  1
+
+You are logged in as: [project-owner@chetabahana.iam.gserviceaccount.com].
+
+Pick cloud project to use: 
+ [1] chetabahana
+ [2] Create a new project
+Please enter numeric choice or text value (must exactly match list 
+item):  1
+
+Your current project has been set to: [chetabahana].
+
+Your project default Compute Engine zone has been set to [us-east1-b].
+You can change it by running [gcloud config set compute/zone NAME].
+
+Your project default Compute Engine region has been set to [us-east1].
+You can change it by running [gcloud config set compute/region NAME].
+
+Your Google Cloud SDK is configured and ready to use!
+
+$ gcloud --version
+Google Cloud SDK 238.0.0 \ alpha/beta/core/2019.03.08 bq 2.0.42 gsutil 4.37 
+WARNING: `gcloud auth login` no longer writes application default credentials.
+If you need to use ADC, see: gcloud auth application-default --help
+```
+
+==Docker==
+* [[Containers on Compute Engine|https://cloud.google.com/compute/docs/containers/]]
+* Running  [[Containers on Instances|https://cloud.google.com/container-optimized-os/docs/how-to/run-container-instance]]
+
+===Akun Registry===
+* Buat akun di ''[[Docker Hub|https://cloud.docker.com/login]]'' dan hubungkan di [[Codefresh|https://g.codefresh.io/user/settings]]
+* [[docker login|https://docs.docker.com/engine/reference/commandline/login/]] dan [[pull image from-codefresh|https://codefresh.io/docs/docs/docker-registries/codefresh-registry/#pull-image-from-codefresh-registry]] 
+Jika sudah terkoneksi maka kita Instal Docker Engine 
+
+===Instal (Ubuntu)===
+* Docker CE: [[Install|https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce]] dan [[upgrade|https://docs.docker.com/install/linux/docker-ce/ubuntu/#upgrade-docker-ce]]
+* Docker daemon [[Configure and troubleshoot|https://docs.docker.com/config/daemon/]] 
+
+```
+$ sudo apt-get update
+$ sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+$ sudo apt-key fingerprint 0EBFCD88
+pub   rsa4096 2017-02-22 [SCEA]
+      9DC8 5822 9FC7 DD38 854A  E2D8 8D81 803C 0EBF CD88
+uid           [ unknown] Docker Release (CE deb) <docker@docker.com>
+sub   rsa4096 2017-02-22 [S]
+$ sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+
+$ sudo apt-get update
+$ sudo apt-get install docker-ce docker-ce-cli containerd.io
+$ apt-cache madison docker-ce
+apt-cache madison docker-ce
+ docker-ce | 5:18.09.3~3-0~ubuntu-bionic | https..
+ docker-ce | 5:18.09.2~3-0~ubuntu-bionic | https..
+ docker-ce | 5:18.09.1~3-0~ubuntu-bionic | https..
+ docker-ce | 5:18.09.0~3-0~ubuntu-bionic | https..
+ docker-ce | 18.06.3~ce~3-0~ubuntu | https..
+ docker-ce | 18.06.2~ce~3-0~ubuntu | https..
+ docker-ce | 18.06.1~ce~3-0~ubuntu | https..
+ docker-ce | 18.06.0~ce~3-0~ubuntu | https..
+ docker-ce | 18.03.1~ce~3-0~ubuntu | https..
+https.. = https://download.docker.com/linux/ubuntu bionic/stable amd64 Packages
+
+$ VERSION_STRING="5:18.09.3~3-0~ubuntu-bionic"
+$ sudo apt-get install docker-ce=$VERSION_STRING \
+docker-ce-cli=$VERSION_STRING containerd.io
+
+Building dependency tree       
+Reading state information... Done
+containerd.io is already the newest version (1.2.4-1).
+docker-ce-cli is already the newest version (5:18.09.3~3-0~ubuntu-bionic).
+docker-ce is already the newest version (5:18.09.3~3-0~ubuntu-bionic).
+The following package was automatically installed and is no longer required:
+  grub-pc-bin
+Use 'sudo apt autoremove' to remove it.
+0 upgraded, 0 newly installed, 0 to remove and 23 not upgraded.
+
+$ sudo apt autoremove
+$ sudo systemctl status docker
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/lib/systemd/system/docker.service; enabled; 
+           vendor preset: enabled)
+   Active: active (running) since Wed 2019-03-20 01:54:50 UTC; 30min ago
+     Docs: https://docs.docker.com
+ Main PID: 18325 (dockerd)
+    Tasks: 10
+   CGroup: /system.slice/docker.service
+           └─18325 /usr/bin/dockerd -H fd:// 
+           --containerd=/run/containerd/containerd.sock
+
+level=warning msg="Your kernel does not support cgroup rt period"
+level=warning msg="Your kernel does not support cgroup rt runtime"
+level=info msg="Loading containers: start."
+level=info msg="Default bridge (docker0) is assigned with an IP address 172.17.0.0/16.
+level=info msg="Loading containers: done."
+level=info msg="Docker daemon" commit=774a1f4 graphdriver(s)=overlay2 version=18.09.3
+level=info msg="Daemon has completed initialization"
+Started Docker Application Container Engine.
+level=info msg="API listen on /var/run/docker.sock"
+```
+Tekan keyboard Ctrl+C dan test docker sbb:
+```
+$ sudo docker run hello-world
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+1b930d010525: Pull complete
+Digest: sha256:2557e3c07ed1e38f26e389462d03ed943586f744621577a99efb77324b0fe535
+Status: Downloaded newer image for hello-world:latest
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+   (amd64)
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+To try something more ambitious, you can run an Ubuntu container with:
+ $ docker run -it ubuntu bash
+
+Share images, automate workflows, and more with a free Docker ID:
+ https://hub.docker.com/
+
+For more examples and ideas, visit:
+ https://docs.docker.com/get-started/
+
+$ sudo docker version
+Client:
+ Version:           18.09.3
+ API version:       1.39
+ Go version:        go1.10.8
+ Git commit:        774a1f4
+ Built:             Thu Feb 28 06:53:11 2019
+ OS/Arch:           linux/amd64
+ Experimental:      false
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          18.09.3
+  API version:      1.39 (minimum version 1.12)
+  Go version:       go1.10.8
+  Git commit:       774a1f4
+  Built:            Thu Feb 28 05:59:55 2019
+  OS/Arch:          linux/amd64
+  Experimental:     false
+```
+
+===Non Root User===
+* Post-installation [[Steps for Linux|https://docs.docker.com/install/linux/linux-postinstall/]] dan [[Tutorial|https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-18-04#step-2-%E2%80%94-executing-the-docker-command-without-sudo-optional]]
+* Join the [[docker group|https://superuser.com/a/1415541/505363]] dan reload to [[switch groups without-logging out|https://superuser.com/questions/272061/reload-a-linux-users-group-assignments-without-logging-out#354475]]
+```
+$ docker run hello-world
+Got permission denied while trying to connect to the Docker daemon socket at 
+unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.39/version: 
+dial unix /var/run/docker.sock: connect: permission denied
+
+$ id
+uid=1001(chetabahana) gid=1002(chetabahana) groups=1002(chetabahana),4(adm),
+20(dialout),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),
+108(lxd),114(netdev),1000(ubuntu),1001(google-sudoers)
+
+$ groups
+chetabahana adm dialout cdrom floppy audio dip video plugdev lxd netdev ubuntu 
+google-sudoers
+
+$ echo ${USER}
+chetabahana
+$ sudo groupadd docker
+groupadd: group 'docker' already exists
+$ sudo usermod -aG docker ${USER}
+Adding user chetabahana to group docker
+
+$ sudo systemctl enable docker
+Synchronizing state of docker.service with SysV service script with 
+/lib/systemd/systemd-sysv-install.
+Executing: /lib/systemd/systemd-sysv-install enable docker
+$ systemctl list-unit-files
+docker.service enabled
+```
+Edit docker.service
+```
+$ sudo systemctl edit docker.service
+```
+Isikan data berikut ini
+```
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// -H tcp://127.0.0.1:2375
+```
+Tekan keyboard <code>Ctrl +X</code> dan pilih Yes kemudian tekan <code><Enter></code>
+```
+$ sudo systemctl daemon-reload
+$ sudo systemctl restart docker.service
+$ sudo systemctl is-active docker
+active
+$ sudo netstat -lntp | grep dockerd
+tcp   0      0 127.0.0.1:2375   0.0.0.0:*   LISTEN      2929/dockerd
+$ logout 
+```
+Login lagi dan cek grup docker sudah masuk di daftar groups..
+```
+$ groups
+chetabahana adm dialout cdrom floppy audio dip video plugdev lxd netdev docker 
+ubuntu google-sudoers
+$ id
+uid=1001(chetabahana) gid=1002(chetabahana) groups=1002(chetabahana),4(adm),
+20(dialout),24(cdrom),25(floppy),29(audio),30(dip),44(video),46(plugdev),
+108(lxd),114(netdev),999(docker),1000(ubuntu),1001(google-sudoers)
+
+$ sudo netstat -lntp | grep dockerd
+tcp     0      0 127.0.0.1:2375   0.0.0.0:*  LISTEN      997/dockerd
+
+$ sudo service docker status
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/lib/systemd/system/docker.service; enabled; vendor preset: enabled)
+  Drop-In: /etc/systemd/system/docker.service.d
+           └─override.conf
+   Active: active (running) since Wed 2019-03-20 03:44:38 UTC; 7min ago
+     Docs: https://docs.docker.com
+ Main PID: 997 (dockerd)
+    Tasks: 10
+   CGroup: /system.slice/docker.service
+           └─997 /usr/bin/dockerd -H fd:// -H tcp://127.0.0.1:2375
+```
+Tes jalankan docker tanpa <code>sudo</code>
+```
+$ docker run hello-world
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+Ambil docker sebagai grup default
+```
+$ sudo usermod -g docker ${USER}
+$ logout
+```
+Login lagi dan cek grup docker sudah menjadi grup default
+```
+$ id
+uid=1001(chetabahana) gid=999(docker) groups=999(docker),...
+$ ls -alR
+.:
+total 40
+drwxr-xr-x 6 chetabahana docker 4096 Mar 20 01:44 .
+drwxr-xr-x 5 root        root   4096 Mar 19 20:59 ..
+-rw------- 1 chetabahana docker 2376 Mar 20 04:59 .bash_history
+-rw-r--r-- 1 chetabahana docker  220 Apr  4  2018 .bash_logout
+-rw-r--r-- 1 chetabahana docker 3771 Apr  4  2018 .bashrc
+drwx------ 2 chetabahana docker 4096 Mar 19 21:02 .cache
+drwxrwxr-x 3 chetabahana docker 4096 Mar 20 01:44 .config
+drwx------ 3 chetabahana docker 4096 Mar 19 21:02 .gnupg
+-rw-r--r-- 1 chetabahana docker  807 Apr  4  2018 .profile
+drwx------ 2 chetabahana docker 4096 Mar 19 22:30 .ssh
+```
+
+===Docker credential===
+====Opsi-1: Via Aplikasi====
+* [[Application Default Credentials (ADC)|https://cloud.google.com/docs/authentication/production#creating_a_service_account]]
+```
+$ sudo cat <<EOF >> ~/.bashrc
+# enviromment variables for ADC 
+# ref: https://cloud.google.com/docs/authentication/production
+export GOOGLE_APPLICATION_CREDENTIALS="/home/user/.credentials/[FILE_NAME].json"
+EOF
+$ export GOOGLE_APPLICATION_CREDENTIALS="/home/user/.credentials/[FILE_NAME].json"
+$ env
+```
+
+====Opsi-2: via Access Token====
+* [[access token|https://cloud.google.com/container-registry/docs/advanced-authentication#access_token]]
+```
+$ gcloud auth print-access-token | docker login -u oauth2accesstoken \
+--password-stdin https://[HOSTNAME]
+$ docker login -u oauth2accesstoken -p "$(gcloud auth print-access-token)" \
+https://[HOSTNAME]
+```
+atau OAuth access token via metadata
+```
+$ METADATA=http://metadata.google.internal/computeMetadata/v1
+$ SVC_ACCT=$METADATA/instance/service-accounts/default
+$ ACCESS_TOKEN=$(curl -H 'Metadata-Flavor: Google' $SVC_ACCT/token \
+    | cut -d'"' -f 4)
+$ docker login -u oauth2accesstoken -p $ACCESS_TOKEN https://gcr.io
+$ docker run … gcr.io/YOUR_PROJECT/YOUR_IMAGE
+```
+
+====Opsi-3: via JSON key file====
+* [[JSON key file|https://cloud.google.com/container-registry/docs/advanced-authentication#json_key_file]]
+```
+cat keyfile.json | docker login -u _json_key --password-stdin https://[HOSTNAME]
+docker login -u _json_key -p "$(cat keyfile.json)" https://[HOSTNAME]
+```
+
+====Opsi-4: Credential Helper====
+Credential Helper bisa di install dengan beberapa cara berikut ini:
+* Alternatif-1: via [[Google Cloud|https://cloud.google.com/container-registry/docs/advanced-authentication#gcloud_as_a_docker_credential_helper]]
+```
+$ gcloud components install docker-credential-gcr
+
+```
+
+* Alternatif-2: via [[Google go|https://github.com/GoogleCloudPlatform/docker-credential-gcr#gcr-credentials]]
+```
+$ export GOPATH=$HOME/.go
+$ sudo apt install golang-go
+$ sudo apt install gccgo-go 
+$ go get -u github.com/GoogleCloudPlatform/docker-credential-gcr
+
+
+$ find / -iname "make" 2>/dev/null
+$ sudo apt-get install make
+$ cd $GOPATH/src/github.com/GoogleCloudPlatform/docker-credential-gcr
+$ make
+$ sudo mv ./bin/docker-credential-gcr /usr/bin/docker-credential-gcr
+```
+
+* Alternatif-3: via [[curl -fsSL|https://cloud.google.com/container-registry/docs/advanced-authentication#standalone_docker_credential_helper]]
+```
+$ VERSION=1.5.0
+$ OS=linux  # or "darwin" for OSX, "windows" for Windows.
+$ ARCH=amd64  # or "386" for 32-bit OSs
+$ URL=https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v
+$ curl -fsSL "${URL}${VERSION}/docker-credential-gcr_${OS}_${ARCH}-${VERSION}.tar.gz" \
+  | tar xz --to-stdout ./docker-credential-gcr \
+  > ~/docker-credential-gcr && chmod +x ~/docker-credential-gcr
+$ sudo mv docker-credential-gcr /usr/bin/
+$ docker-credential-gcr version
+Google Container Registry Docker credential helper 1.5.0
+```
+
+Menjalankan Credential adalah seperti berikut ini:
+```
+$ docker-credential-gcr help
+Usage: docker-credential-gcr <flags> <subcommand> <subcommand args>
+
+Subcommands:
+        clear            remove all stored credentials
+        commands         list all command names
+        help             describe subcommands and their syntax
+        version          print the version of the binary to stdout
+
+Subcommands for Config:
+        config           configure the credential helper
+        configure-docker  configures the Docker client to use docker-credential-gcr
+
+Subcommands for Docker credential store API:
+        erase            erase any stored credentials for the server specified 
+                         via stdin
+        get              for the server specified via stdin, return the stored 
+                         credentials via stdout
+        list             list all stored credentials
+        store            for the specified server, store the credentials provided 
+                         via stdin
+
+Subcommands for GCR authentication:
+        gcr-login        log in to GCR
+        gcr-logout       log out from GCR
+
+$ docker-credential-gcr configure-docker
+/home/chetabahana_gmail_com/.docker/config.json successfully configured
+
+$ cat /home/chetabahana_gmail_com/.docker/config.json
+{
+        "auths": {},
+        "credHelpers": {
+                "asia.gcr.io": "gcr",
+                "eu.gcr.io": "gcr",
+                "gcr.io": "gcr",
+                "staging-k8s.gcr.io": "gcr",
+                "us.gcr.io": "gcr"
+        }
+
+$ echo "https://gcr.io" | docker-credential-gcr get
+{"ServerURL":"","Username":"_dcgcr_1_5_0_token","Secret":"xxx.c.XXxxXX_c-XXxXX-XXxxXX_w"}
+
+$ docker login --username=<username> --password=<password>
+$ docker login r.cfcr.io -u <username> -p <ACCESS_TOKEN>
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+WARNING! Your password will be stored unencrypted in /home/<user>/.docker/config.json.
+Configure a credential helper to remove this warning. See
+https://docs.docker.com/engine/reference/commandline/login/#credentials-store
+Login Succeeded
+
+$ cat /home/chetabahana/.docker/config.json
+{
+        "auths": {
+                "https://index.docker.io/v1/": {
+                        "auth": XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+                },
+                "r.cfcr.io": {
+                        "auth": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX="
+                }
+        },
+        "HttpHeaders": {
+                "User-Agent": "Docker-Client/18.09.3 (linux)"
+        },
+        "credHelpers": {
+                "asia.gcr.io": "gcr",
+                "eu.gcr.io": "gcr",
+                "gcr.io": "gcr",
+                "staging-k8s.gcr.io": "gcr",
+                "us.gcr.io": "gcr"
+        }
+
+```
+===Auto Scrit ===
+Dengan config di atas instalasi sudah siap jd kita bs satukan semua
+```
+export CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)"
+echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | \
+    sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+sudo apt-get update && sudo apt-get install google-cloud-sdk
+gcloud init
+
+sudo apt-get update
+sudo apt-get install \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg-agent \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io
+apt-cache madison docker-ce
+VERSION_STRING="5:18.09.3~3-0~ubuntu-bionic"
+sudo apt-get install docker-ce=$VERSION_STRING \
+docker-ce-cli=$VERSION_STRING containerd.io
+sudo apt autoremove
+sudo docker run hello-world
+
+sudo usermod -aG docker ${USER}
+sudo systemctl enable docker
+sudo systemctl edit docker.service
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker.service
+sudo systemctl is-active docker
+sudo netstat -lntp | grep dockerd
+sudo usermod -g docker ${USER}
+logout
+
+VERSION=1.5.0
+OS=linux  # or "darwin" for OSX, "windows" for Windows.
+ARCH=amd64  # or "386" for 32-bit OSs
+URL=https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v
+curl -fsSL "${URL}${VERSION}/docker-credential-gcr_${OS}_${ARCH}-${VERSION}.tar.gz" \
+  | tar xz --to-stdout ./docker-credential-gcr \
+  > ~/docker-credential-gcr && chmod +x ~/docker-credential-gcr
+sudo mv docker-credential-gcr /usr/bin/
+docker-credential-gcr version
+docker-credential-gcr configure-docker
+docker login --username=chetabahana --password=<PASSWORD>
+docker login r.cfcr.io -u Chetabahana -p <TOKEN>
+cat /home/chetabahana_gmail_com/.docker/config.json
+```
+
+==Saleor==
+
+Lihat
+* Connect Localhost from [[inside docker|https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach?rq=1]]
+
+===Setel Lingkungan===
+
+* [[Configuration|https://docs.getsaleor.com/en/latest/gettingstarted/configuration.html]]
+```
+$ cat <<EOF >>~/.docker/common.env
+DEFAULT_FROM_EMAIL=admin@chetabahana.com
+DATABASE_URL=postgres://saleor:saleor@db/saleor
+CELERY_BROKER_URL=redis://redis:6379/1
+CACHE_URL=redis://redis:6379/0
+JWT_VERIFY_EXPIRATION=True
+OPENEXCHANGERATES_API_KEY
+VATLAYER_ACCESS_KEY
+EOF
+```
+
+===Kontainer Tunggal===
+* Deploy a [[registry server|https://docs.docker.com/registry/deploying/]]
+* Memilih [[Restart policy|https://stackoverflow.com/a/55137036/4058484]] dan otomatis [[start on boot using upstart|https://stackoverflow.com/a/49802878/4058484]]
+
+====Postgres====
+Secara komponen, instal database Postgres untuk Aplikasi Saleor pada Kontainer Tunggal dapat dilakukan sama seperti yang sudah dibahas di sesi GAE. Lihat [[Instalasi-di-GAE#Database|cara install database untuk opsi GAE]].
+
+====Jalankan Image====
+```
+$ docker run --rm -p 8000:8000 --user saleor:saleor --restart unless-stopped \
+--env-file ~/.docker/common.env gcr.io/chetabahana/saleor:latest 
+
+[uWSGI] getting INI configuration from /app/saleor/wsgi/uwsgi.ini
+[uwsgi-static] added mapping for /static => /app/static
+*** Starting uWSGI 2.0.17.1 (64bit) on [Tue Mar 12 15:10:03 2019] ***
+compiled with version: 6.3.0 20170516 on 08 February 2019 17:14:12
+os: Linux-4.4.0-142-generic #168~14.04.1-Ubuntu SMP Sat Jan 19 11:26:28 UTC 2019
+nodename: 7b6f445c1c6f
+machine: x86_64
+clock source: unix
+pcre jit disabled
+detected number of CPU cores: 1
+current working directory: /app
+detected binary path: /usr/local/bin/uwsgi
+your processes number limit is 524288
+your memory page size is 4096 bytes
+detected max file descriptor number: 524288
+building mime-types dictionary from file /etc/mime.types...554 entry found
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uwsgi socket 0 bound to TCP address :8000 fd 3
+Python version: 3.6.8 (default, Feb  6 2019, 03:44:09)  [GCC 6.3.0 20170516]
+*** Python threads support is disabled. You can enable it with --enable-threads ***
+Python main interpreter initialized at 0xXXX
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 364600 bytes (356 KB) for 4 cores
+*** Operational MODE: preforking ***
+WSGI app 0 (mountpoint='') ready in 2 seconds on interpreter 0xXXX pid: 1 (default app)
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI master process (pid: 1)
+spawned uWSGI worker 1 (pid: 9, cores: 1)
+spawned uWSGI worker 2 (pid: 10, cores: 1)
+spawned uWSGI worker 3 (pid: 11, cores: 1)
+spawned uWSGI worker 4 (pid: 12, cores: 1)
+```
+Buka shell baru dan cek seperti berikut ini:<br>
+
+====Cek running service====
+```
+$ sudo netstat -plnt
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address Foreign Address State  PID/Program name
+tcp        0      0 0.0.0.0:22    0.0.0.0:*       LISTEN 1526/sshd
+tcp6       0      0 :::22         :::*            LISTEN 1526/sshd
+tcp6       0      0 :::8000       :::*            LISTEN 1725/docker-proxy
+```
+
+====List container & Image====
+```
+$ docker ps
+CONTAINER ID IMAGE  COMMAND                PORTS                  NAMES 
+7b6f445c1c6f saleor "uwsgi --ini /app/sal" 0.0.0.0:8000->8000/tcp lonely_bartik
+
+$ docker images
+REPOSITORY                  TAG      IMAGE ID       CREATED       SIZE
+gcr.io/chetabahana/saleor   latest   03c65b553b45   4 weeks ago   619.5 MB
+```
+
+====Shell kedalam container====
+```
+$ docker exec -it 7b6f445c1c6f /bin/bash
+saleor@7b6f445c1c6f:/app$ ls
+CHANGELOG.md          Procfile                     deployment         manage.py
+requirements_dev.txt  static                       tslint.json        Dockerfile    
+README.md             docker-compose.override.yml  media              runtime.txt
+templates             webpack-bundle.json          LICENSE            apollo.config.js
+docker-compose.yml    package-lock.json  saleor    tests              webpack.config.js
+Pipfile               app.json                     docs               package.json
+scripts               tox.ini                      webpack.d.ts       Pipfile.lock  
+common.env            locale                       requirements.txt   setup.cfg
+tsconfig.json
+
+saleor@7b6f445c1c6f:/app$ env
+PYTHONUNBUFFERED=1
+PROCESSES=4
+LANG=C.UTF-8
+HOSTNAME=b24153bab33c
+GPG_KEY=0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
+SECRET_KEY=[DJANGO_SECRET_KEY]
+PWD=/app
+STATIC_URL=/static/
+HOME=/home/saleor
+PORT=8000
+PYTHON_VERSION=3.6.8
+SHLVL=1
+PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PYTHON_PIP_VERSION=19.0.1
+_=/usr/bin/env
+
+saleor@7b6f445c1c6f:/app$ python3 manage.py migrate
+saleor@7b6f445c1c6f:/app$ python3 manage.py populatedb
+saleor@7b6f445c1c6f:/app$ python3 manage.py createsuperuser
+saleor@7b6f445c1c6f:/app$ exit
+```
+
+====Stop dan delete====
+```
+$ docker stop 7b6f445c1c6f
+7b6f445c1c6f
+
+$ docker rm 7b6f445c1c6f
+7b6f445c1c6f
+
+$ docker rmi gcr.io/chetabahana/saleor
+Untagged: gcr.io/chetabahana/saleor:latest
+Deleted: sha256:03c65b553b455bb7f1b7b15c02d17ea8172b3b062d32ec1636fd76d6dff99f47
+Deleted: sha256:021acbd51ad6a477eb3d9af7cf8b17d5ea5fc0c65618fec33ece7f1b0d283f1e
+..
+..
+Deleted: sha256:82390739c0ae496a11a303d8dd90354e95026f6eff294abb7002ee75ac1da04e
+Deleted: sha256:0a07e81f5da36e4cd6c89d9bc3af643345e56bb2ed74cc8772e42ec0d393aee3
+
+```
+
+===Multi Kontainer===
+====Docker-Compose====
+* Cara [[install|https://docs.docker.com/compose/install/]] 
+* [[Prerequisites|https://docs.getsaleor.com/en/latest/gettingstarted/installation-linux.html#prerequisites]]
+```
+$ sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/\
+docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+$ sudo chmod +x /usr/local/bin/docker-compose
+$ docker-compose --version
+docker-compose version 1.23.2, build 1110ad01
+
+```
+====Compose / Override====
+Buat file di <code>~/.docker/docker-compose.yml</code> isi sbb:
+* Docker: [[version 3|https://docs.docker.com/compose/compose-file/]]
+* Saleor: [[Dockerfile|https://github.com/mirumee/saleor/blob/master/Dockerfile]] and [[compose.yaml|https://github.com/mirumee/saleor/blob/master/docker-compose.yml]]m dan [[docker-compose.override.yml|https://github.com/mirumee/saleor/blob/master/docker-compose.override.yml]]
+
+docker-compose.yml
+```
+version: "3.2"
+
+services:
+  web:
+    image: 'gcr.io/chetabahana/saleor'
+    env_file: common.env
+    restart: no
+    networks:
+      - network-tier
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: library/postgres:11.1-alpine
+    restart: always
+    networks:
+      - network-tier
+    volumes:
+      - saleor-db:/var/lib/postgresql
+    environment:
+      - POSTGRES_USER=saleor
+      - POSTGRES_PASSWORD=saleor
+
+  redis:
+    image: library/redis:5.0-alpine
+    user: redis:redis
+    restart: unless-stopped
+    networks:
+      - network-tier
+    volumes:
+      - saleor-redis:/data
+
+volumes:
+  saleor-db:
+    driver: local
+  saleor-redis:
+    driver: local
+
+networks:
+  network-tier:
+    driver: bridge
+
+```
+docker-compose.override.yml
+```
+version: "3.2"
+
+services:
+  web:
+    ports:
+      - 8000:8000
+    privileged: true
+    user: saleor:saleor
+    volumes:
+      - type: bind
+        #Using gcsfuse, see https://github.com/MarketLeader/Tutorial-Buka-Toko/wiki/Storage
+        source: /home/chetabahana/.docker/media
+        target: /app/media
+
+  db:
+    ports:
+      - 5432:5432
+
+  redis:
+    ports:
+      - 6379:6379
+
+```
+====Jalankan Compose====
+* Docker: [[Get started|https://docs.docker.com/compose/gettingstarted/]]
+* Saleor: [[Docker-compose|https://docs.getsaleor.com/en/latest/customization/docker.html]] 
+
+```
+$ cd ~/.docker
+~/.docker$ ls
+common.env  config.json  docker-compose.yml
+~/.docker$ docker-compose up
+~/.docker$ docker exec -it docker_product_1 /bin/bash
+saleor@<container_id>:/app$ python manage.py migrate
+saleor@<container_id>:/app$ python manage.py populatedb
+saleor@<container_id>:/app$ python manage.py createsuperuser
+
+```
+====Expose Kontainer====
+* [[How to EXPOSE Port on running container|https://forums.docker.com/t/how-to-expose-port-on-running-container/3252/12]]
+* [[Edit files with Docker Containers|https://ligerlearn.com/how-to-edit-files-within-docker-containers/]]
+
+```
+$ docker ps
+CONTAINER ID        IMAGE                       COMMAND                  CREATED             STATUS              PORTS                    NAMES
+d76b1865b8fb        chetabahana/saleor:latest   "uwsgi --ini /app/sa…"   About an hour ago   Up 35 minutes       0.0.0.0:8000->8000/tcp   backend_web_1
+ced26f0d66d1        postgres:11.1-alpine        "docker-entrypoint.s…"   2 hours ago         Up 35 minutes       0.0.0.0:5432->5432/tcp   backend_db_1
+chetabahana@backend:~$ docker exec -it ced26f0d66d1 bash
+bash-4.4# psql -U postgres
+psql: FATAL:  role "postgres" does not exist
+bash-4.4# psql -h localhost -p 5432 -U postgres
+psql: FATAL:  role "postgres" does not exist
+bash-4.4# psql -h localhost -p 5432 -U saleor
+psql (11.1)
+Type "help" for help.
+
+saleor=# exit
+bash-4.4# exit
+
+$ sudo apt-get install postgresql-client
+$ psql postgres://saleor:saleor@localhost/saleor
+psql (11.1)
+Type "help" for help.
+
+saleor=# exit
+bash-4.4# exit
+
+$ docker run -e POSTGRES_PASSWORD=saleor -d -p 5432:5432 postgres:11.1-alpine
+$ docker run --rm -P -p 127.0.0.1:5432:5432 -e POSTGRES_PASSWORD="saleor" --name pg postgres:11.1-alpine
+
+$ docker exec -it ced26f0d66d1 bash
+bash-4.4# psql postgres://saleor:saleor@localhost/saleor
+psql (11.1)
+Type "help" for help.
+saleor=# exit
+
+bash-4.4# psql -U saleor -c 'SHOW config_file'
+               config_file
+------------------------------------------
+ /var/lib/postgresql/data/postgresql.conf
+(1 row)bash-4.4# cd /var/lib/postgresql/data
+bash-4.4# sed 's/host all all all md5/host all all 0.0.0.0\/0 md5/' pg_hba.conf > pg_hba.conf.changed && mv pg_hba.conf.changed pg_hba.conf
+bash-4.4# cat pg_hba.conf
+bash-4.4# psql -U saleor
+psql (11.1)
+Type "help" for help.
+
+saleor=# SELECT pg_reload_conf();
+ pg_reload_conf
+----------------
+ t
+(1 row)
+
+$ netstat -nlt
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State
+tcp        0      0 127.0.0.1:2375          0.0.0.0:*               LISTEN
+tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN
+tcp6       0      0 :::22                   :::*                    LISTEN
+tcp6       0      0 :::5432                 :::*                    LISTEN
+tcp6       0      0 :::8000                 :::*                    LISTEN
+```
+
+
+====Stop dan Delete====
+```
+~/.docker$ docker-compose down --volumes
+```
+
+==''Referensi''==
+* [[Using Firewall Rules|https://cloud.google.com/vpc/docs/using-firewalls]]
+* [[Using Debian and Ubuntu|https://cloud.google.com/sdk/docs/quickstart-debian-ubuntu]]
+* [[Don't just "docker-compose up"|https://kostasbariotis.com/dont-just-docker-compose-up/]]
+* [[Terminate docker compose when test container finishes|https://stackoverflow.com/a/55373401/4058484]]
+* [[Docker tutorial — getting started with Python, Redis, and NGINX|https://medium.freecodecamp.org/docker-tutorial-getting-started-with-python-redis-and-nginx-73ec94ca2f1]]

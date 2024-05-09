@@ -1,0 +1,53 @@
+Untuk tampilan aplikasi diluar Saleor kita pakai ''[[DEITY Falcon|https://github.com/deity-io/falcon]]'' dibangun dengan NodeJS, GraphQL, React, Apollo, Koa. Webpack. dan Jest. 
+
+__TOC__
+
+==Fitur==
+* [[Demo|https://demo.deity.io/]]
+Prinsipnya hampir sama yaitu merupakan pustaka agnostik platform, berdiri sendiri tetapi modular untuk digunakan dengan mudah membangun situs web PWA yang terpisah.
+
+[[<img src=https://falcon.deity.io/docs/assets/falcon-schema.png>|https://falcon.deity.io/docs/getting-started/intro]]
+
+Fitur asarnya adalah sbb:
+* Fleksibel - Memungkinkan untuk situs web apa pun; e-commerce, blog, portofolio, apa saja
+* Integrable - Memungkinkan Anda untuk mengintegrasikan segala jenis sumber data dengannya
+* Andal - Anda tidak perlu khawatir tentang lalu lintas tinggi dan skalabilitas
+* Extensible - Memungkinkan Anda untuk memperpanjang proyek Anda dengan sebanyak mungkin fitur kustom 
+
+==Konsep==
+Semua metode opsional bergantung pada konfigurasi Ekstensi.
+
+===Client-Server===
+Gagasan utama yang berdiri di belakang memiliki aplikasi terpisah untuk bagian Klien dan Server adalah untuk menyediakan pengembang skala kemampuan scaling:
+
+
+====Client====
+* [[Cannot find module '@deity/eslint-config-falcon|https://github.com/deity-io/falcon/issues/343]]
+
+* Anda dapat menetapkan persyaratan server khusus untuk instance Falcon Server, tetapi menjaga instance server Falcon Client lebih "ringan"
+* Anda dapat memiliki beberapa instance Klien Falcon (didistribusikan secara geografis) yang terhubung ke aplikasi Falcon Server tunggal
+
+====Server====
+* Falcon Server tidak perlu memiliki identitas, sehingga Anda dapat meningkatkannya sesuai kebutuhan 
+* Bisa jadi solusi supaya tidak terjebak dengan satu instance Server Falcon karena bisa sambil mendukung pengunjung seluler Anda dengan aplikasi khusus yang menggunakan Falcon Server sebagai penyedia data.
+
+===Ekstensi-API===
+Falcon Server sendiri tidak menyediakan data apa pun, melainkan bertindak sebagai lem untuk ekstensi data Anda. Sebagai hasil dari kerjanya - Falcon Server menghasilkan Skema GraphQL terpadu yang dapat digunakan oleh Klien GraphQL untuk bekerja dengan data.
+
+====Falcon Server====
+* Falcon Server menggunakan Ekstensi Falcon sebagai lapisan abstrak untuk bekerja dengan entitas tertentu (misalnya, ekstensi toko, ekstensi blog, dll.) Untuk memberikan akses data "agnostik" dan menjadi penyedia data yang bebas platform.
+
+* Falcon Extension harus mendefinisikan Kueri, Mutasi, dan tipe abstrak sebagai bagian dari Falcon Server API, yang akan "dijahit" ke dalam Skema GraphQL terpadu oleh Falcon Server. 
+
+====Ekstensi Falcon====
+* Ekstensi Falcon menggunakan API sebagai lapisan transportasi untuk bekerja dengan layanan back-end tertentu (misalnya, magento-api, wordpress-api dll), yang harus menerapkan semua metode Kueri dan Mutasi bersama dengan Jenis GraphQL yang telah diselesaikan (struktur data) yang ditentukan oleh Falcon Extension.
+
+* Semua metode yang didefinisikan harus diproksikan ke Falcon API yang ditetapkan (didefinisikan dalam konfigurasi Falcon Server).
+
+Sebagai contoh, wordpress-api dibuat sebagai lapisan transport untuk ekstensi-blog. 
+<br><br>
+Berarti bahwa kelas wordpress-api harus memberikan semua Kueri dan Mutasi yang diperlukan yang ditentukan dalam skema-ekstensi GraphQL blog dan cocok dengan tipe GraphQL-nya.
+<br><br>
+Ekstensi Falcon tidak peduli bagaimana data ini sedang diambil dan pra / pasca diproses oleh Falcon API, penting untuk "memenuhi" definisi skema. 
+
+

@@ -1,0 +1,3 @@
+https://cloud.google.com/compute/docs/storing-retrieving-metadata
+
+https://console.cloud.google.com/compute/metadata/sshKeys

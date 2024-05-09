@@ -1,0 +1,316 @@
+__TOC__
+==Git==
+* [[gitignore|https://git-scm.com/docs/gitignore]]
+
+[[<img src=https://storage.googleapis.com/gweb-cloudblog-publish/images/serverless-deployments-3dnr8.max-700x700.PNG>|https://storage.googleapis.com/gweb-cloudblog-publish/images/serverless-deployments-3dnr8.max-700x700.PNG]]
+```
+    $ git status
+    [...]
+    # Untracked files:
+    [...]
+    #       Documentation/foo.html
+    #       Documentation/gitignore.html
+    #       file.o
+    #       lib.a
+    #       src/internal.o
+    [...]
+    $ cat .git/info/exclude
+    # ignore objects and archives, anywhere in the tree.
+    *.[oa]
+    $ cat Documentation/.gitignore
+    # ignore generated html files,
+    *.html
+    # except foo.html which is maintained by hand
+    !foo.html
+    $ git status
+    [...]
+    # Untracked files:
+    [...]
+    #       Documentation/foo.html
+    [...]
+```
+===GitHub===
+* [[gitignore - sample|https://github.com/github/gitignore/blob/master/Python.gitignore]]
+* [[gitignore - review|https://realpython.com/python-git-github-intro]]
+```
+$ git status
+On branch master
+Your branch is up to date with 'origin/master'.
+
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+        modified:   cloudbuild.yaml
+        deleted:    get-pip.py
+        modified:   saleor/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/__pycache__/celeryconf.cpython-37.pyc
+        modified:   saleor/__pycache__/settings.cpython-37.pyc
+        modified:   saleor/account/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/account/__pycache__/models.cpython-37.pyc
+        modified:   saleor/account/__pycache__/utils.cpython-37.pyc
+        modified:   saleor/account/__pycache__/validators.cpython-37.pyc
+        modified:   saleor/checkout/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/checkout/__pycache__/models.cpython-37.pyc
+        modified:   saleor/core/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/core/__pycache__/exceptions.cpython-37.pyc
+        modified:   saleor/core/__pycache__/i18n.cpython-37.pyc
+        modified:   saleor/core/__pycache__/models.cpython-37.pyc
+        modified:   saleor/core/__pycache__/weight.cpython-37.pyc
+        modified:   saleor/core/utils/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/core/utils/__pycache__/json_serializer.cpython-37.pyc
+        modified:   saleor/core/utils/__pycache__/taxes.cpython-37.pyc
+        modified:   saleor/core/utils/__pycache__/translations.cpython-37.pyc
+        modified:   saleor/dashboard/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/data_feeds/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/discount/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/discount/__pycache__/models.cpython-37.pyc
+        modified:   saleor/discount/__pycache__/utils.cpython-37.pyc
+        modified:   saleor/graphql/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/menu/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/menu/__pycache__/models.cpython-37.pyc
+        modified:   saleor/order/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/order/__pycache__/models.cpython-37.pyc
+        modified:   saleor/page/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/page/__pycache__/models.cpython-37.pyc
+        modified:   saleor/payment/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/payment/__pycache__/models.cpython-37.pyc
+        modified:   saleor/product/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/product/__pycache__/models.cpython-37.pyc
+        modified:   saleor/search/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/seo/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/seo/__pycache__/models.cpython-37.pyc
+        modified:   saleor/shipping/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/shipping/__pycache__/models.cpython-37.pyc
+        modified:   saleor/shipping/__pycache__/utils.cpython-37.pyc
+        modified:   saleor/site/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/site/__pycache__/models.cpython-37.pyc
+        modified:   saleor/site/__pycache__/patch_sites.cpython-37.pyc
+        modified:   saleor/wsgi/__pycache__/__init__.cpython-37.pyc
+        modified:   saleor/wsgi/__pycache__/health_check.cpython-37.pyc
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+        virtual-env
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+```
+===Google===
+* [[skip_files - sample|https://cloud.google.com/appengine/docs/standard/python/config/appref#skip_files]]
+* [[gcloudignore - sample|https://cloud.google.com/sdk/gcloud/reference/topic/gcloudignore]]
+
+
+
+==Auth==
+* [[Accessing private GitHub repositories|https://cloud.google.com/cloud-build/docs/access-private-github-repos]]
+===GitHub===
+* [[Cara koneksi ke GitHub|https://help.github.com/articles/requesting-organization-approval-for-oauth-apps/]]
+
+===Google===
+* [[Cara koneksi ke Google|https://cloud.google.com/source-repositories/docs/cloning-repositories]]
+
+==Repo==
+* Cara buat repository baru: [[GitHub|https://help.github.com/en/articles/creating-a-new-repository]] dan [[Google|https://cloud.google.com/source-repositories/docs/creating-an-empty-repository]]
+
+===GitHub===
+* Setel [[Private atau Public|https://help.github.com/en/articles/setting-repository-visibility]]
+
+====Buat====
+Untuk Aplikasi Saleor ''[[dibuat Repo baru di GitHub|https://github.com/new]]'' secara kosongan dan disetel private.
+
+[[<img src=https://chetabahana.github.io/images/github/github-repo.png>|https://chetabahana.github.io/images/github/github-repo.png]]
+
+====Push====
+Login ssh ke instance dan Kirim konten ([[push|https://gist.github.com/ucheng/5501366]]) yang dibuat ''[[Instalasi-di-GAE#via-build-image|via-build-image]]'' dari [[Apa-Itu-Codefresh|Coderesh]]. 
+
+```
+$ docker run -d r.cfcr.io/chetabahana/saleor
+$ CONTAINER_ID=$(docker ps -alq)
+$ docker cp $CONTAINER_ID:/app .
+$ docker stop $CONTAINER_ID
+$ cd app
+$ git config --global user.name "chetabahana"
+$ git config --global user.email "chetabahana@gmail.com"
+$ git init
+$ git add .
+$ git commit -m "initial commit"
+$ git remote add origin https://github.com/chetabahana/market.git
+$ git push -u origin master
+Username for 'https://github.com': chetabahana
+Password for 'https://chetabahana@github.com': *****
+Counting objects: 3711, done.
+Compressing objects: 100% (3584/3584), done.
+Writing objects: 100% (3711/3711), 22.19 MiB | 9.94 MiB/s, done.
+Total 3711 (delta 745), reused 0 (delta 0)
+remote: Resolving deltas: 100% (745/745), done.
+To https://github.com/chetabahana/market.git
+   de02deb..f5af36b  master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+```
+====Token====
+* [[Creating a personal access token for the command line|https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line]]
+```
+#!/bin/sh
+if [ -d compose ]; then rm -Rf compose; fi
+git clone https://chetabahana:$GITHUB_TOKEN@github.com/chetabahana/compose.git
+cd compose && git remote rm origin
+git config --global user.name "chetabahana"
+git config --global user.email "chetabahana@gmail.com"
+git remote add origin https://chetabahana:$GITHUB_TOKEN@github.com/chetabahana/compose.git
+sed -i "s/-[0-9]\{1,\}-\([a-zA-Z0-9_]*\)'/-`date +%d%H%M`-cron'/g" cloudbuild.yaml
+git status && git add . && git commit -m "codefresh commit" && git push -u origin master
+
+```
+====Config====
+* [[Make .gitconfig Work for You|http://michaelwales.com/articles/make-gitconfig-work-for-you/]]
+* [[Sample of git config file (Example .gitconfig)|https://gist.github.com/pksunkara/988716]]
+```
+[user]
+    name = Michael Wales
+    email = webmaster@michaelwales.com
+
+[credential]
+    helper = osxkeychain
+
+[alias]
+    ci = commit
+    co = checkout
+
+[push]
+    default = simple
+
+[url "https://bitbucket.org/"]
+    insteadOf = bb:
+
+[url "https://github.com/"]
+    insteadOf = gh:
+
+[url "https://gist.github.com/"]
+    insteadOf = gist:
+```
+
+Contoh command
+```
+$ git clone gh:walesmd/walesmd.github.io
+$ git clone gist:walesmd/7315613
+$ git clone bb:walesmd/codeigniter-erkana-auth
+```
+
+
+====Update====
+* [[Pushing to a remote|https://help.github.com/en/articles/pushing-to-a-remote]]
+Update repo va local PC atau via instance
+```
+$ cd ~
+$ git clone https://github.com/chetabahana/market.git
+$ cd market
+~/market$ cp -rf ../app/* ../*.yaml ../ . #juga file-file lain yang ingin diubah/ditambah
+~/market$ git add .
+~/market$ git commit -m "update commit"
+~/market$ git push -u origin master
+```
+====Merging====
+* [[Penggabungan|https://git-scm.com/book/id/v1/Branching-Pada-Git-Dasar-Pencabangan-Branching-dan-Penggabungan-Merging]]
+
+[[<img src=https://git-scm.com/figures/18333fig0316-tn.png>|https://git-scm.com/book/id/v1/Branching-Pada-Git-Dasar-Pencabangan-Branching-dan-Penggabungan-Merging]]
+
+====AutoSync====
+* [[Auto Syncing a Forked Git Repository With the Parent|https://h3manth.com/new/blog/2013/auto-syncing-a-forked-git-repository-with-the-parent/]]
+```
+#!/bin/sh
+# crontab -l: 0 * * * * sh cron.sh
+cd ~/.gits/Tutorial-Buka-Toko
+eval `ssh-agent` && expect ~/.ssh/agent && ssh-add -l
+upstream=git://github.com/mirumee/saleor.git
+git remote add upstream $upstream
+git checkout master
+git pull --rebase
+git push origin master
+eval `ssh-agent -k`
+```
+====GitHub App====
+* [[Running builds on GitHub|https://cloud.google.com/cloud-build/docs/run-builds-on-github]]
+
+[[<img src=https://i.stack.imgur.com/e4lJH.png>|https://stackoverflow.com/questions/52191307/syncing-git-repo-to-google-cloud/56880897#56880897]]
+
+===Google===
+* [[Pushing code from an existing repository|https://cloud.google.com/source-repositories/docs/pushing-code-from-a-repository]]
+
+====Koneksi====
+Repo ''[[dibuat baru di Google dan dikoneksi|https://source.cloud.google.com/repo/connect]]'' ke GitHub
+
+[[<img src=https://chetabahana.github.io/images/google/google-repo.png>|https://chetabahana.github.io/images/google/google-repo.png]]
+
+====Pemicu====
+Buat [[pemicu di Google|https://console.cloud.google.com/cloud-build/triggers/add]] disetel dengan <code>cloudbuild.yaml</code>
+
+```
+steps:
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy", '--version=v1-1']
+timeout: "1600s"
+```
+
+====Update====
+Dengan configurasi diatas maka semua repo dimanapun perubahan code dilakukan akan sinkron satu sama lain demikian juga aplikasi yang di deploy via trigger <code>cloudbuild.yaml</code>.
+```
+starting build "c450d07e-e5d6-4e46-bef4-2b2fa1519b8e"
+
+FETCHSOURCE
+Initialized empty Git repository in /workspace/.git/
+From https://source.developers.google.com/p/chetabahana/r/github_chetabahana_market
+ * branch            057b04509c941ce92ceeff5e1d6b5211a32943ca -> FETCH_HEAD
+HEAD is now at 057b045 /market/static
+BUILD
+Already have image (with digest): gcr.io/cloud-builders/gcloud
+Services to deploy:
+
+descriptor:      [/workspace/app.yaml]
+source:          [/workspace]
+target project:  [chetabahana]
+target service:  [market]
+target version:  [v1-1]
+target url:      [https://market-dot-chetabahana.appspot.com]
+
+
+Do you want to continue (Y/n)?  
+Beginning deployment of service [market]...
+Created .gcloudignore file. See `gcloud topic gcloudignore` for details.
+#============================================================#
+#= Uploading 4 files to Google Cloud Storage                =#
+#============================================================#
+File upload done.
+Updating service [market]...
+...................................................................................
+.......................................done.
+Setting traffic split for service [market]...
+...................................................................................
+.......................................done.
+Deployed service [market] to [https://market-dot-chetabahana.appspot.com]
+
+You can stream logs from the command line by running:
+  $ gcloud app logs tail -s market
+
+To view your application in the web browser run:
+  $ gcloud app browse -s market --project=chetabahana
+PUSH
+DONE
+```
+
+====Security====
+* [[Detecting security keys|https://cloud.google.com/source-repositories/docs/detecting-security-keys]]
+Pastikan tidak menyimpan kunci keamanan dalam [[sistem repository|https://console.cloud.google.com/cloud-resource-manager]]. Repositori Google Cloud dapat membantu Anda mencegah pengguna menyimpan kunci keamanan dalam repositori. 
+
+```
+gcloud init
+gcloud source project-configs update --enable-pushblock
+```
+
+[[Aktifkan fitur|https://cloud.google.com/source-repositories/docs/detecting-security-keys]] ini untuk meminta Google  memeriksa jenis kunci keamanan berikut:
+
+# Kredensial akun layanan Google Cloud Platform (format JSON)
+# Kunci privat berkode PEM (termasuk RSA, DSA, dan PGP)
+Fitur ini tersedia di semua repositori tanpa biaya.
+

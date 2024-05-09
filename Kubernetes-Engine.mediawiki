@@ -1,0 +1,51 @@
+[[Kubernetes|https://en.wikipedia.org/wiki/Kubernetes]] adalah sistem orkestrasi wadah sumber terbuka untuk mengotomatiskan penerapan, penskalaan, dan manajemen aplikasi. Awalnya dirancang oleh Google, dan sekarang dikelola oleh Cloud Native Computing Foundation.
+
+__TOC__
+==Load balancing==
+Selain grup instance, Anda dapat menggunakan grup titik akhir jaringan (NEG) sebagai backend untuk layanan backend. Dokumen ini membahas penggunaan grup titik akhir jaringan dalam HTTP (S), proksi TCP, dan penyeimbang beban proxy proxy. Anda tidak dapat menggunakan NEG sebagai backend dengan penyeimbang beban internal atau penyeimbang beban jaringan.
+
+NEG dapat digunakan sebagai backend untuk layanan backend di load balancer. Ketika Anda menggunakan NEG sebagai backend untuk layanan backend, semua backend lain dalam layanan backend juga harus NEG. Anda tidak dapat menggunakan grup instan dan NEG sebagai backend dalam layanan backend yang sama.
+
+Anda dapat menambahkan titik akhir jaringan yang sama (kombinasi [[alamat IP|https://id.wikipedia.org/wiki/Alamat_IP]] dan port) ke lebih dari satu NEG. Anda dapat menggunakan NEG yang sama sebagai backend untuk lebih dari satu layanan backend.
+
+Layanan backend menggunakan NEG untuk backend hanya dapat menggunakan mode penyeimbangan RATE atau CONNECTION. Anda tidak dapat menggunakan mode penyeimbang dari UTILIZATION untuk layanan backend yang menggunakan NEG sebagai backends.
+
+===Network End Point (NEG)===
+Contoh berikut menunjukkan bagaimana mendistribusikan lalu lintas di antara layanan microser yang berjalan dalam wadah di VM Anda. 
+
+VM dikonfigurasikan untuk menggunakan ''[[Rentang IP alias dari subnetnya|https://www.academia.edu/9206902/Valid_Range_IP_address_dan_Total_IP_Valid]]'', dan rentang tersebut adalah alamat yang digunakan oleh kontainer. Baik HTTP (S), Proxy TCP, atau SSL Proxy load balancing digunakan.
+[[<img src="https://cloud.google.com/load-balancing/images/neg-container.svg?hl=in">|https://cloud.google.com/load-balancing/docs/negs/#load_balancing_with_containers]]
+
+
+===Contoh Kasus===
+Contoh di ''[[Dokumentasi|https://cloud.google.com/load-balancing/docs/negs/#load_balancing_with_containers]]'' ini dapat diatur sebagai berikut:
+
+#  Konfigurasikan wadah atau layanan di VM. Jika beberapa wadah harus dijalankan pada setiap VM atau jika Anda memerlukan alamat IP untuk wadah tersebut, konfigurasikan [[alias alamat IP|https://cloud.google.com/vpc/docs/alias-ip]] untuk VM tersebut. Jika Anda mengkonfigurasi layanan, Anda memerlukan dua atau lebih layanan yang berjalan pada VM yang sama sehingga setidaknya nomor port berbeda.
+#  Buat grup titik akhir jaringan. Jika Anda menggunakan Kubernetes atau Google Kubernetes Engine, langkah ini tidak diperlukan karena pengontrol Ingress membuat NEG.
+#  Tambahkan titik akhir jaringan ke grup titik akhir jaringan.
+#  Buat [[pemeriksaan kesehatan|https://cloud.google.com/load-balancing/docs/health-checks#legacy-health-checks]].
+#  Buat [[layanan backend|https://cloud.google.com/load-balancing/docs/backend-service]].
+#  Untuk Penyeimbangan HTTP (S), buat [[peta URL|https://cloud.google.com/load-balancing/docs/https/url-map]] dan hubungkan layanan backend.
+#  Buat jenis [[proksi target|https://cloud.google.com/load-balancing/docs/target-proxies]] yang sesuai, seperti proksi HTTP target, proksi HTTPS target, proksi SSL target, atau proksi - TCP target. Tautkan proksi target ke peta URL (untuk penyeimbangan beban HTTP (S)) atau layanan backend (untuk Proxy TCP dan penyeimbangan beban Proxy SSL).
+#  Buat [[aturan penerusan global|https://cloud.google.com/load-balancing/docs/https/global-forwarding-rules]] dan tautkan ke proksi target.
+#  Periksa input di [[Pul Target|https://cloud.google.com/load-balancing/docs/target-pools?hl=in]].
+
+Lihat ''[[Tutorial|https://cloud.google.com/load-balancing/docs/negs/setting-up-negs#negs-example]]''
+
+===Pemecahan Masalah===
+
+Setelah layanan dikonfigurasi, titik akhir baru umumnya menjadi dapat dijangkau setelah melampirkannya ke NEG, asalkan mereka menanggapi pemeriksaan kesehatan.
+
+Jika lalu lintas tidak dapat mencapai titik akhir, yang menghasilkan kode kesalahan 502 untuk HTTP atau koneksi yang ditolak untuk penyeimbang beban TCP / SSL, periksa hal berikut:
+
+*  Verifikasi bahwa [[aturan firewall|https://cloud.google.com/vpc/docs/firewalls]] mengizinkan lalu lintas [[TCP|https://id.wikipedia.org/wiki/Transmission_Control_Protocol]] yang masuk ke titik akhir Anda dari rentang berikut: <code>130.211.0.0/22</code> dan <code>35.191.0.0/16</code>.
+*  Verifikasi bahwa titik akhir Anda sehat dengan menggunakan gcloud, seperti yang ditunjukkan di bawah ini, atau dengan memanggil <code>getHealth</code> API pada sumber daya layanan backend atau API <code>listEndpoints</code> pada NEG dengan parameter <code>showHealth</code> diatur ke SHOW. Perintah gcloud berikut menunjukkan informasi kesehatan berdasarkan titik akhir jaringan:
+```bash
+gcloud beta compute network-endpoint-groups list-network-endpoints --zone=ZONE
+```
+==Referensi==
+* [[Kubernetes-Engine - Dokumentasi|https://cloud.google.com/kubernetes-engine/]]
+* [[Extend-Kubernetes - Service-Catalog|https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/]]
+
+
+
